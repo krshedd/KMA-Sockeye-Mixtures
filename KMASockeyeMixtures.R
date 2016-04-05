@@ -67,55 +67,93 @@ collection.size.original <- sapply(LateAugustMixtures2014, function(silly) get(p
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Clean workspace; dget .gcl objects and Locus Control ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+rm(list = ls(all = TRUE))
+setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Mixtures")
+# This sources all of the new GCL functions to this workspace
+source("C:/Users/krshedd/Documents/R/Functions.GCL.R")
+source("H:/R Source Scripts/Functions.GCL_KS.R")
+
+## Get objects
+LocusControl <- dget(file = "Objects/OriginalLocusControl.txt")
+LateAugustMixtures2014 <- dget(file = "Objects/EASSIP-LateAugust2014/LateAugustMixtures2014.txt")
+
+KMAobjects <- list.files(path = "Objects", recursive = FALSE)
+KMAobjects <- KMAobjects[!KMAobjects %in% c("EASSIP-LateAugust2014", "OriginalLocusControl.txt")]
+KMAobjects
+
+invisible(sapply(KMAobjects, function(objct) {assign(x = unlist(strsplit(x = objct, split = ".txt")), value = dget(file = paste(getwd(), "Objects", objct, sep = "/")), pos = 1) })); beep(2)
+
+
+## Get un-altered mixtures
+invisible(sapply(LateAugustMixtures2014, function(silly) {assign(x = paste(silly, ".gcl", sep = ""), value = dget(file = paste(getwd(), "/Raw genotypes/OriginalCollections/KMALateAugust2014/", silly, ".txt", sep = "")), pos = 1)} )); beep(2)
+objects(pattern = "\\.gcl")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Define strata ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-## Confirming samples sizes
+## Confirming samples sizes by date
 sapply(LateAugustMixtures2014, function(silly) {table(get(paste(silly, ".gcl", sep = ''))$attributes$CAPTURE_DATE)} )
 
 
 ## SKARLC
 str(SKARLC14.gcl$attributes$CAPTURE_DATE)
 sort(unique(SKARLC14.gcl$attributes$CAPTURE_DATE))
+max(sort(unique(SKARLC14.gcl$attributes$CAPTURE_DATE)))
 table(SKARLC14.gcl$attributes$CAPTURE_DATE)
 
-SKARLC_Aug26IDs <- AttributesToIDs.GCL(silly = "SKARLC14", attribute = "CAPTURE_DATE", matching = sort(unique(SKARLC14.gcl$attributes$CAPTURE_DATE))[11])
+SKARLC14_Aug26IDs <- AttributesToIDs.GCL(silly = "SKARLC14", attribute = "CAPTURE_DATE", matching = max(sort(unique(SKARLC14.gcl$attributes$CAPTURE_DATE))))
 
-SKARLC_Aug26IDs <- list(as.numeric(na.omit(SKARLC_Aug26IDs)))
-names(SKARLC_Aug26IDs) <- "SKARLC14"
+SKARLC14_Aug26IDs <- list(as.numeric(na.omit(SKARLC14_Aug26IDs)))
+names(SKARLC14_Aug26IDs) <- "SKARLC14"
 
-PoolCollections.GCL("SKARLC14", loci = loci96, IDs = SKARLC_Aug26IDs, newname = "SKARLC14_Aug26")
-SKARLC_Aug26.gcl$n  # 285
+PoolCollections.GCL(collections = "SKARLC14", loci = loci96, IDs = SKARLC14_Aug26IDs, newname = "SKARLC14_Aug26")
+SKARLC14_Aug26.gcl$n  # 285
 
 
 ## SUGANC
 str(SUGANC14.gcl$attributes$CAPTURE_DATE)
 sort(unique(SUGANC14.gcl$attributes$CAPTURE_DATE))
+max(sort(unique(SUGANC14.gcl$attributes$CAPTURE_DATE)))
 table(SUGANC14.gcl$attributes$CAPTURE_DATE)
 
-SUGANC_Aug27IDs <- AttributesToIDs.GCL(silly = "SUGANC14", attribute = "CAPTURE_DATE", matching = sort(unique(SUGANC14.gcl$attributes$CAPTURE_DATE))[6])
+SUGANC14_Aug27IDs <- AttributesToIDs.GCL(silly = "SUGANC14", attribute = "CAPTURE_DATE", matching = max(sort(unique(SUGANC14.gcl$attributes$CAPTURE_DATE))))
 
-SUGANC_Aug27IDs <- list(as.numeric(na.omit(SUGANC_Aug27IDs)))
-names(SUGANC_Aug27IDs) <- "SUGANC14"
+SUGANC14_Aug27IDs <- list(as.numeric(na.omit(SUGANC14_Aug27IDs)))
+names(SUGANC14_Aug27IDs) <- "SUGANC14"
 
-PoolCollections.GCL("SUGANC14", loci = loci96, IDs = SUGANC_Aug27IDs, newname = "SUGANC14_Aug27")
-SUGANC_Aug27.gcl$n  # 285
+PoolCollections.GCL(collections = "SUGANC14", loci = loci96, IDs = SUGANC14_Aug27IDs, newname = "SUGANC14_Aug27")
+SUGANC14_Aug27.gcl$n  # 285
 
 
 ## SUYAKC
 str(SUYAKC14.gcl$attributes$CAPTURE_DATE)
 sort(unique(SUYAKC14.gcl$attributes$CAPTURE_DATE))
+max(sort(unique(SUYAKC14.gcl$attributes$CAPTURE_DATE)))
 table(SUYAKC14.gcl$attributes$CAPTURE_DATE)
 
-SUYAKC_Aug26IDs <- AttributesToIDs.GCL(silly = "SUYAKC14", attribute = "CAPTURE_DATE", matching = sort(unique(SUYAKC14.gcl$attributes$CAPTURE_DATE))[22])
+SUYAKC14_Aug26IDs <- AttributesToIDs.GCL(silly = "SUYAKC14", attribute = "CAPTURE_DATE", matching = max(sort(unique(SUYAKC14.gcl$attributes$CAPTURE_DATE))))
 
-SUYAKC_Aug26IDs <- list(as.numeric(na.omit(SUYAKC_Aug26IDs)))
-names(SUYAKC_Aug26IDs) <- "SUYAKC14"
+SUYAKC14_Aug26IDs <- list(as.numeric(na.omit(SUYAKC14_Aug26IDs)))
+names(SUYAKC14_Aug26IDs) <- "SUYAKC14"
 
-PoolCollections.GCL("SUYAKC14", loci = loci96, IDs = SUYAKC_Aug26IDs, newname = "SUYAKC14_Aug26")
-SUYAKC_Aug26.gcl$n  # 285
+PoolCollections.GCL(collections = "SUYAKC14", loci = loci96, IDs = SUYAKC14_Aug26IDs, newname = "SUYAKC14_Aug26")
+SUYAKC14_Aug26.gcl$n  # 285
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Mixture sillyvec
 LateAugustMixtures2014Strata <- c("SKARLC14_Aug26", "SUGANC14_Aug27", "SUYAKC14_Aug26")
+dput(x = LateAugustMixtures2014Strata, file = "Objects/LateAugustMixtures2014Strata.txt")
+
+# Confirm sample sizes
+sapply(LateAugustMixtures2014Strata, function(silly) get(paste(silly, ".gcl", sep = ""))$n)
+
+# dput mixture sillys
+dir.create("Raw genotypes/OriginalCollections_Strata")
+invisible(sapply(LateAugustMixtures2014Strata, function(silly) {dput(x = get(paste(silly, ".gcl", sep = '')), file = paste("Raw genotypes/OriginalCollections_Strata/" , silly, ".txt", sep = ''))} )); beep(8)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Data QC/Massage ####
@@ -123,66 +161,137 @@ LateAugustMixtures2014Strata <- c("SKARLC14_Aug26", "SUGANC14_Aug27", "SUYAKC14_
 
 require(xlsx)
 
-LateAugustMixtures
+LateAugustMixtures2014Strata
 
-LateAugustMixtures_SampleSizes <- matrix(data = NA, nrow = length(LateAugustMixtures), ncol = 5, 
-                                         dimnames = list(LateAugustMixtures, c("Genotyped", "Alternate", "Missing", "Duplicate", "Final")))
+LateAugustMixtures2014Strata_SampleSizes <- matrix(data = NA, nrow = length(LateAugustMixtures2014Strata), ncol = 5, 
+                                                   dimnames = list(LateAugustMixtures2014Strata, c("Genotyped", "Alternate", "Missing", "Duplicate", "Final")))
 
 #### Check loci
 ## Get sample size by locus
-Original_LateAugustMixtures_SampleSizebyLocus <- SampSizeByLocus.GCL(LateAugustMixtures, loci96)
-min(Original_LateAugustMixtures_SampleSizebyLocus) ## 267/285
-apply(Original_LateAugustMixtures_SampleSizebyLocus,1,min)/apply(Original_LateAugustMixtures_SampleSizebyLocus,1,max) # Good, 0.947
+Original_LateAugustMixtures2014Strata_SampleSizebyLocus <- SampSizeByLocus.GCL(sillyvec = LateAugustMixtures2014Strata, loci = loci96)
+min(Original_LateAugustMixtures2014Strata_SampleSizebyLocus)  ## 267/285
+apply(Original_LateAugustMixtures2014Strata_SampleSizebyLocus, 1, min) / apply(Original_LateAugustMixtures2014Strata_SampleSizebyLocus, 1, max) # Good, 0.947
 
 
 #### Check individuals
 ### Initial
 ## Get number of individuals per silly before removing missing loci individuals
-Original_LateAugustMixtures_ColSize <- sapply(paste(LateAugustMixtures, ".gcl", sep = ''), function(x) get(x)$n)
-LateAugustMixtures_SampleSizes[, "Genotyped"] <- Original_LateAugustMixtures_ColSize
+Original_LateAugustMixtures2014Strata_ColSize <- sapply(paste(LateAugustMixtures2014Strata, ".gcl", sep = ''), function(x) get(x)$n)
+LateAugustMixtures2014Strata_SampleSizes[, "Genotyped"] <- Original_LateAugustMixtures2014Strata_ColSize
 
 
 ### Alternate
 ## Indentify alternate species individuals
-LateAugustMixtures_Alternate <- FindAlternateSpecies.GCL(sillyvec = LateAugustMixtures, species = "sockeye")
+LateAugustMixtures2014Strata_Alternate <- FindAlternateSpecies.GCL(sillyvec = LateAugustMixtures2014Strata, species = "sockeye")
 
 ## Remove Alternate species individuals
-RemoveAlternateSpecies.GCL(AlternateSpeciesReport = LateAugustMixtures_Alternate, AlternateCutOff = 0.5, FailedCutOff = 0.5)
+RemoveAlternateSpecies.GCL(AlternateSpeciesReport = LateAugustMixtures2014Strata_Alternate, AlternateCutOff = 0.5, FailedCutOff = 0.5)
 
 ## Get number of individuals per silly after removing alternate species individuals
-ColSize_LateAugustMixtures_PostAlternate <- sapply(paste(LateAugustMixtures, ".gcl", sep = ''), function(x) get(x)$n)
-LateAugustMixtures_SampleSizes[, "Alternate"] <- Original_LateAugustMixtures_ColSize-ColSize_LateAugustMixtures_PostAlternate
+ColSize_LateAugustMixtures2014Strata_PostAlternate <- sapply(paste(LateAugustMixtures2014Strata, ".gcl", sep = ''), function(x) get(x)$n)
+LateAugustMixtures2014Strata_SampleSizes[, "Alternate"] <- Original_LateAugustMixtures2014Strata_ColSize-ColSize_LateAugustMixtures2014Strata_PostAlternate
 
 
 ### Missing
 ## Remove individuals with >20% missing data
-LateAugustMixtures_MissLoci <- RemoveIndMissLoci.GCL(sillyvec = LateAugustMixtures, loci = loci96, proportion = 0.8)
+LateAugustMixtures2014Strata_MissLoci <- RemoveIndMissLoci.GCL(sillyvec = LateAugustMixtures2014Strata, proportion = 0.8)
 
 ## Get number of individuals per silly after removing missing loci individuals
-ColSize_LateAugustMixtures_PostMissLoci <- sapply(paste(LateAugustMixtures, ".gcl", sep = ''), function(x) get(x)$n)
-LateAugustMixtures_SampleSizes[, "Missing"] <- ColSize_LateAugustMixtures_PostAlternate-ColSize_LateAugustMixtures_PostMissLoci
+ColSize_LateAugustMixtures2014Strata_PostMissLoci <- sapply(paste(LateAugustMixtures2014Strata, ".gcl", sep = ''), function(x) get(x)$n)
+LateAugustMixtures2014Strata_SampleSizes[, "Missing"] <- ColSize_LateAugustMixtures2014Strata_PostAlternate-ColSize_LateAugustMixtures2014Strata_PostMissLoci
 
 
 ### Duplicate
 ## Check within collections for duplicate individuals.
-LateAugustMixtures_DuplicateCheck95MinProportion <- CheckDupWithinSilly.GCL(sillyvec = LateAugustMixtures, loci = loci96, quantile = NULL, minproportion = 0.95)
-LateAugustMixtures_DuplicateCheckReportSummary <- sapply(LateAugustMixtures, function(x) LateAugustMixtures_DuplicateCheck95MinProportion[[x]]$report)
+LateAugustMixtures2014Strata_DuplicateCheck95MinProportion <- CheckDupWithinSilly.GCL(sillyvec = LateAugustMixtures2014Strata, loci = loci96, quantile = NULL, minproportion = 0.95)
+LateAugustMixtures2014Strata_DuplicateCheckReportSummary <- sapply(LateAugustMixtures2014Strata, function(x) LateAugustMixtures2014Strata_DuplicateCheck95MinProportion[[x]]$report)
 
 ## Remove duplicate individuals
-LateAugustMixtures_RemovedDups <- RemoveDups.GCL(LateAugustMixtures_DuplicateCheck95MinProportion)
+LateAugustMixtures2014Strata_RemovedDups <- RemoveDups.GCL(LateAugustMixtures2014Strata_DuplicateCheck95MinProportion)
 
 ## Get number of individuals per silly after removing duplicate individuals
-ColSize_LateAugustMixtures_PostDuplicate <- sapply(paste(LateAugustMixtures, ".gcl", sep = ''), function(x) get(x)$n)
-LateAugustMixtures_SampleSizes[, "Duplicate"] <- ColSize_LateAugustMixtures_PostMissLoci-ColSize_LateAugustMixtures_PostDuplicate
+ColSize_LateAugustMixtures2014Strata_PostDuplicate <- sapply(paste(LateAugustMixtures2014Strata, ".gcl", sep = ''), function(x) get(x)$n)
+LateAugustMixtures2014Strata_SampleSizes[, "Duplicate"] <- ColSize_LateAugustMixtures2014Strata_PostMissLoci-ColSize_LateAugustMixtures2014Strata_PostDuplicate
 
 
 ### Final
-LateAugustMixtures_SampleSizes[, "Final"] <- ColSize_LateAugustMixtures_PostDuplicate
-LateAugustMixtures_SampleSizes
+LateAugustMixtures2014Strata_SampleSizes[, "Final"] <- ColSize_LateAugustMixtures2014Strata_PostDuplicate
+LateAugustMixtures2014Strata_SampleSizes
 
-write.xlsx(LateAugustMixtures_SampleSizes, file = "Output/LateAugustMixtures_SampleSizes.xlsx")
-
+write.xlsx(LateAugustMixtures2014Strata_SampleSizes, file = "Output/LateAugustMixtures2014Strata_SampleSizes.xlsx")
+dput(x = LateAugustMixtures2014Strata_SampleSizes, file = "Objects/LateAugustMixtures2014Strata_SampleSizes.txt")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Combine Loci ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## Get the final locus set from baseline file to avoid any errors
+loci46 <- dget(file = "V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Baseline/Objects/loci46.txt")
+dput(x = loci46, file = "Objects/loci46.txt")
+
+## Combine loci
+combined.loci <- sapply(grep(pattern = "\\.", x = loci46, value = TRUE), function(locus) {unlist(strsplit(x = locus, split = "\\."))}, simplify = FALSE)
+sapply(combined.loci, function(loci2combine) {CombineLoci.GCL(sillyvec = LateAugustMixtures2014Strata, markerset = loci2combine, update = TRUE)} )
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Save PostQC/Combined loci .gcl's as back-up:
+dir.create("Raw genotypes/OriginalCollections_Strata_PostQC_CombinedLoci")
+invisible(sapply(LateAugustMixtures2014Strata, function(silly) {dput(x = get(paste(silly, ".gcl", sep = '')), file = paste("Raw genotypes/OriginalCollections_Strata_PostQC_CombinedLoci/" , silly, ".txt", sep = ''))} )); beep(8)
+
+## Dput LocusControl
+dput(x = LocusControl, file = "Objects/LocusControl98.txt")
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Geneop
+# Kick out Genepop file to look for gross excesses of hets - using HWE probability test option with default settings to see P-values w/ Fis:
+gcl2Genepop.GCL(sillyvec = LateAugustMixtures2014Strata, loci = loci96[-mito.loci], path = "Genepop/LateAugustMixtures2014Strata_93nuclearloci.gen", VialNums = TRUE)
+
+# Read in Genepop output .P file
+HWE <- ReadGenepopHWE.GCL(file = "Genepop/LateAugustMixtures2014Strata_93nuclearloci.txt.P")
+
+#~~~~~~~~~~~~~~~~~~
+# Plot Fis values (looking for gross excess of hets [-Fis]) and look for markers out of HWE
+
+# by(data = HWE$DataByPop, INDICES = HWE$DataByPop$Pop, FUN = function(x) {
+#   plot(sort(x[, "WC Fis"]), type = "h", lwd = 5, ylab = "WC Fis", xlab = "Loci (sorted)", col = "grey40", main = "Silly")
+#   abline(h = 0, lwd = 5)
+# } )
+
+sapply(as.character(unique(HWE$DataByPop$Pop)), function(pop) {
+  x <- subset(x = HWE$DataByPop, subset = Pop == pop)
+  plot(sort(x[, "WC Fis"]), type = "h", lwd = 5, ylab = "WC Fis", xlab = "Loci (sorted)", col = "grey40", main = pop)
+  abline(h = 0, lwd = 5)
+  x[x$PValue[!is.na(x$PValue)] < 0.05, ]
+}, USE.NAMES = TRUE, simplify = FALSE
+)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Clean workspace; dget .gcl objects and Locus Control ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+rm(list = ls(all = TRUE))
+setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Mixtures")
+# This sources all of the new GCL functions to this workspace
+source("C:/Users/krshedd/Documents/R/Functions.GCL.R")
+source("H:/R Source Scripts/Functions.GCL_KS.R")
+
+## Get objects
+LocusControl <- dget(file = "Objects/LocusControl98.txt")
+
+KMAobjects <- list.files(path = "Objects", recursive = FALSE)
+KMAobjects <- KMAobjects[!KMAobjects %in% c("EASSIP-LateAugust2014", "OriginalLocusControl.txt", "LocusControl98.txt")]
+KMAobjects
+
+invisible(sapply(KMAobjects, function(objct) {assign(x = unlist(strsplit(x = objct, split = ".txt")), value = dget(file = paste(getwd(), "Objects", objct, sep = "/")), pos = 1) })); beep(2)
+
+
+## Get un-altered mixtures
+invisible(sapply(LateAugustMixtures2014Strata, function(silly) {assign(x = paste(silly, ".gcl", sep = ""), value = dget(file = paste(getwd(), "/Raw genotypes/OriginalCollections_Strata_PostQC_CombinedLoci/", silly, ".txt", sep = "")), pos = 1)} )); beep(2)
+objects(pattern = "\\.gcl")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Get MSA Objects ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
