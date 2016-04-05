@@ -4,6 +4,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 date()
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Introduction ####
 # The goal of this script is to analyze sockeye salmon mixtures from the KMA
 # commercial harvest from 2014-2016 using a coastwide sockeye baseline
@@ -11,6 +12,7 @@ date()
 # grouped into 46 loci (2 sets of linked SNPs are combined as haplotypes).
 # All mixtures are to be analyzed with the program BAYES.
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Specific Objectives ####
 # This script will:
 # 1) Import mixture data
