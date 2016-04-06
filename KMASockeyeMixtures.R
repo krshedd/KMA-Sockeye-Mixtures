@@ -326,17 +326,20 @@ KMA47346Baseline <- dget(file = "KMA47346Baseline.txt")
 KMA47389Baseline <- dget(file = "KMA47389Baseline.txt")
 WASSIPSockeyeSeeds <- dget("V:/Analysis/5_Coastwide/Sockeye/WASSIP/Mixture/Objects/WASSIPSockeyeSeeds.txt")
 KMA473CommonNames <- dget(file = "CommonNames473.txt")
-
+KMA15Colors <- dget(file = "Colors15.txt")
 setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Mixtures")
 
 ## Copy these baseline objects and put them in the Mixtures/Objects directory
 
 setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Baseline/Objects")
-file.copy(from = c("KMA473Pops15FlatPrior.txt", "KMA473PopsInits.txt", "KMA473PopsGroupVec15.txt", "KMA473Pops.txt", "PCGroups15.txt", "CommonNames473.txt",
+file.copy(from = c("KMA473Pops15FlatPrior.txt", "KMA473PopsInits.txt", "KMA473PopsGroupVec15.txt", "KMA473Pops.txt", "PCGroups15.txt", "CommonNames473.txt", "Colors15.txt",
                    "V:/Analysis/5_Coastwide/Sockeye/WASSIP/Mixture/Objects/WASSIPSockeyeSeeds.txt"), 
           to = "V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Mixtures/Objects")
 setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Mixtures")
 
+
+KMA15GroupsPC2Rows <- PCGroups15Rows2 <- c("West of\nChignik", "Black\nLake", "Chignik\nLake", "U. Station\nAkalura", "Frazer\n", "Ayakulik\n", "Karluk\n", "Uganik\n", "Northwest\nKodiak", "Afognak\n", "Eastside\nKodiak", "Saltery\n", "Cook\nInlet", "PWS\n", "South of\nCape Suckling")
+dput(x = KMA15GroupsPC2Rows, file = "Objects/KMA15GroupsPC2Rows.txt")
 # Note, I changed the names for CommonNames473.txt -> KMA473CommonNames.txt & PCGroups15 -> KMA15GroupsPC.txt
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -393,90 +396,383 @@ sapply(LateAugustMixtures2014Strata, function(Mix) {dir.create(paste("BAYES/Late
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Summarize Output ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-LateAugust_Estimates <- CustomCombineBAYESOutput.GCL(groupvec = 1:14, groupnames = EASSIP14Groups, maindir = "BAYES/Output", mixvec = LateAugustMixtures2014Strata, prior = "", 
-                                                     ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1, PosteriorOutput = TRUE)
-dput(LateAugust_Estimates, file = "Estimates objects/LateAugust_Estimates.txt")
-LateAugust_Estimates <- dget(file = "Estimates objects/LateAugust_Estimates.txt")
 
-str(LateAugust_Estimates)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## 89 Loci
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+LateAugust2014Strata_89loci_Estimates <- CustomCombineBAYESOutput.GCL(groupvec = seq(KMA15GroupsPC), groupnames = KMA15GroupsPC, 
+                                                                      maindir = "BAYES/Late August 89loci/Output", 
+                                                                      mixvec = LateAugustMixtures2014Strata, prior = "",  
+                                                                      ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1, PosteriorOutput = TRUE)
 
+# Dput 1) estimates stats + posterior output & 2) estimates stats
+dput(LateAugust2014Strata_89loci_Estimates, file = "Estimates objects/LateAugust2014Strata_89loci_Estimates.txt")
+dput(LateAugust2014Strata_89loci_Estimates$Stats, file = "Estimates objects/LateAugust2014Strata_89loci_EstimatesStats.txt")
 
-# Simplfy and look at Kodiak vs. non-Kodiak
-LateAugust_Estimates_Simple <- CustomCombineBAYESOutput.GCL(groupvec = c(1, 1, 1, rep(2, 9), 1, 1), groupnames = c("Non-Kodiak", "Kodiak"), maindir = "BAYES/Output", mixvec = LateAugustMixtures2014Strata, prior = "",
-                                                            ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1, PosteriorOutput = TRUE)
-LateAugust_Estimates_Simple$Stats
-dput(LateAugust_Estimates_Simple, file = "Estimates objects/LateAugust_Estimates_Simple.txt")
-
+LateAugust2014Strata_89loci_Estimates <- dget(file = "Estimates objects/LateAugust2014Strata_89loci_Estimates.txt")
+LateAugust2014Strata_89loci_EstimatesStats <- dget(file = "Estimates objects/LateAugust2014Strata_89loci_EstimatesStats.txt")
 
 
 # Verify that Gelman-Rubin < 1.2
-lapply(LateAugust_Estimates$Stats, function(Mix) {Mix[, "GR"]})
-lapply(LateAugust_Estimates$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})
+sapply(LateAugust2014Strata_89loci_Estimates$Stats, function(Mix) {Mix[, "GR"]})
+sapply(LateAugust2014Strata_89loci_Estimates$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})
 
-# Sneak Peak at resutls
-LateAugust_Estimates$Stats
+# Quick look at raw posterior output
+str(LateAugust2014Strata_89loci_Estimates$Output)
+LateAugust2014StrataHeader <- c("Karluk Section August 26, 2014",
+                                "Uganik Section August 27, 2014",
+                                "Uyak Section August 26, 2014")
+PlotPosterior <- function(output, header, groups, colors = NULL, set.mfrow, thin = 10){
+  if(is.null(colors)) {colors <- rep("black", length(groups))}
+  
+  par(mfrow = set.mfrow, mar = c(2.1, 2.1, 1.1, 1.1), oma = c(4.1, 4.1, 3.1, 1.1))
+  
+  thin = 10  # thins the posterior to create plots faster
+  invisible(sapply(seq(length(output)), function(j) {
+    invisible(sapply(seq(groups), function(i) {
+      RG <- output[[j]][, i]
+      RG <- RG[seq(1, length(RG), thin)]
+      plot(RG, type = "l", ylim = c(0,1), xlab = "", ylab = "")
+      abline(v = seq(0, length(RG), length(RG)/5))
+      text(x = length(RG)/2, y = 0.98, labels = groups[i], col = colors[i], cex = 1.2, font = 2)} ))
+    mtext(text = LateAugust2014StrataHeader[j], side = 3, outer = TRUE, cex = 1.5)
+    mtext(text = "Iteration (5 chains each)", side = 1, outer = TRUE, cex = 1.5, line = 1.5)
+    mtext(text = "Posterior", side = 2, outer = TRUE, cex = 1.5, line = 1.5)
+  }))
+  
+  par(mfrow = c(1, 1), mar = c(5.1, 4.1, 4.1, 2.1), oma = c(0, 0, 0, 0))
+}
+
+PlotPosterior(output = LateAugust2014Strata_89loci_Estimates$Output, groups = KMA15GroupsPC, colors = KMA15Colors, header = LateAugust2014StrataHeader, set.mfrow = c(5, 3), thin = 10)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## 46 Loci
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+LateAugust2014Strata_46loci_Estimates <- CustomCombineBAYESOutput.GCL(groupvec = seq(KMA15GroupsPC), groupnames = KMA15GroupsPC, 
+                                                                      maindir = "BAYES/Late August 46loci/Output", 
+                                                                      mixvec = LateAugustMixtures2014Strata, prior = "",  
+                                                                      ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1, PosteriorOutput = TRUE)
+
+# Dput 1) estimates stats + posterior output & 2) estimates stats
+dput(LateAugust2014Strata_46loci_Estimates, file = "Estimates objects/LateAugust2014Strata_46loci_Estimates.txt")
+dput(LateAugust2014Strata_46loci_Estimates$Stats, file = "Estimates objects/LateAugust2014Strata_46loci_EstimatesStats.txt")
+
+LateAugust2014Strata_46loci_Estimates <- dget(file = "Estimates objects/LateAugust2014Strata_46loci_Estimates.txt")
+LateAugust2014Strata_46loci_EstimatesStats <- dget(file = "Estimates objects/LateAugust2014Strata_46loci_EstimatesStats.txt")
 
 
-## Re-order RGs to make more sense geographically
-# Check NW Minor
-WASSIP294CommonNames[which(EASSIP294Pops14GroupVec == which(EASSIP14Groups == "NW Minor"))]
+# Verify that Gelman-Rubin < 1.2
+sapply(LateAugust2014Strata_46loci_Estimates$Stats, function(Mix) {Mix[, "GR"]})
+sapply(LateAugust2014Strata_46loci_Estimates$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})
 
-EASSIP14Groups[c(1, 2, 3, 12, 11, 4, 5, 7, 6, 8, 9, 10, 13, 14)]
+# Quick look at raw posterior output
+str(LateAugust2014Strata_46loci_Estimates$Output)
+LateAugust2014StrataHeader <- c("Karluk Section August 26, 2014",
+                                "Uganik Section August 27, 2014",
+                                "Uyak Section August 26, 2014")
 
-GroupOrder <- c(1, 2, 3, 12, 11, 4, 5, 7, 6, 8, 9, 10, 13, 14)
-EASSIP14GroupsColors <- EASSIP14GroupsColors[GroupOrder]
-names(EASSIP14GroupsColors) <- EASSIP14Groups[GroupOrder]
-
-
-
-## Save all EASSIP objects
-getwd()
-ls()[-grep(pattern = ".GCL", x = ls())]
-
-dput(x = EASSIP14Groups, file = "Objects/EASSIP14Groups.txt")
-dput(x = EASSIP14GroupsColors, file = "Objects/EASSIP14GroupsColors.txt")
-dput(x = EASSIP14GroupsShort, file = "Objects/EASSIP14GroupsShort.txt")
-dput(x = EASSIP294Pops14GroupsFlatPrior, file = "Objects/EASSIP294Pops14GroupsFlatPrior.txt")
-dput(x = EASSIP294Pops14GroupVec, file = "Objects/EASSIP294Pops14GroupVec.txt")
-dput(x = GroupOrder, file = "Objects/GroupOrder.txt")
-dput(x = LateAugustHarvests, file = "Objects/LateAugustHarvests.txt")
-dput(x = KMAsockeyeNames, file = "Objects/KMAsockeyeNames.txt")
-
-dput(x = LateAugust_Estimates_Harvest, file = "Estimates objects/LateAugust_Estimates_Harvest.txt")
+PlotPosterior(output = LateAugust2014Strata_46loci_Estimates$Output, groups = KMA15GroupsPC, colors = KMA15Colors, header = LateAugust2014StrataHeader, set.mfrow = c(5, 3), thin = 10)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Plot results ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## Quick and dirty plot
-par(mar = c(5.6, 4.6, 3.1, 6.6))
-sapply(LateAugustMixtures2014Strata, function(Mix) {plot(LateAugust_Estimates$Stats[[Mix]][, "mean"], cex = 3, pch = 16, col = EASSIP14GroupsColors, ylab = "Proportion of Mixture", ylim = c(0, 1), xlab = "", axes = FALSE, main = Mix, cex.main = 2, cex.lab = 1.5)
-                                          arrows(x0 = 1:14, y0 = LateAugust_Estimates$Stats[[Mix]][, "5%"], x1 = 1:14, y1 = LateAugust_Estimates$Stats[[Mix]][, "95%"], angle = 90, code = 3, length = 0.2, lwd = 2)
-                                          points(LateAugust_Estimates$Stats[[Mix]][, "mean"], cex = 3, pch = 16, col = EASSIP14GroupsColors)
-                                          axis(side = 2)
-                                          axis(side = 1, labels = NA, at = 1:14)
-                                          text(x = (1:14) - 0.35, y = 0, labels = EASSIP14GroupsShort, srt = 60, pos = 1, offset = 3.5, xpd = TRUE)
-                                          legend(x = 14, y = 0.9, xpd = TRUE, legend = EASSIP14GroupsShort, fill = EASSIP14GroupsColors, bty = "n")})
+par(mar = c(5.6, 4.6, 3.1, 2.1))
+sapply(LateAugustMixtures2014Strata, function(Mix) {
+  plot(LateAugust2014Strata_46loci_Estimates$Stats[[Mix]][, "median"], cex = 3, pch = 16, col = KMA15Colors, ylab = "Proportion of Mixture", 
+       ylim = c(0, 1), xlab = "", axes = FALSE, main = Mix, cex.main = 2, cex.lab = 1.5)
+  arrows(x0 = seq(KMA15GroupsPC), y0 = LateAugust2014Strata_46loci_Estimates$Stats[[Mix]][, "5%"], x1 = seq(KMA15GroupsPC), 
+         y1 = LateAugust2014Strata_46loci_Estimates$Stats[[Mix]][, "95%"], angle = 90, code = 3, length = 0.2, lwd = 2)
+  points(LateAugust2014Strata_46loci_Estimates$Stats[[Mix]][, "median"], cex = 3, pch = 16, col = KMA15Colors)
+  axis(side = 2)
+  axis(side = 1, labels = NA, at = seq(KMA15GroupsPC))
+  text(x = (seq(KMA15GroupsPC)) - 0.35, y = 0, labels = KMA15GroupsPC2Rows, srt = 60, pos = 1, offset = 3.5, xpd = TRUE)
+})
 par(mar = c(5.1, 4.1, 4.1, 2.1))
 
 ## Make violin plots of posteriors with RGs sorted
-require(vioplot)
 
-LateAugustMixtures2014Strata
-LateAugustMixtures2014Strata_SampleSizes
 LateAugustMixtures2014StrataDetail <- c("Outer Karluk (255-20)\n8/26/14 (n = 284)", "Uganik (253-11, 13)\n8/27/14 (n = 282)", "Uyak (254-10, 20)\n8/26/14 (n = 280)")
 names(LateAugustMixtures2014StrataDetail) <- LateAugustMixtures2014Strata
 
-par(mar = c(5.1, 4.6, 3.6, 6.6))
-sapply(LateAugustMixtures2014Strata, function(Mix) {plot(LateAugust_Estimates$Stats[[Mix]][GroupOrder, "mean"], cex = 3, pch = 16, col = EASSIP14GroupsColors, ylab = "Proportion of Mixture", ylim = c(0, 1), xlab = "", axes = FALSE, main = LateAugustMixtures2014StrataDetail[[Mix]], cex.main = 2, cex.lab = 1.5)
-                                          sapply(1:14, function(i) {vioplot2(LateAugust_Estimates$Output[[Mix]][, GroupOrder[i]], at = i, horizontal = FALSE, col = EASSIP14GroupsColors[i], border = TRUE, drawRect = FALSE, rectCol = EASSIP14GroupsColors[i], add = TRUE, wex = 2, lwd = 2)})
-                                          arrows(x0 = 1:14, y0 = LateAugust_Estimates$Stats[[Mix]][GroupOrder, "5%"], x1 = 1:14, y1 = LateAugust_Estimates$Stats[[Mix]][GroupOrder, "95%"], angle = 90, code = 3, length = 0.2, lwd = 2)
-                                          points(LateAugust_Estimates$Stats[[Mix]][GroupOrder, "mean"], cex = 2, pch = 21, col = "white", bg = EASSIP14GroupsColors, lwd = 3)
-                                          axis(side = 2, lwd = 3, cex.axis = 1.5)
-                                          text(x = (1:14) - 0.35, y = 0, labels = EASSIP14GroupsShort[GroupOrder], srt = 60, pos = 1, offset = 2.5, xpd = TRUE)
-                                          axis(side = 1, labels = NA, at = 1:14, pos = 0, lwd = 2, tick = FALSE)
-                                          abline(h = 0, lwd = 3)
-                                          legend(x = 14, y = 0.9, xpd = TRUE, legend = EASSIP14GroupsShort[GroupOrder], fill = EASSIP14GroupsColors, bty = "n")}
-)
+ViolinPlot <- function(estimates, groups, colors, header, wex = 1) {
+  while(!require(vioplot, quietly = TRUE)){install.packages("vioplot")}
+  
+  mixtures <- names(estimates$Stats)
+  
+  par(mar = c(5.1, 4.6, 3.6, 1.1))
+  sapply(mixtures, function(Mix) {
+    plot(estimates$Stats[[Mix]][, "median"], cex = 3, pch = 16, col = colors, ylab = "Proportion of Mixture", ylim = c(0, 1), xlab = "", axes = FALSE, main = header[[Mix]], cex.main = 2, cex.lab = 1.5)
+    sapply(seq(groups), function(i) {vioplot2(estimates$Output[[Mix]][, i], at = i, horizontal = FALSE, col = colors[i], border = TRUE, drawRect = FALSE, rectCol = colors[i], add = TRUE, wex = wex, lwd = 2)})
+    arrows(x0 = seq(groups), y0 = estimates$Stats[[Mix]][, "5%"], x1 = seq(groups), y1 = estimates$Stats[[Mix]][, "95%"], angle = 90, code = 3, length = 0.2, lwd = 2)
+    points(estimates$Stats[[Mix]][, "median"], cex = 2, pch = 21, col = "white", bg = colors, lwd = 3)
+    axis(side = 2, lwd = 3, cex.axis = 1.5)
+    text(x = (seq(groups)) - 0.35, y = 0, labels = groups, srt = 60, pos = 1, offset = 2.5, xpd = TRUE)
+    axis(side = 1, labels = NA, at = seq(groups), pos = 0, lwd = 2, tick = FALSE)
+    abline(h = 0, lwd = 3)
+  } )
+  
+}
+
+ViolinPlot(estimates = LateAugust2014Strata_89loci_Estimates, groups = KMA15GroupsPC2Rows, colors = KMA15Colors, header = LateAugustMixtures2014StrataDetail)
+ViolinPlot(estimates = LateAugust2014Strata_46loci_Estimates, groups = KMA15GroupsPC2Rows, colors = KMA15Colors, header = LateAugustMixtures2014StrataDetail)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Compare markersets, side by side barplots
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Libraries
+require(devEMF)
+require(gplots)
+require(plotrix)
+
+
+LateAugust2014Strata_89loci_EstimatesStats <- dget(file = "Estimates objects/LateAugust2014Strata_89loci_EstimatesStats.txt")
+LateAugust2014Strata_46loci_EstimatesStats <- dget(file = "Estimates objects/LateAugust2014Strata_46loci_EstimatesStats.txt")
+
+KMA15GroupsPC
+KMA15GroupsPC2Rows
+LateAugustMixtures2014StrataDetail
+
+cex.lab <- 1.5
+cex.yaxis <- 1.2
+cex.xaxis <- 0.5
+cex.title <- 2
+
+mixtures <- LateAugustMixtures2014Strata
+for(mixture in mixtures) {
+  par(mar = c(5.1, 4.1, 4.1, 2.1))
+  Barplot1 <- barplot2(height = t(matrix(c(LateAugust2014Strata_89loci_EstimatesStats[[mixture]][, "median"],
+                                           LateAugust2014Strata_46loci_EstimatesStats[[mixture]][, "median"]), ncol = 2)* 100), 
+                       beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
+                       ci.l = t(matrix(c(LateAugust2014Strata_89loci_EstimatesStats[[mixture]][, "5%"],
+                                         LateAugust2014Strata_46loci_EstimatesStats[[mixture]][, "5%"]), ncol = 2)* 100), 
+                       ci.u = t(matrix(c(LateAugust2014Strata_89loci_EstimatesStats[[mixture]][, "95%"],
+                                         LateAugust2014Strata_46loci_EstimatesStats[[mixture]][, "95%"]), ncol = 2)* 100), 
+                       ylim = c(0, 100), col = colorpanel(2, low = "blue", high = "white"), cex.axis = cex.yaxis, yaxt = "n", xaxt = 'n')
+  axis(side = 2, at = seq(0, 100, 25), labels = formatC(x = seq(0, 100, 25), big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+  legend(x = 1, y = 95, legend = c("loci89", "loci46"), fill = colorpanel(2, low = "blue", high = "white"), border = "black", bty = "n", cex = 1, title = LateAugustMixtures2014StrataDetail[1])
+  abline(h = 0)
+  mtext(text = "Percentage of Catch", side = 2, line = 2.5, cex = cex.lab)
+  mtext(text = "Reporting Group", side = 1, line = 3, cex = cex.lab)
+  mtext(text = KMA15GroupsPC2Rows, side = 1, line = 1, at = colMeans(Barplot1), adj = 0.5, cex = cex.xaxis)
+  mtext(text = LateAugustMixtures2014StrataDetail[mixture], side = 3, cex = cex.title)
+}
+
+
+
+
+
+
+
+
+plot.ci.extract <- function(x, mixture, group, stat.col) {
+  list.index <- grep(pattern = mixture, x = names(x))  
+  sapply(list.index, function(i) {x[[i]][group, stat.col]} )
+}
+
+
+
+emf(file = "V:/Presentations/Regional/4_Westward/Sockeye/COMFISH/KarlukScenarioFigure.emf", width = 7, height = 7, family = "sans", bg = "white")
+
+# Three barplot layout
+layoutmat <- matrix(data=c(  1, 2,
+                             1, 3,
+                             1, 4,
+                             5, 6), nrow = 4, ncol = 2, byrow = TRUE)
+
+PCGroups15
+PCGroups15Rows2 <- c("West of\nChignik", "Black\nLake", "Chignik\nLake", "U. Station\nAkalura", "Frazer\n", "Ayakulik\n", "Karluk\n", "Uganik\n", "Northwest\nKodiak", "Afognak\n", "Eastside\nKodiak", "Saltery\n", "Cook\nInlet", "PWS\n", "South of\nCape Suckling")
+cex.lab <- 1.5
+cex.yaxis <- 1.2
+cex.xaxis <- 0.5
+ci.lwd <- 2.5
+TrueKarlukProportions <- MixtureProofTestProportions[FisheryProofTestScenarioNames[3], ] * 100
+
+
+
+layout(mat = layoutmat, widths = c(0.1, 1, 1), heights = c(0.9, 0.9, 1, 0.1))
+par(mar = rep(0, 4))
+
+# Y-axis label
+plot.new()
+text(x = 0.25, y = 0.5, labels = "Percentage of Catch", srt = 90, cex = cex.lab)
+
+# Hypothetical Late Karluk Replicate 1
+par(mar = c(1, 1, 1, 1))
+Barplot1 <- barplot2(height = KMA473PopsGroups15loci46RepeatedMixProofTestsEstimatesStats$late.Karluk1[, "median"] * 100, 
+                     beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
+                     ci.l = KMA473PopsGroups15loci46RepeatedMixProofTestsEstimatesStats$late.Karluk1[, "5%"] * 100, 
+                     ci.u = KMA473PopsGroups15loci46RepeatedMixProofTestsEstimatesStats$late.Karluk1[, "95%"] * 100, 
+                     ylim = c(0, 100), col = colorpanel(1, low = "blue", high = "white"), cex.axis = cex.yaxis, yaxt = "n", xaxt = 'n')
+segments(x0 = Barplot1-0.5, y0 = TrueKarlukProportions, x1 = Barplot1+0.5, y1 = TrueKarlukProportions, col = "red", lwd = ci.lwd)
+axis(side = 2, at = seq(0, 100, 25), labels = formatC(x = seq(0, 100, 25), big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+legend(legend = "Hypothetical August", x = "topleft", fill = colorpanel(1, low = "blue", high = "white"), border = "black", bty = "n", cex = 1, title="Replicate 1")
+abline(h = 0)
+
+# Hypothetical Late Karluk Replicate 2
+par(mar = c(1, 1, 1, 1))
+Barplot2 <- barplot2(height = KMA473PopsGroups15loci46RepeatedMixProofTestsEstimatesStats$late.Karluk2[, "median"] * 100, 
+                     beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
+                     ci.l = KMA473PopsGroups15loci46RepeatedMixProofTestsEstimatesStats$late.Karluk2[, "5%"] * 100, 
+                     ci.u = KMA473PopsGroups15loci46RepeatedMixProofTestsEstimatesStats$late.Karluk2[, "95%"] * 100, 
+                     ylim = c(0, 100), col = colorpanel(1, low = "blue", high = "white"), cex.axis = cex.yaxis, yaxt = "n", xaxt = 'n')
+segments(x0 = Barplot1-0.5, y0 = TrueKarlukProportions, x1 = Barplot1+0.5, y1 = TrueKarlukProportions, col = "red", lwd = ci.lwd)
+axis(side = 2, at = seq(0, 100, 25), labels = formatC(x = seq(0, 100, 25), big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+legend(legend = "Hypothetical August", x = "topleft", fill = colorpanel(1, low = "blue", high = "white"), border = "black", bty = "n", cex = 1, title="Replicate 2")
+abline(h = 0)
+
+# Hypothetical Late Karluk Replicate 3
+par(mar = c(2, 1, 1, 1))
+Barplot3 <- barplot2(height = KMA473PopsGroups15loci46RepeatedMixProofTestsEstimatesStats$late.Karluk3[, "median"] * 100, 
+                     beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
+                     ci.l = KMA473PopsGroups15loci46RepeatedMixProofTestsEstimatesStats$late.Karluk3[, "5%"] * 100, 
+                     ci.u = KMA473PopsGroups15loci46RepeatedMixProofTestsEstimatesStats$late.Karluk3[, "95%"] * 100, 
+                     ylim = c(0, 100), col = colorpanel(1, low = "blue", high = "white"), cex.axis = cex.yaxis, yaxt = "n", xaxt = 'n')
+segments(x0 = Barplot1-0.5, y0 = TrueKarlukProportions, x1 = Barplot1+0.5, y1 = TrueKarlukProportions, col = "red", lwd = ci.lwd)
+axis(side = 2, at = seq(0, 100, 25), labels = formatC(x = seq(0, 100, 25), big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+legend(legend = "Hypothetical August", x = "topleft", fill = colorpanel(1, low = "blue", high = "white"), border = "black", bty = "n", cex = 1, title="Replicate 3")
+abline(h = 0)
+mtext(text = PCGroups15Rows2, side = 1, line = 1, at = Barplot3[, 1], adj = 0.5, cex = cex.xaxis)
+
+## Blank Corner
+par(mar = rep(0, 4))
+plot.new()
+
+## x-axis label
+par(mar = rep(0, 4))
+plot.new()
+text(x = 0.5, y = 0.5, labels = "Reporting Group", cex = cex.lab)
+
+
+dev.off()
+
+
+
+
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Compare markersets
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Define layout structure
+FiveByThreeMatrix <- matrix(data=c(1,2,3,4,
+                                   1,5,6,7,
+                                   1,8,9,10,
+                                   1,11,12,13,
+                                   1,14,15,16,
+                                   17,18,18,18),nrow=6,ncol=4,byrow=TRUE)
+FiveByThreeLayout <- layout(mat=FiveByThreeMatrix,widths=c(0.2,rep(1,3)),heights=c(1,1,1,1,1,0.2))
+layout.show(n=18)
+
+#~~~~~~~~~~~~~~~~~~
+# Create 5%, median, 95% extractor function
+plot.ci.extract <- function(x, mixture, group, stat.col) {
+  list.index <- grep(pattern = mixture, x = names(x))  
+  sapply(list.index, function(i) {x[[i]][group, stat.col]} )
+}
+
+#~~~~~~~~~~~~~~~~~~
+# Create a figure wrapup funtion
+require(gplots)
+require(devEMF)
+
+percent = TRUE
+mixtures = LateAugustMixtures2014Strata
+
+col = c("black", "grey70")
+cex.pch = 1.5
+ci.lwd = 2
+sfrac = 0.02
+
+
+for(mixture in mixtures) {
+  
+  x.loci89 <- dget(file = "Estimates objects/LateAugust2014Strata_89loci_EstimatesStats.txt")
+  x.loci46 <- dget(file = "Estimates objects/LateAugust2014Strata_46loci_EstimatesStats.txt")
+  
+  if(percent){
+    percent.multiplier <- 100
+    x.loci89 <- sapply(x.loci89, function(rpt) {rpt[, 1:5] * percent.multiplier}, simplify = FALSE)
+    x.loci46 <- sapply(x.loci46, function(rpt) {rpt[, 1:5] * percent.multiplier}, simplify = FALSE)
+    file = paste("Figures/", mixture, ".Percent.emf", sep = '')
+    y.label = "Percent"
+  } else {
+    percent.multiplier <- 1
+    file = paste("Figures/", mixture, ".emf", sep = '')
+    y.label = "Proportion"
+  }
+  
+  MixtureProofTestProportions <- t(dget(file = "Objects/MixtureProofTestProportions.txt")) * percent.multiplier
+  
+  emf(file = file, width = 6.5, height = 8, family = "Times")
+  #png(file = paste(filedir, "/", mixture, ".png", sep = ""), width = 6.5, height = 7.5, units = "in", res = 1200, pointsize = 4, family = "Times")
+  layout(mat = FiveByThreeMatrix, widths = c(0.3, rep(1, 3)), heights = c(1, 1, 1, 1, 1, 0.4))
+  
+  # Plot 1 - y-axis title
+  par(mar = c(0, 0, 0, 0))
+  par(srt = 90)
+  plot.new()
+  text(labels = y.label, x = 0.2, y = 0.5, adj = c(0.5, 0.5), font = 1, cex = 2)
+  
+  # Plot 2-16 - Groups
+  sapply(seq(groups), function(j) {
+    
+    y <- c(t(matrix(data = c(plot.ci.extract(x = x.loci89, mixture = mixture, group = groups[j], stat.col = "median"),
+                             plot.ci.extract(x = x.loci46, mixture = mixture, group = groups[j], stat.col = "median")),
+                    nrow = 5)))
+    ui <- c(t(matrix(data = c(plot.ci.extract(x = x.loci89, mixture = mixture, group = groups[j], stat.col = "95%"),
+                              plot.ci.extract(x = x.loci46, mixture = mixture, group = groups[j], stat.col = "95%")),
+                     nrow = 5)))
+    li <- c(t(matrix(data = c(plot.ci.extract(x = x.loci89, mixture = mixture, group = groups[j], stat.col = "5%"),
+                              plot.ci.extract(x = x.loci46, mixture = mixture, group = groups[j], stat.col = "5%")),
+                     nrow = 5)))
+    
+    par(mar = c(0, 0, 0, 0))
+    par(srt = 0)
+    if(j == 1) {
+      plotCI(x = c(1:2, 4:5, 7:8, 10:11, 13:14), y = y, ui = ui, li = li, xlim = c(0.5, 14.5), ylim = c(0, 0.65 * percent.multiplier), gap = 0, pch = 16, ylab = '', xlab = '', xaxt = "n", cex = cex.pch, col = col, lwd = ci.lwd, sfrac = sfrac)
+      legend("topleft", legend = c("89 loci", "46 loci"), fill = col, bty = 'n', cex = 1.2)
+    }
+    
+    if(j %in% c(4, 7, 10)) {
+      plotCI(x = c(1:2, 4:5, 7:8, 10:11, 13:14), y = y, ui = ui, li = li, xlim = c(0.5, 14.5), ylim = c(0, 0.65 * percent.multiplier), gap = 0, pch = 16, ylab = '', xlab = '', xaxt = "n", cex = cex.pch, col = col, lwd = ci.lwd, sfrac = sfrac)
+    }
+    
+    if(j == 13) {
+      plotCI(x = c(1:2, 4:5, 7:8, 10:11, 13:14), y = y, ui = ui, li = li, xlim = c(0.5, 14.5), ylim = c(0, 0.65 * percent.multiplier), gap = 0, pch = 16, ylab = '', xlab = '', xaxt = "n", cex = cex.pch, col = col, lwd = ci.lwd, sfrac = sfrac)
+      axis(side = 1, at = seq(from = 1.5, by = 3, length.out = 5), labels = 1:5)
+    }
+    
+    if(j %in% c(14, 15)) {
+      plotCI(x = c(1:2, 4:5, 7:8, 10:11, 13:14), y = y, ui = ui, li = li, xlim = c(0.5, 14.5), ylim = c(0, 0.65 * percent.multiplier), gap = 0, pch = 16, ylab = '', xlab = '', xaxt = "n", yaxt = "n", cex = cex.pch, col = col, lwd = ci.lwd, sfrac = sfrac)
+      axis(side = 1, at = seq(from = 1.5, by = 3, length.out = 5), labels = 1:5)
+    }
+    
+    if(j %in% c(2, 3, 5, 6, 8, 9, 11, 12)) {
+      plotCI(x = c(1:2, 4:5, 7:8, 10:11, 13:14), y = y, ui = ui, li = li, xlim = c(0.5, 14.5), ylim = c(0, 0.65 * percent.multiplier), gap = 0, pch = 16, ylab = '', xlab = '', xaxt = "n", yaxt = "n", cex = cex.pch, col = col, lwd = ci.lwd, sfrac = sfrac)
+    }
+    
+    abline(h = MixtureProofTestProportions[j, mixture], col = "red", lwd = 2)
+    abline(h = 0, lwd = 1, lty = 2)
+    text(PCGroups15[j], x = 14, y = 0.6 * percent.multiplier, adj = 1, cex = 1.2)
+  } )
+  
+  # Plot 17 - Blank Corner
+  plot.new()
+  
+  ## Plot 18 - x-axis title
+  par(mar = c(0, 0, 0, 0))
+  plot.new()
+  text(labels = "Replicate", x = 0.5, y = 0.25, adj = c(0.5, 0.5), font = 1, cex = 2)
+  
+  dev.off()
+}
+
+
+
+
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
