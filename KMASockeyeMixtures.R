@@ -79,7 +79,7 @@ source("C:/Users/krshedd/Documents/R/Functions.GCL.R")
 source("H:/R Source Scripts/Functions.GCL_KS.R")
 
 ## Get objects
-LocusControl <- dget(file = "Objects/OriginalLocusControl.txt")
+LocusControl <- dget(file = "Objects/OriginalLocusControl96.txt")
 LateAugustMixtures2014 <- dget(file = "Objects/EASSIP-LateAugust2014/LateAugustMixtures2014.txt")
 
 KMAobjects <- list.files(path = "Objects", recursive = FALSE)
@@ -623,7 +623,7 @@ dput(x = KMA2015, file = "Objects/KMA2015.txt")
 # dput(x = KMA2016, file = "Objects/KMA2016.txt")
 
 ## Create Locus Control
-CreateLocusControl.GCL(markersuite = "Sockeye_Kodiak48SNPs", username = username, password = password)
+CreateLocusControl.GCL(markersuite = "Sockeye_Kodiak_48SNPs", username = username, password = password)
 
 ## Save original LocusControl
 loci48 <- LocusControl$locusnames
@@ -658,8 +658,6 @@ source("H:/R Source Scripts/Functions.GCL_KS.R")
 
 ## Get objects
 LocusControl <- dget(file = "Objects/OriginalLocusControl48.txt")
-KMA2014 <- dget(file = "Objects/KMA2014.txt")
-KMA2015 <- dget(file = "Objects/KMA2015.txt")
 
 KMAobjects <- list.files(path = "Objects", recursive = FALSE)
 KMAobjects <- KMAobjects[!KMAobjects %in% c("EASSIP-LateAugust2014", "OriginalLocusControl96.txt", "OriginalLocusControl48.txt")]
@@ -676,18 +674,52 @@ objects(pattern = "\\.gcl")
 #### Define strata ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+## All fish have a capture date?
+sapply(c(KMA2014, KMA2015), function(silly) {sum(is.na(get(paste(silly, ".gcl", sep = ''))$attributes$CAPTURE_DATE))} )
+
 ## Confirming samples sizes by date
 sapply(c(KMA2014, KMA2015), function(silly) {table(get(paste(silly, ".gcl", sep = ''))$attributes$CAPTURE_DATE)} )
 
+
 ## Get dataframes of strata dates
 KMA.Strata.Dates.2014AlitakAya <- read.xlsx(file = "MixtureStrataDates.xlsx", sheetName = "2014AlitakAya", header = TRUE)
+KMA.Strata.Dates.2014AlitakAya$Strata <- factor(x = KMA.Strata.Dates.2014AlitakAya$Strata, levels = c("Early", "Middle", "Late"))
+
 KMA.Strata.Dates.2014KarlUganUyak <- read.xlsx(file = "MixtureStrataDates.xlsx", sheetName = "2014KarlUganUyak", header = TRUE)
+KMA.Strata.Dates.2014KarlUganUyak$Strata <- factor(x = KMA.Strata.Dates.2014KarlUganUyak$Strata, levels = c("Early", "Middle", "Late", "LateLate"))
+
 KMA.Strata.Dates.2015 <- read.xlsx(file = "MixtureStrataDates.xlsx", sheetName = "2015", header = TRUE)
+KMA.Strata.Dates.2015$Strata <- factor(x = KMA.Strata.Dates.2015$Strata, levels = c("Early", "Middle", "Late"))
 
 
+## Function to define strata by dates (date.df)
 
+# Inputs
+silly <- "SKARLC14"
+date.df <- KMA.Strata.Dates.2014KarlUganUyak
+loci <- loci48
 
+PoolCollectionsByDateDF <- function(silly, date.df, loci) {
+  sapply(silly, function(mix) {
+    mix.dates <- unique(as.Date(get(paste(mix, ".gcl", sep = ''))$attributes$CAPTURE_DATE))
+    by(data = date.df, INDICES = date.df$Strata, function(x) {
+      IDs <- AttributesToIDs.GCL(silly = mix, attribute = "CAPTURE_DATE", matching = mix.dates[mix.dates >= x$Begin & mix.dates <= x$End])
+      IDs <- list(as.numeric(na.omit(IDs)))
+      names(IDs) <- mix
+      PoolCollections.GCL(collections = mix, loci = loci, IDs = IDs, newname = paste(mix, as.character(x$Strata), sep = "_"))
+      list("First Last Fish" = range(IDs), "n" = get(paste(mix, "_", as.character(x$Strata), ".gcl", sep = ''))$n)
+    } )
+  }, simplify = FALSE, USE.NAMES = TRUE)
+}
 
+# Example
+PoolCollectionsByDateDF(silly = LateAugustMixtures2014[c(1,3)], date.df = KMA.Strata.Dates.2014KarlUganUyak, loci = loci48)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Stopped here ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ## SKARLC
 str(SKARLC14.gcl$attributes$CAPTURE_DATE)
