@@ -635,16 +635,17 @@ dput(x = mito.loci48, file = "Objects/mito.loci48.txt")
 
 #~~~~~~~~~~~~~~~~~~
 ## Pull all data for each silly code and create .gcl objects for each
-LOKI2R.GCL(sillyvec = c(KMA2014, KMA2015), username = username, password = password)
+# LOKI2R.GCL(sillyvec = c(KMA2014, KMA2015), username = username, password = password)
+sapply(c(KMA2014, KMA2015), function(silly) {LOKI2R.GCL(sillyvec = silly, username = username, password = password)} )  # looping through due to heap space error when getting all sillys at once
 rm(username, password)
 objects(pattern = "\\.gcl")
 
 ## Save unaltered .gcl's as back-up:
-invisible(sapply(LateAugustMixtures2014, function(silly) {dput(x = get(paste(silly, ".gcl", sep = '')), file = paste("Raw genotypes/OriginalCollections/" , silly, ".txt", sep = ''))} )); beep(8)
+invisible(sapply(c(KMA2014, KMA2015), function(silly) {dput(x = get(paste(silly, ".gcl", sep = '')), file = paste("Raw genotypes/OriginalCollections/" , silly, ".txt", sep = ''))} )); beep(8)
 
 ## Original sample sizes by SILLY
 collection.size.original <- sapply(c(KMA2014, KMA2015), function(silly) get(paste(silly, ".gcl", sep = ""))$n)
-
+matrix(data = collection.size.original, ncol = 2, dimnames = list(c("Alitak", "Ayakulik", "Karluk", "Uganik", "Uyak"), 2014:2015))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Clean workspace; dget .gcl objects and Locus Control ####
@@ -675,42 +676,44 @@ objects(pattern = "\\.gcl")
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ## All fish have a capture date?
-sapply(c(KMA2014, KMA2015), function(silly) {sum(is.na(get(paste(silly, ".gcl", sep = ''))$attributes$CAPTURE_DATE))} )
+sapply(c(KMA2014, KMA2015), function(silly) {sum(is.na(get(paste(silly, ".gcl", sep = ''))$attributes$CAPTURE_DATE))} )  # Zeros are good
 
 ## Confirming samples sizes by date
 sapply(c(KMA2014, KMA2015), function(silly) {table(get(paste(silly, ".gcl", sep = ''))$attributes$CAPTURE_DATE)} )
 
 
 ## Get dataframes of strata dates
-KMA.Strata.Dates.2014AlitakAya <- read.xlsx(file = "MixtureStrataDates.xlsx", sheetName = "2014AlitakAya", header = TRUE)
+KMA.Strata.Dates.2014Alitak <- read.xlsx(file = "MixtureStrataDates.xlsx", sheetName = "2014Alitak", header = TRUE)
+KMA.Strata.Dates.2014Ayak <- read.xlsx(file = "MixtureStrataDates.xlsx", sheetName = "2014Ayak", header = TRUE)
 KMA.Strata.Dates.2014KarlUganUyak <- read.xlsx(file = "MixtureStrataDates.xlsx", sheetName = "2014KarlUganUyak", header = TRUE)
 KMA.Strata.Dates.2015 <- read.xlsx(file = "MixtureStrataDates.xlsx", sheetName = "2015", header = TRUE)
 
 
 ## Function to define strata by dates (date.df)
 
-# Inputs
-silly <- "SKARLC14"
-date.df <- KMA.Strata.Dates.2014KarlUganUyak
-loci <- loci48
+# # Inputs
+# silly <- "SKARLC14"
+# date.df <- KMA.Strata.Dates.2014KarlUganUyak
+# loci <- loci48
 
 PoolCollectionsByDateDF <- function(silly, date.df, loci) {
   sapply(silly, function(mix) {
     mix.dates <- unique(as.Date(get(paste(mix, ".gcl", sep = ''))$attributes$CAPTURE_DATE))
     by(data = date.df, INDICES = date.df$Strata, function(x) {
       IDs <- AttributesToIDs.GCL(silly = mix, attribute = "CAPTURE_DATE", matching = mix.dates[mix.dates >= x$Begin & mix.dates <= x$End])
-      IDs <- list(as.numeric(na.omit(IDs)))
+      IDs <- list(na.omit(IDs))
       names(IDs) <- mix
       PoolCollections.GCL(collections = mix, loci = loci, IDs = IDs, newname = paste(mix, as.character(x$Strata), sep = "_"))
-      list("First Last Fish" = range(IDs), "n" = get(paste(mix, "_", as.character(x$Strata), ".gcl", sep = ''))$n)
+      list("First Last Fish" = range(as.numeric(unlist(IDs))), "n" = get(paste(mix, "_", as.character(x$Strata), ".gcl", sep = ''))$n)
     } )
   }, simplify = FALSE, USE.NAMES = TRUE)
 }
 
-# Example
-PoolCollectionsByDateDF(silly = LateAugustMixtures2014[c(1, 3)], date.df = KMA.Strata.Dates.2014KarlUganUyak, loci = loci48)
+# # Example
+# PoolCollectionsByDateDF(silly = LateAugustMixtures2014[c(1, 3)], date.df = KMA.Strata.Dates.2014KarlUganUyak, loci = loci48)
 
-PoolCollectionsByDateDF(silly = KMA2014[1:2], date.df = KMA.Strata.Dates.2014AlitakAya, loci = loci48)
+PoolCollectionsByDateDF(silly = KMA2014[1], date.df = KMA.Strata.Dates.2014Alitak, loci = loci48)
+PoolCollectionsByDateDF(silly = KMA2014[2], date.df = KMA.Strata.Dates.2014Ayak, loci = loci48)
 PoolCollectionsByDateDF(silly = KMA2014[3:5], date.df = KMA.Strata.Dates.2014KarlUganUyak, loci = loci48)
 PoolCollectionsByDateDF(silly = KMA2015, date.df = KMA.Strata.Dates.2015, loci = loci48)
 
@@ -727,6 +730,24 @@ dput(x = KMA2014_2015Strata, file = "Objects/KMA2014_2015Strata.txt")
 
 # Confirm sample sizes
 sapply(KMA2014_2015Strata, function(silly) get(paste(silly, ".gcl", sep = ""))$n)
+
+# View as tables by year
+require(reshape)
+samp.df.2014 <- data.frame(t(sapply(KMA2014Strata, function(strata) {
+  location <- unlist(strsplit(x = strata, split = "_"))[1]
+  temporal.strata <- as.numeric(unlist(strsplit(x = strata, split = "_"))[2])
+  n <- get(paste(strata, ".gcl", sep = ""))$n
+  c(location = location, temporal.strata = temporal.strata, n = n)
+})))
+cast(data = samp.df.2014, location ~ temporal.strata)
+
+samp.df.2015 <- data.frame(t(sapply(KMA2015Strata, function(strata) {
+  location <- unlist(strsplit(x = strata, split = "_"))[1]
+  temporal.strata <- as.numeric(unlist(strsplit(x = strata, split = "_"))[2])
+  n <- get(paste(strata, ".gcl", sep = ""))$n
+  c(location = location, temporal.strata = temporal.strata, n = n)
+})))
+cast(data = samp.df.2015, location ~ temporal.strata)
 
 # dput mixture sillys
 invisible(sapply(KMA2014_2015Strata, function(silly) {dput(x = get(paste(silly, ".gcl", sep = '')), file = paste("Raw genotypes/OriginalCollections_Strata/" , silly, ".txt", sep = ''))} )); beep(8)
@@ -748,6 +769,18 @@ KMA2014_2015Strata_SampleSizes <- matrix(data = NA, nrow = length(KMA2014_2015St
 Original_KMA2014_2015Strata_SampleSizebyLocus <- SampSizeByLocus.GCL(sillyvec = KMA2014_2015Strata, loci = loci48)
 min(Original_KMA2014_2015Strata_SampleSizebyLocus)  ## 267/285
 apply(Original_KMA2014_2015Strata_SampleSizebyLocus, 1, min) / apply(Original_KMA2014_2015Strata_SampleSizebyLocus, 1, max)  ## Good, 0.947
+
+Original_KMA2014_2015Strata_PercentbyLocus <- apply(Original_KMA2014_2015Strata_SampleSizebyLocus, 1, function(row) {row / max(row)} )
+which(apply(Original_KMA2014_2015Strata_PercentbyLocus, 2, min) < 0.8)  # no re-runs!
+
+require(lattice)
+new.colors <- colorRampPalette(c("black", "white"))
+levelplot(t(Original_KMA2014_2015Strata_PercentbyLocus), 
+          col.regions = new.colors, 
+          at = seq(from = 0, to = 1, length.out = 100), 
+          main = "% Genotyped", xlab = "SILLY", ylab = "Locus", 
+          scales = list(x = list(rot = 90)), 
+          aspect = "fill")  # aspect = "iso" will make squares
 
 
 #### Check individuals
@@ -878,82 +911,62 @@ objects(pattern = "\\.gcl")
 #### Get MSA Objects ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-## Get baseline objects needed for MSA
-setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Baseline/Objects")
+# ## Get baseline objects needed for MSA
+# setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Baseline/Objects")
+# 
+# KMA473Pops15FlatPrior <- dget(file = "KMA473Pops15FlatPrior.txt")
+# KMA473PopsInits <- dget(file = "KMA473PopsInits.txt")
+# KMA473PopsGroupVec15 <- dget(file = "KMA473PopsGroupVec15.txt")
+# KMA473Pops <- dget(file = "KMA473Pops.txt")
+# KMA15GroupsPC <- dget(file = "PCGroups15.txt")
+# KMA47346Baseline <- dget(file = "KMA47346Baseline.txt")
+# KMA47389Baseline <- dget(file = "KMA47389Baseline.txt")
+# WASSIPSockeyeSeeds <- dget("V:/Analysis/5_Coastwide/Sockeye/WASSIP/Mixture/Objects/WASSIPSockeyeSeeds.txt")
+# KMA473CommonNames <- dget(file = "CommonNames473.txt")
+# KMA15Colors <- dget(file = "Colors15.txt")
+# setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Mixtures")
+# 
+# ## Copy these baseline objects and put them in the Mixtures/Objects directory
+# 
+# setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Baseline/Objects")
+# file.copy(from = c("KMA473Pops15FlatPrior.txt", "KMA473PopsInits.txt", "KMA473PopsGroupVec15.txt", "KMA473Pops.txt", "PCGroups15.txt", "CommonNames473.txt", "Colors15.txt",
+#                    "V:/Analysis/5_Coastwide/Sockeye/WASSIP/Mixture/Objects/WASSIPSockeyeSeeds.txt"), 
+#           to = "V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Mixtures/Objects")
+# setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Mixtures")
+# 
+# 
+# KMA15GroupsPC2Rows <- PCGroups15Rows2 <- c("West of\nChignik", "Black\nLake", "Chignik\nLake", "U. Station\nAkalura", "Frazer\n", "Ayakulik\n", "Karluk\n", "Uganik\n", "Northwest\nKodiak", "Afognak\n", "Eastside\nKodiak", "Saltery\n", "Cook\nInlet", "PWS\n", "South of\nCape Suckling")
+# dput(x = KMA15GroupsPC2Rows, file = "Objects/KMA15GroupsPC2Rows.txt")
+# # Note, I changed the names for CommonNames473.txt -> KMA473CommonNames.txt & PCGroups15 -> KMA15GroupsPC.txt
 
-KMA473Pops15FlatPrior <- dget(file = "KMA473Pops15FlatPrior.txt")
-KMA473PopsInits <- dget(file = "KMA473PopsInits.txt")
-KMA473PopsGroupVec15 <- dget(file = "KMA473PopsGroupVec15.txt")
-KMA473Pops <- dget(file = "KMA473Pops.txt")
-KMA15GroupsPC <- dget(file = "PCGroups15.txt")
-KMA47346Baseline <- dget(file = "KMA47346Baseline.txt")
-KMA47389Baseline <- dget(file = "KMA47389Baseline.txt")
-WASSIPSockeyeSeeds <- dget("V:/Analysis/5_Coastwide/Sockeye/WASSIP/Mixture/Objects/WASSIPSockeyeSeeds.txt")
-KMA473CommonNames <- dget(file = "CommonNames473.txt")
-KMA15Colors <- dget(file = "Colors15.txt")
-setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Mixtures")
-
-## Copy these baseline objects and put them in the Mixtures/Objects directory
-
-setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Baseline/Objects")
-file.copy(from = c("KMA473Pops15FlatPrior.txt", "KMA473PopsInits.txt", "KMA473PopsGroupVec15.txt", "KMA473Pops.txt", "PCGroups15.txt", "CommonNames473.txt", "Colors15.txt",
-                   "V:/Analysis/5_Coastwide/Sockeye/WASSIP/Mixture/Objects/WASSIPSockeyeSeeds.txt"), 
-          to = "V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Mixtures/Objects")
-setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Mixtures")
-
-
-KMA15GroupsPC2Rows <- PCGroups15Rows2 <- c("West of\nChignik", "Black\nLake", "Chignik\nLake", "U. Station\nAkalura", "Frazer\n", "Ayakulik\n", "Karluk\n", "Uganik\n", "Northwest\nKodiak", "Afognak\n", "Eastside\nKodiak", "Saltery\n", "Cook\nInlet", "PWS\n", "South of\nCape Suckling")
-dput(x = KMA15GroupsPC2Rows, file = "Objects/KMA15GroupsPC2Rows.txt")
-# Note, I changed the names for CommonNames473.txt -> KMA473CommonNames.txt & PCGroups15 -> KMA15GroupsPC.txt
+dir.create(path = "BAYES/2014-2015 Mixtures 46loci")
+sapply(c("Control", "Mixture", "Output"), function(folder) {dir.create(path = paste(getwd(), "BAYES/2014-2015 Mixtures 46loci", folder, sep = "/"))} )
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#### MSA files for BAYES
+#### MSA files for BAYES 2014 Early Strata ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+KMA2014Strata_1_Early <- grep(pattern = "1_Early", x = KMA2014Strata, value = TRUE)
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## 89 Loci
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## Dumping Mixture files
-dir.create("BAYES/Late August 89loci")
-KMA47389MixtureFormat <- CreateMixture.GCL(sillys = LateAugustMixtures2014Strata[1], loci = loci89, IDs = NULL, mixname = LateAugustMixtures2014Strata[1],
-                                           dir = "BAYES/Late August 89loci/Mixture", type = "BAYES", PT = FALSE)
-dput(KMA47389MixtureFormat, file = "Objects/KMA47389MixtureFormat.txt")
-
-sapply(LateAugustMixtures2014Strata, function(Mix) {CreateMixture.GCL(sillys = Mix, loci = loci89, IDs = NULL, mixname = Mix, dir = "BAYES/Late August 89loci/Mixture", type = "BAYES", PT = FALSE)})
-
-## Dumping Control files
-sapply(LateAugustMixtures2014Strata, function(Mix) {
-  CreateControlFile.GCL(sillyvec = KMA473Pops, loci = loci89, mixname = Mix, basename = "KMA473Pops89Markers", suffix = "", nreps = 40000, nchains = 5,
-                        groupvec = KMA473PopsGroupVec15, priorvec = KMA473Pops15FlatPrior, initmat = KMA473PopsInits, dir = "BAYES/Late August 89loci/Control",
-                        seeds = WASSIPSockeyeSeeds, thin = c(1, 1, 100), mixfortran = KMA47389MixtureFormat, basefortran = KMA47389Baseline, switches = "F T F T T T F")
-})
-
-## Create output directory
-sapply(LateAugustMixtures2014Strata, function(Mix) {dir.create(paste("BAYES/Late August 89loci/Output/", Mix, sep = ""))})
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## 46 Loci
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## Dumping Mixture files
-KMA47346MixtureFormat <- CreateMixture.GCL(sillys = LateAugustMixtures2014Strata[1], loci = loci46, IDs = NULL, mixname = LateAugustMixtures2014Strata[1],
-                                           dir = "BAYES/Late August 46loci/Mixture", type = "BAYES", PT = FALSE)
+KMA47346MixtureFormat <- CreateMixture.GCL(sillys = KMA2014Strata_1_Early[1], loci = loci46, IDs = NULL, mixname = KMA2014Strata_1_Early[1],
+                                           dir = "BAYES/2014-2015 Mixtures 46loci/Mixture", type = "BAYES", PT = FALSE)
 dput(KMA47346MixtureFormat, file = "Objects/KMA47346MixtureFormat.txt")
 
-sapply(LateAugustMixtures2014Strata, function(Mix) {CreateMixture.GCL(sillys = Mix, loci = loci46, IDs = NULL, mixname = Mix, dir = "BAYES/Late August 46loci/Mixture", type = "BAYES", PT = FALSE)})
+sapply(KMA2014Strata_1_Early, function(Mix) {CreateMixture.GCL(sillys = Mix, loci = loci46, IDs = NULL, mixname = Mix, dir = "BAYES/2014-2015 Mixtures 46loci/Mixture", type = "BAYES", PT = FALSE)} )
 
 ## Dumping Control files
-sapply(LateAugustMixtures2014Strata, function(Mix) {
+sapply(KMA2014Strata_1_Early, function(Mix) {
   CreateControlFile.GCL(sillyvec = KMA473Pops, loci = loci46, mixname = Mix, basename = "KMA473Pops46Markers", suffix = "", nreps = 40000, nchains = 5,
-                        groupvec = KMA473PopsGroupVec15, priorvec = KMA473Pops15FlatPrior, initmat = KMA473PopsInits, dir = "BAYES/Late August 46loci/Control",
+                        groupvec = KMA473PopsGroupVec15, priorvec = KMA473Pops15FlatPrior, initmat = KMA473PopsInits, dir = "BAYES/2014-2015 Mixtures 46loci/Control",
                         seeds = WASSIPSockeyeSeeds, thin = c(1, 1, 100), mixfortran = KMA47346MixtureFormat, basefortran = KMA47346Baseline, switches = "F T F T T T F")
 })
 
 ## Create output directory
-sapply(LateAugustMixtures2014Strata, function(Mix) {dir.create(paste("BAYES/Late August 46loci/Output/", Mix, sep = ""))})
+sapply(KMA2014Strata_1_Early, function(Mix) {dir.create(paste("BAYES/2014-2015 Mixtures 46loci/Output/", Mix, sep = ""))})
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#### Go run BAYES
+#### Go run BAYES ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
