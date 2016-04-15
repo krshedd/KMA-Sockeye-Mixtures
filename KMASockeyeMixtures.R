@@ -784,6 +784,64 @@ levelplot(t(Original_KMA2014_2015Strata_PercentbyLocus),
 
 
 #### Check individuals
+## View Histogram of Failure Rate by Strata
+invisible(sapply(KMA2014_2015Strata, function(mix) {
+  my.gcl <- get(paste(mix, ".gcl", sep = ''))
+  failure <- apply(my.gcl$scores[, , 1], 1, function(ind) {sum(ind == "0") / length(ind)} )
+  hist(x = failure, main = mix, xlab = "Failure Rate", col = 8, xlim = c(0, 1), ylim = c(0, 20), breaks = seq(from = 0, to = 1, by = 0.02))
+  abline(v = 0.2, lwd = 3)
+}))
+
+## Experimental method to look for a way to remove "missing" loci fish based on a strata specific failure rate (rather than 0.8 globally, as done normally)
+# Experimented with loess, smooth.split, polynomial regressions, outlier (Franz), and Cooks Distance methods to model outliers.
+# Thought of a clever idea to look at the "shoulder" of the cumulative success rate, but this concept is a bit weird.
+# Planning to keep it simple!
+invisible(sapply(KMA2014_2015Strata, function(mix) {
+  my.gcl <- get(paste(mix, ".gcl", sep = ''))
+  success <- apply(my.gcl$scores[, , 1], 1, function(ind) {sum(!ind == "0") / length(ind)} )
+  plot(x = sort(success, decreasing = TRUE), main = mix, xlab = "Sorted Individuatls", col = 8, type = "p", pch = 16, ylim = c(0, 1), ylab = "Success Rate")
+  
+  cutoff.floor = 0.9
+  cutoff <- min(sort(success, decreasing = TRUE)[sort(success, decreasing = TRUE) > (seq(success) / length(success))])
+  cutoff <- pmin(cutoff, cutoff.floor)
+  points(y = sort(success, decreasing = TRUE)[sort(success, decreasing = TRUE) < cutoff],
+         x = seq(success)[sort(success, decreasing = TRUE) < cutoff], pch = 16, col = "black")
+  
+  abline(h = 0.8, col = "red", lwd = 3)
+  abline(h = cutoff.floor, col = "red", lwd = 3, lty = 3)
+  segments(x0 = 0, x1 = length(success), y0 = 0, y1 = 1, lwd = 3)
+  
+  # points(smooth.spline(sort(success, decreasing = TRUE), spar = 0.2), type = "l", col = 1, lwd = 3)
+  # 
+  # y.loess <- loess(sort(success, decreasing = TRUE) ~ seq(success), span = 0.75, data.frame(x = seq(success), y = sort(success, decreasing = TRUE)))
+  # y.predict <- predict(y.loess, data.frame(x = seq(success)))
+  # lines(x = seq(success), y = y.predict, col = "black", lwd = 3)
+  # 
+  # y.loess <- loess(sort(success, decreasing = TRUE) ~ seq(success), span = 0.5, data.frame(x = seq(success), y = sort(success, decreasing = TRUE)))
+  # y.predict <- predict(y.loess, data.frame(x = seq(success)))
+  # lines(x = seq(success), y = y.predict, col = "blue", lwd = 3)
+  # 
+  # y.loess <- loess(sort(success, decreasing = TRUE) ~ seq(success), span = 0.3, data.frame(x = seq(success), y = sort(success, decreasing = TRUE)))
+  # y.predict <- predict(y.loess, data.frame(x = seq(success)))
+  # lines(x = seq(success), y = y.predict, col = "green", lwd = 3)
+  # 
+  # fit1 <- lm(sort(success, decreasing = TRUE) ~ poly(seq(success) + 100, 1, raw = TRUE))
+  # fit2 <- lm(sort(success, decreasing = TRUE) ~ poly(seq(success) + 100, 2, raw = TRUE))
+  # fit3 <- lm(sort(success, decreasing = TRUE) ~ poly(seq(success) + 100, 3, raw = TRUE))
+  # fit4 <- lm(sort(success, decreasing = TRUE) ~ poly(seq(success) + 100, 4, raw = TRUE))
+  # 
+  # points(y = predict(fit1, data.frame(x = seq(success) + 100)), x = seq(success), type = "l", col = 1, lwd = 3)
+  # points(y = predict(fit2, data.frame(x = seq(success) + 100)), x = seq(success), type = "l", col = 2, lwd = 3)
+  # points(y = predict(fit3, data.frame(x = seq(success) + 100)), x = seq(success), type = "l", col = 3, lwd = 3)
+  # points(y = predict(fit4, data.frame(x = seq(success) + 100)), x = seq(success), type = "l", col = 4, lwd = 3)
+
+  text(x = 0, y = 0.5, labels = paste("cutoff", sum(success < cutoff), sep = "_"), cex = 1.2, pos = 4)
+  text(x = 0, y = 0.4, labels = paste("cutoff.floor", sum(success < cutoff.floor), sep = "_"), pos = 4)
+  text(x = 0, y = 0.3, labels = paste("0.8", sum(success < 0.8), sep = "_"), pos = 4)
+  
+}))
+
+
 ### Initial
 ## Get number of individuals per silly before removing missing loci individuals
 Original_KMA2014_2015Strata_ColSize <- sapply(paste(KMA2014_2015Strata, ".gcl", sep = ''), function(x) get(x)$n)
@@ -929,7 +987,7 @@ objects(pattern = "\\.gcl")
 # ## Copy these baseline objects and put them in the Mixtures/Objects directory
 # 
 # setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Baseline/Objects")
-# file.copy(from = c("KMA473Pops15FlatPrior.txt", "KMA473PopsInits.txt", "KMA473PopsGroupVec15.txt", "KMA473Pops.txt", "PCGroups15.txt", "CommonNames473.txt", "Colors15.txt",
+# file.copy(from = c("KMA473Pops15FlatPrior.txt", "KMA473PopsInits.txt", "KMA473PopsGroupVec15.txt", "KMA473Pops.txt", "PCGroups15.txt", "KMA47346Baseline.txt", "KMA47389Baseline.txt", "CommonNames473.txt", "Colors15.txt",
 #                    "V:/Analysis/5_Coastwide/Sockeye/WASSIP/Mixture/Objects/WASSIPSockeyeSeeds.txt"), 
 #           to = "V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Mixtures/Objects")
 # setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Mixtures")
@@ -945,24 +1003,30 @@ sapply(c("Control", "Mixture", "Output"), function(folder) {dir.create(path = pa
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### MSA files for BAYES 2014 Early Strata ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Starting with a Regionally flat prior, then rolling prior afterwards
+KMA473Pops15FlatPrior
+
+
 KMA2014Strata_1_Early <- grep(pattern = "1_Early", x = KMA2014Strata, value = TRUE)
+Round1Mixtures_2014 <- c(KMA2014Strata_1_Early, "SALITC14_2_Middle")
+dput(x = Round1Mixtures_2014, file = "Objects/Round1Mixtures_2014.txt")
 
 ## Dumping Mixture files
 KMA47346MixtureFormat <- CreateMixture.GCL(sillys = KMA2014Strata_1_Early[1], loci = loci46, IDs = NULL, mixname = KMA2014Strata_1_Early[1],
                                            dir = "BAYES/2014-2015 Mixtures 46loci/Mixture", type = "BAYES", PT = FALSE)
 dput(KMA47346MixtureFormat, file = "Objects/KMA47346MixtureFormat.txt")
 
-sapply(KMA2014Strata_1_Early, function(Mix) {CreateMixture.GCL(sillys = Mix, loci = loci46, IDs = NULL, mixname = Mix, dir = "BAYES/2014-2015 Mixtures 46loci/Mixture", type = "BAYES", PT = FALSE)} )
+sapply(Round1Mixtures_2014, function(Mix) {CreateMixture.GCL(sillys = Mix, loci = loci46, IDs = NULL, mixname = Mix, dir = "BAYES/2014-2015 Mixtures 46loci/Mixture", type = "BAYES", PT = FALSE)} )
 
 ## Dumping Control files
-sapply(KMA2014Strata_1_Early, function(Mix) {
+sapply(Round1Mixtures_2014, function(Mix) {
   CreateControlFile.GCL(sillyvec = KMA473Pops, loci = loci46, mixname = Mix, basename = "KMA473Pops46Markers", suffix = "", nreps = 40000, nchains = 5,
                         groupvec = KMA473PopsGroupVec15, priorvec = KMA473Pops15FlatPrior, initmat = KMA473PopsInits, dir = "BAYES/2014-2015 Mixtures 46loci/Control",
                         seeds = WASSIPSockeyeSeeds, thin = c(1, 1, 100), mixfortran = KMA47346MixtureFormat, basefortran = KMA47346Baseline, switches = "F T F T T T F")
 })
 
 ## Create output directory
-sapply(KMA2014Strata_1_Early, function(Mix) {dir.create(paste("BAYES/2014-2015 Mixtures 46loci/Output/", Mix, sep = ""))})
+sapply(Round1Mixtures_2014, function(Mix) {dir.create(paste("BAYES/2014-2015 Mixtures 46loci/Output/", Mix, sep = ""))})
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
