@@ -1081,7 +1081,7 @@ PlotPosterior <- function(mixvec = NULL, output, header, groups, colors = NULL, 
       RG <- output[[Mix]][, i]
       RG <- RG[seq(1, length(RG), thin)]
       plot(RG, type = "l", ylim = c(0,1), xlab = "", ylab = "")
-      abline(v = seq(0, length(RG), length(RG)/5))
+      abline(v = seq(0, length(RG), length(RG)/5), xpd = FALSE)
       text(x = length(RG)/2, y = 0.96, labels = groups[i], col = colors[i], cex = 1.2, font = 2)} ))
     mtext(text = header[Mix], side = 3, outer = TRUE, cex = 1.5)
     mtext(text = "Iteration (5 chains each)", side = 1, outer = TRUE, cex = 1.5, line = 1.5)
@@ -1138,7 +1138,7 @@ QuickBarplot <- function(mixvec, estimatesstats, groups, groups2rows = NULL, hea
   }
   if("Stats" %in% names(estimatesstats)) {estimatesstats <- estimatesstats$Stats}
   
-  par(mfrow = c(1, 1), mar = c(5.6, 4.6, 5.1, 2.1))
+  par(mfrow = c(1, 1), mar = c(3.1, 5.1, 4.1, 2.1), oma = rep(0, 4))
   sapply(mixvec, function(Mix) {
     Barplot <- barplot2(height = estimatesstats[[Mix]][, "median"] * 100,
                         beside = TRUE, plot.ci = TRUE, ci.lwd = 1,
@@ -1168,7 +1168,7 @@ ViolinPlot <- function(mixvec = NULL, estimates, groups, colors, header, wex = 1
   
   if(is.null(mixvec)) {mixvec <- names(estimates$Stats)}
   
-  par(mar = c(5.1, 4.6, 3.6, 1.1))
+  par(mar = c(5.6, 4.6, 3.6, 1.1))
   sapply(mixvec, function(Mix) {
     plot(estimates$Stats[[Mix]][, "median"], cex = 3, pch = 16, col = colors, ylab = "Proportion of Mixture", ylim = c(0, 1), xlab = "", axes = FALSE, main = header[[Mix]], cex.main = 2, cex.lab = 1.5)
     sapply(seq(groups), function(i) {vioplot2(estimates$Output[[Mix]][seq(from = 1, to = nrow(estimates$Output[[Mix]]), by = thin), i], at = i, horizontal = FALSE, col = colors[i], border = TRUE, drawRect = FALSE, rectCol = colors[i], add = TRUE, wex = wex, lwd = 2)})
@@ -1177,7 +1177,7 @@ ViolinPlot <- function(mixvec = NULL, estimates, groups, colors, header, wex = 1
     axis(side = 2, lwd = 3, cex.axis = 1.5)
     text(x = (seq(groups)) - 0.35, y = 0, labels = groups, srt = 60, pos = 1, offset = 2.5, xpd = TRUE)
     axis(side = 1, labels = NA, at = seq(groups), pos = 0, lwd = 2, tick = FALSE)
-    abline(h = 0, lwd = 3)
+    abline(h = 0, lwd = 3, xpd = FALSE)
   } )
   
 }
@@ -1879,11 +1879,91 @@ sapply(Round3Mixtures_2014, function(Mix) {dir.create(paste("BAYES/2014-2015 Mix
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Summarize Round 3 Output ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Round3Mixtures_2014_Estimates <- CustomCombineBAYESOutput.GCL(
+  groupvec = seq(KMA15GroupsPC), groupnames = KMA15GroupsPC, 
+  maindir = "BAYES/2014-2015 Mixtures 46loci/Output", 
+  mixvec = Round3Mixtures_2014, prior = "",  
+  ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1, PosteriorOutput = TRUE)
+
+# Dput 1) estimates stats + posterior output & 2) estimates stats
+dput(Round3Mixtures_2014_Estimates, file = "Estimates objects/Round3Mixtures_2014_Estimates.txt")
+dput(Round3Mixtures_2014_Estimates$Stats, file = "Estimates objects/Round3Mixtures_2014_EstimatesStats.txt")
+
+Round3Mixtures_2014_Estimates <- dget(file = "Estimates objects/Round3Mixtures_2014_Estimates.txt")
+Round3Mixtures_2014_EstimatesStats <- dget(file = "Estimates objects/Round3Mixtures_2014_EstimatesStats.txt")
+
+
+# Verify that Gelman-Rubin < 1.2
+sapply(Round3Mixtures_2014_Estimates$Stats, function(Mix) {Mix[, "GR"]})
+sapply(Round3Mixtures_2014_Estimates$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # Issues with SUGANC14_3_Late
+require(gplots)
+par(mfrow = c(1, 1), mar = c(3.1, 4.6, 3.1, 1.1), oma = rep(0, 4))
+sapply(Round3Mixtures_2014[c(3, 4, 2, 1)], function(Mix) {
+  BarPlot <- barplot2(Round3Mixtures_2014_EstimatesStats[[Mix]][, "GR"], col = "blue", ylim = c(1, pmax(1.5, max(Round3Mixtures_2014_EstimatesStats[[Mix]][, "GR"]))), ylab = "Gelman-Rubin", xpd = FALSE, main = Mix, names.arg = '', cex.lab = 1.5, cex.main = 2)
+  abline(h = 1.2, lwd = 3, xpd = FALSE)
+  text(x = BarPlot, y = 1, labels = KMA15GroupsPC2Rows, srt = 0, pos = 1, xpd = TRUE, cex = 0.55)
+})
+
+# Quick look at raw posterior output
+str(Round3Mixtures_2014_Estimates$Output)
+Round3Mixtures_2014_Header <- setNames(object = c("Ayakulik Section Middle July 26-August 29, 2014",
+                                                  "Karluk Section Middle July 26-August 29, 2014",
+                                                  "Uganik Section Middle July 26-August 29, 2014",
+                                                  "Uyak Section Middle July 26-August 29, 2014"), 
+                                       nm = Round3Mixtures_2014)
+dput(x = Round3Mixtures_2014_Header, file = "Objects/Round3Mixtures_2014_Header.txt")
+
+PlotPosterior(mixvec = Round3Mixtures_2014[c(3, 4, 2, 1)], output = Round3Mixtures_2014_Estimates$Output, 
+              groups = KMA15GroupsPC, colors = KMA15Colors, 
+              header = Round3Mixtures_2014_Header, set.mfrow = c(5, 3), thin = 10)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Plot Round 3 Results ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Quick and dirty plot
+QuickPlot(mixvec = Round3Mixtures_2014[c(3, 4, 2, 1)], estimatesstats = Round3Mixtures_2014_Estimates, groups = KMA15GroupsPC, groups2rows = KMA15GroupsPC2Rows, colors = KMA15Colors, header = Round3Mixtures_2014_Header)
+
+## Quick barplot
+QuickBarplot(mixvec = Round3Mixtures_2014[c(3, 4, 2, 1)], estimatesstats = Round3Mixtures_2014_Estimates, groups = KMA15GroupsPC, groups2rows = KMA15GroupsPC2Rows, header = Round3Mixtures_2014_Header)
+
+## Make violin plots of posteriors with RGs sorted
+ViolinPlot(mixvec = Round3Mixtures_2014[c(3, 4, 2, 1)], estimates = Round3Mixtures_2014_Estimates, groups = KMA15GroupsPC2Rows, colors = KMA15Colors, header = Round3Mixtures_2014_Header)
+rm(Round3Mixtures_2014_Estimates)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Round 3 Repeated MSA files for BAYES 80K Iterations ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Dumping out a new control file to re-analyze SUGANC14_3_Late Round 3 mixtures with a 80K posterior as opposed to our standard 40K
+## Perhaps it will converge on one of the modes for South of Cape Suckling?
+
+# Just use original mixture, no need to create a new one!
+
+## Dumping a New Control file that goes out further!
+
+sapply(Round3Mixtures_2014[3], function(Mix) {
+  CreateControlFile.GCL(sillyvec = KMA473Pops, loci = loci46, mixname = Mix, basename = "KMA473Pops46Markers", suffix = "", nreps = 80000, nchains = 5,
+                        groupvec = KMA473PopsGroupVec15, priorvec = Round3Mixtures_2014_Prior[[Mix]], initmat = KMA473PopsInits, dir = "BAYES/2014-2015 Mixtures 46loci/Control",
+                        seeds = WASSIPSockeyeSeeds, thin = c(1, 1, 100), mixfortran = KMA47346MixtureFormat, basefortran = KMA47346Baseline, switches = "F T F T T T F")
+})
+
+## Create output directory
+sapply(Round3Mixtures_2014[3], function(Mix) {dir.create(paste("BAYES/2014-2015 Mixtures 46loci/Output/", Mix, sep = ""))})
+# Will rename later, but leave as is for now for BayesCopyPaste.GCL
+
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Plot results KMA Mixtures ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Round1Mixtures_2014_EstimatesStats <- dget("Estimates objects/Round1Mixtures_2014_EstimatesStats.txt")
+Round2Mixtures_2014_EstimatesStats_Final <- dget("Estimates objects/Round2Mixtures_2014_EstimatesStats_Final.txt")
+Round3Mixtures_2014_EstimatesStats <- dget("Estimates objects/Round3Mixtures_2014_EstimatesStats.txt")
 
-KMA2014Strata_EstimatesStats <- c(Round1Mixtures_2014_EstimatesStats, Round2Mixtures_2014_EstimatesStats_Final)
+KMA2014Strata_EstimatesStats <- c(Round1Mixtures_2014_EstimatesStats, Round2Mixtures_2014_EstimatesStats_Final, Round3Mixtures_2014_EstimatesStats)
 str(KMA2014Strata_EstimatesStats)
 
 
@@ -1901,39 +1981,63 @@ layoutmat <- matrix(data=c(  1, 2,
                              1, 4,
                              5, 6), nrow = 4, ncol = 2, byrow = TRUE)
 
-TempMix <- c("_1_Early", "_2_Middle")
-TempLegend14 <- c("June 1-27", "June 28-July 25")
-TempLegend15 <- c("June 1-27", "June 28-July 25")
-TempLegend16 <- c("June 1-27", "June 28-July 25")
-GeoMix <- "SAYAKC"
+TempMix <- c("_1_Early", "_2_Middle", "_3_Late")
+TempLegend14 <- c("June 1-27", "June 28-July 25", "July 26-August 29")
+TempLegend15 <- c("June 1-July 3", "July 4-August 1", "August 2-August 29")
+TempLegend16 <- c("June 1-27", "June 28-July 25", "July 26-August 29")
+GeoMix <- c("SALITC", "SAYAKC", "SKARLC", "SUGANC", "SUYAKC")
+GeoHeader <- setNames(object = c(paste("Cape Alitak/Humpy Deadman 257-10,20,50,60,70", sep = ''),
+                                 paste("Ayakulik/Halibut Bay 256-10", "\u2013", "256-30", sep = ''),
+                                 paste("Karluk/Sturgeon 255-10", "\u2013", "255-20; 256-40", sep = ''),
+                                 paste("Uganik/Kupreanof 253", sep = ''),
+                                 paste("Uyak Bay 254", sep = '')),
+                      nm = GeoMix)
+darkcolor <- "blue"
 Estimates <- KMA2014Strata_EstimatesStats
 Groups <- KMA15GroupsPC
 Groups2Rows <- KMA15GroupsPC2Rows
 cex.lab <- 1.5
-cex.yaxis <- 1.2
-cex.xaxis <- 0.5
+cex.yaxis <- 1.5
+cex.xaxis <- 0.7
+cex.main <- 2
+cex.leg <- 1.5
 ci.lwd <- 2.5
 
 
-layout(mat = layoutmat, widths = c(0.1, 1, 1), heights = c(0.9, 0.9, 1, 0.1))
-par(mar = rep(0, 4))
+# layout(mat = layoutmat, widths = c(0.1, 1, 1), heights = c(0.9, 0.9, 1, 0.1))
+# par(mar = rep(0, 4))
 
 # Y-axis label
-plot.new()
-text(x = 0.25, y = 0.5, labels = "Percentage of Catch", srt = 90, cex = cex.lab)
+# plot.new()
+# text(x = 0.25, y = 0.5, labels = "Percentage of Catch", srt = 90, cex = cex.lab)
 
-# Hypothetical Late Karluk Replicate 1
-par(mar = c(1, 1, 1, 1))
-Barplot1 <- barplot2(height = t(sapply(TempMix, function(tempmix) {Estimates[[paste(GeoMix, "14", tempmix, sep = '')]][, "median"]})) * 100, 
-                     beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
-                     ci.l = t(sapply(TempMix, function(tempmix) {Estimates[[paste(GeoMix, "14", tempmix, sep = '')]][, "5%"]})) * 100, 
-                     ci.u = t(sapply(TempMix, function(tempmix) {Estimates[[paste(GeoMix, "14", tempmix, sep = '')]][, "95%"]})) * 100, 
-                     ylim = c(0, 100), col = colorpanel(length(TempMix), low = "blue", high = "white"), cex.axis = cex.yaxis, yaxt = "n", xaxt = 'n')
-axis(side = 2, at = seq(0, 100, 25), labels = formatC(x = seq(0, 100, 25), big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
-legend(legend = TempLegend14, x = "topleft", fill = colorpanel(length(TempMix), low = "blue", high = "white"), border = "black", bty = "n", cex = 1, title="2014")
-abline(h = 0)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## 2014
+# par(mar = c(1, 1, 1, 1))
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Temp - Comment this section out for 3 panel plot!!!
+par(mar = c(3.6, 5.1, 3.1, 1.1))
+sapply(GeoMix[2:5], function(geomix) {
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  Barplot1 <- barplot2(height = t(sapply(TempMix, function(tempmix) {Estimates[[paste(geomix, "14", tempmix, sep = '')]][, "median"]})) * 100, 
+                       beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
+                       ci.l = t(sapply(TempMix, function(tempmix) {Estimates[[paste(geomix, "14", tempmix, sep = '')]][, "5%"]})) * 100, 
+                       ci.u = t(sapply(TempMix, function(tempmix) {Estimates[[paste(geomix, "14", tempmix, sep = '')]][, "95%"]})) * 100, 
+                       ylim = c(0, 100), col = colorpanel(length(TempMix), low = darkcolor, high = "white"), cex.axis = cex.yaxis, yaxt = "n", xaxt = 'n')
+  axis(side = 2, at = seq(0, 100, 25), labels = formatC(x = seq(0, 100, 25), big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+  legend(legend = TempLegend14, x = "topleft", fill = colorpanel(length(TempMix), low = darkcolor, high = "white"), border = "black", bty = "n", cex = cex.leg, title="2014")
+  abline(h = 0)
+  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Temp - Comment this section out for 3 panel plot!!! 
+  mtext(text = "Percentage of Catch", side = 2, cex = cex.yaxis, line = 3)
+  mtext(text = Groups2Rows, side = 1, line = 1, at = apply(Barplot1, 2, mean), adj = 0.5, cex = cex.xaxis)
+  mtext(text = GeoHeader[geomix], side = 3, cex = cex.main)
+})
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# Hypothetical Late Karluk Replicate 2
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## 2015
 # par(mar = c(1, 1, 1, 1))
 # Barplot2 <- barplot2(height = t(sapply(TempMix, function(tempmix) {Estimates[[paste(GeoMix, "15", tempmix, sep = '')]][, "median"]})) * 100, 
 #                      beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
@@ -1945,7 +2049,8 @@ abline(h = 0)
 # abline(h = 0)
 plot.new()
 
-# Hypothetical Late Karluk Replicate 3
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## 2016
 # par(mar = c(2, 1, 1, 1))
 # Barplot3 <- barplot2(height = t(sapply(TempMix, function(tempmix) {Estimates[[paste(GeoMix, "16", tempmix, sep = '')]][, "median"]})) * 100, 
 #                      beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
@@ -1955,7 +2060,7 @@ plot.new()
 # axis(side = 2, at = seq(0, 100, 25), labels = formatC(x = seq(0, 100, 25), big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
 # legend(legend = TempLegend16, x = "topleft", fill = colorpanel(length(TempMix), low = "blue", high = "white"), border = "black", bty = "n", cex = 1, title="2016")
 # abline(h = 0)
-mtext(text = Groups2Rows, side = 1, line = 1, at = apply(Barplot, 2, mean), adj = 0.5, cex = cex.xaxis)
+mtext(text = Groups2Rows, side = 1, line = 1, at = apply(Barplot3, 2, mean), adj = 0.5, cex = cex.xaxis)
 plot.new()
 
 ## Blank Corner
