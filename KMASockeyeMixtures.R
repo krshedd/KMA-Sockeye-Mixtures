@@ -1341,19 +1341,37 @@ dir.create("BAYES/2014-2015 Mixtures 46loci/Output/SALITC14_2_Middle")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Pulling entire posterior with no burn-in
-Round1Alitak_2014_Estimates <- CustomCombineBAYESOutput.GCL(groupvec = seq(KMA15GroupsPC), groupnames = KMA15GroupsPC, 
-                                                            maindir = "BAYES/2014-2015 Mixtures 46loci/Output", 
-                                                            mixvec = "SALITC14_2_Middle", prior = "",  
-                                                            ext = "RGN", nchains = 5, burn = 0, alpha = 0.1, PosteriorOutput = TRUE)
+Round1Mixtures200K_2014_Estimates <- CustomCombineBAYESOutput.GCL(groupvec = seq(KMA15GroupsPC), groupnames = KMA15GroupsPC, 
+                                                                  maindir = "BAYES/2014-2015 Mixtures 46loci/Output", 
+                                                                  mixvec = "SALITC14_2_Middle", prior = "",  
+                                                                  ext = "RGN", nchains = 5, burn = 0, alpha = 0.1, PosteriorOutput = TRUE)
+
+
+# Verify that Gelman-Rubin < 1.2
+sapply(Round1Mixtures200K_2014_Estimates$Stats, function(Mix) {Mix[, "GR"]})
+sapply(Round1Mixtures200K_2014_Estimates$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # Issues with SAYAKC14_2_Middle and SUYAKC14_2_
+sapply(Round1Mixtures_2014[5], function(Mix) {
+  par(mfrow = c(1, 1))
+  BarPlot <- barplot2(Round1Mixtures200K_2014_Estimates$Stats[[Mix]][, "GR"], col = "blue", ylim = c(1, pmax(1.5, max(Round1Mixtures200K_2014_Estimates$Stats[[Mix]][, "GR"]))), ylab = "Gelman-Rubin", xpd = FALSE, main = Mix, names.arg = '')
+  abline(h = 1.2, lwd = 3, xpd = FALSE)
+  text(x = BarPlot, y = 1, labels = KMA15GroupsPC2Rows, srt = 0, pos = 1, xpd = TRUE, cex = 0.55)
+})
+
+# Quick look at raw posterior output
+str(Round1Mixtures200K_2014_Estimates$Output)
+
+PlotPosterior(mixvec = Round1Mixtures_2014[5], output = Round1Mixtures200K_2014_Estimates$Output, 
+              groups = KMA15GroupsPC, colors = KMA15Colors, 
+              header = Round1Mixtures_2014_Header[5], set.mfrow = c(5, 3), thin = 100)
 
 # Plotting entire posterior with no burn-in
 nchains <- 5
-RG <- "Frazer"
-# RG <- "Ayakulik"
+# RG <- "Frazer"
+RG <- "Ayakulik"
 par(mfrow = c(5, 1), mar = c(2.1, 2.1, 1.1, 1.1), oma = c(4.1, 4.1, 3.1, 0))
 sapply(seq(nchains), function(chain) {
-  posterior.length <- dim(Round1Alitak_2014_Estimates$Output$SALITC14_2_Middle)[1] / nchains
-  plot(Round1Alitak_2014_Estimates$Output$SALITC14_2_Middle[seq(from = (chain - 1) * posterior.length + 1, length.out = posterior.length), which(KMA15GroupsPC == RG)], 
+  posterior.length <- dim(Round1Mixtures200K_2014_Estimates$Output$SALITC14_2_Middle)[1] / nchains
+  plot(Round1Mixtures200K_2014_Estimates$Output$SALITC14_2_Middle[seq(from = (chain - 1) * posterior.length + 1, length.out = posterior.length), which(KMA15GroupsPC == RG)], 
        type = "l", ylim = c(0, 1), xlab = '', ylab = '')
   abline(v = posterior.length / 2, lwd = 2)
   text(x = posterior.length / 4, y = 1, labels = "Burn-in", pos = 1)
@@ -1446,10 +1464,124 @@ mtext(text = "Iteration", side = 1, outer = TRUE, cex = 1.5, line = 1.5)
 mtext(text = "Running Mean Posterior", side = 2, outer = TRUE, cex = 1.5, line = 1.5)
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Sneak Peak Round 1 Middle Alitak Results with Finer Scale Reporting Groups ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Round1Mixtures200K_2014_31RG_Estimates <- CustomCombineBAYESOutput.GCL(groupvec = KMA473PopsGroupVec31, groupnames = KMA31GroupsPC, 
+                                                                       maindir = "BAYES/2014-2015 Mixtures 46loci/Output/200K Iterations", 
+                                                                       mixvec = Round1Mixtures_2014[5], prior = "",  
+                                                                       ext = "BOT", nchains = 5, burn = 0.5, alpha = 0.1, PosteriorOutput = TRUE)
+str(Round1Mixtures200K_2014_31RG_Estimates)
+QuickBarplot(mixvec = Round1Mixtures_2014[5], estimatesstats = Round1Mixtures200K_2014_31RG_Estimates$Stats, groups = KMA31GroupsPC, header = Round1Mixtures_2014_Header[5])
+
+ViolinPlot(mixvec = Round1Mixtures_2014[5], estimates = Round1Mixtures200K_2014_31RG_Estimates, groups = KMA31GroupsPC, colors = KMA15Colors[c(1,1,1,1,2,3,4,4,4,5,6,6,7,7,8,9,10,11,12,13,13,13,13,13,13,13,13,13,14,14,15)], header = Round1Mixtures_2014_Header[5])
+
+# Still won't converge with 200K iterations/chain
+# Appears to be bouncing between Frazer and Ayakulik Late
+
+Round1Mixtures200KNoBurn_2014_31RG_Estimates <- CustomCombineBAYESOutput.GCL(groupvec = KMA473PopsGroupVec31, groupnames = KMA31GroupsPC, 
+                                                                             maindir = "BAYES/2014-2015 Mixtures 46loci/Output/200K Iterations", 
+                                                                             mixvec = Round1Mixtures_2014[5], prior = "",  
+                                                                             ext = "BOT", nchains = 5, burn = 0, alpha = 0.1, PosteriorOutput = TRUE)
+
+# Plotting trace entire posterior with no burn-in
+nchains <- 5
+par(mfrow = c(5, 1), mar = c(2.1, 2.1, 1.1, 1.1), oma = c(4.1, 4.1, 3.1, 0))
+sapply(seq(nchains), function(chain) {
+  posterior.length <- dim(Round1Mixtures200KNoBurn_2014_31RG_Estimates$Output$SALITC14_2_Middle)[1] / nchains
+  plot(Round1Mixtures200KNoBurn_2014_31RG_Estimates$Output$SALITC14_2_Middle[seq(from = (chain - 1) * posterior.length + 1, length.out = posterior.length), which(KMA31GroupsPC == "Frazer")], 
+       type = "l", ylim = c(0, 1), xlab = '', ylab = '', col = "cyan")
+  points(Round1Mixtures200KNoBurn_2014_31RG_Estimates$Output$SALITC14_2_Middle[seq(from = (chain - 1) * posterior.length + 1, length.out = posterior.length), which(KMA31GroupsPC == "Ayakulik Late")],
+         type = "l", add = TRUE, col = "blue")
+  points(Round1Mixtures200KNoBurn_2014_31RG_Estimates$Output$SALITC14_2_Middle[seq(from = (chain - 1) * posterior.length + 1, length.out = posterior.length), which(KMA31GroupsPC == "Ayakulik Early")],
+         type = "l", add = TRUE, col = "black")
+  abline(v = posterior.length / 2, lwd = 2)
+  text(x = posterior.length / 4, y = 1, labels = "Burn-in", pos = 1)
+  text(x = posterior.length / 4 * 3, y = 1, labels = "Posterior", pos = 1)} )
+mtext(text = "Alitak 2014 Middle Strata", side = 3, outer = TRUE, cex = 1.5)
+mtext(text = "Iteration (5 chains each)", side = 1, outer = TRUE, cex = 1.5, line = 1.5)
+mtext(text = "Posterior", side = 2, outer = TRUE, cex = 1.5, line = 1.5)
+par(mfrow = c(1, 1), mar = c(5.1, 4.1, 4.1, 2.1), oma = c(0, 0, 0, 0))
+
+
+# Plotting histogram entire posterior with no burn-in
+nchains <- 5
+par(mfrow = c(5, 1), mar = c(2.1, 2.1, 1.1, 1.1), oma = c(4.1, 4.1, 3.1, 0))
+sapply(seq(nchains), function(chain) {
+  posterior.length <- dim(Round1Mixtures200KNoBurn_2014_31RG_Estimates$Output$SALITC14_2_Middle)[1] / nchains
+  hist(Round1Mixtures200KNoBurn_2014_31RG_Estimates$Output$SALITC14_2_Middle[seq(from = (chain - 1) * posterior.length + 1, length.out = posterior.length), which(KMA31GroupsPC == "Frazer")], 
+       xlim = c(0, 1), xlab = '', ylab = '', col = "cyan", breaks = seq(0 , 1, 0.01), main = '')
+  hist(Round1Mixtures200KNoBurn_2014_31RG_Estimates$Output$SALITC14_2_Middle[seq(from = (chain - 1) * posterior.length + 1, length.out = posterior.length), which(KMA31GroupsPC == "Ayakulik Late")],
+         add = TRUE, col = "blue", breaks = seq(0 , 1, 0.01), xlab = '', main = '')
+  # hist(Round1Mixtures200KNoBurn_2014_31RG_Estimates$Output$SALITC14_2_Middle[seq(from = (chain - 1) * posterior.length + 1, length.out = posterior.length), which(KMA31GroupsPC == "Ayakulik Early")],
+  #        add = TRUE, col = "black", breaks = seq(0 , 1, 0.01), xlab = '')
+  if(chain == 1) {legend("topright", legend = c("Frazer", "Ayakulik Late"), fill = c("cyan", "blue"), bty = 'n', cex = 2)}
+})
+mtext(text = "Alitak 2014 Middle Strata", side = 3, outer = TRUE, cex = 1.5)
+mtext(text = "Posterior", side = 1, outer = TRUE, cex = 1.5, line = 1.5)
+mtext(text = "Iteration (5 chains each)", side = 2, outer = TRUE, cex = 1.5, line = 1.5)
+par(mfrow = c(1, 1), mar = c(5.1, 4.1, 4.1, 2.1), oma = c(0, 0, 0, 0))
+
+
+# Plotting histogram original 40K, burn first half
+nchains <- 5
+par(mfrow = c(5, 1), mar = c(2.1, 2.1, 1.1, 1.1), oma = c(4.1, 4.1, 3.1, 0))
+sapply(seq(nchains), function(chain) {
+  posterior.length <- dim(Round1Mixtures_2014_Estimates$Output$SALITC14_2_Middle)[1] / nchains
+  hist(Round1Mixtures_2014_Estimates$Output$SALITC14_2_Middle[seq(from = (chain - 1) * posterior.length + 1, length.out = posterior.length), which(KMA15GroupsPC == "Frazer")], 
+       xlim = c(0, 1), xlab = '', ylab = '', col = "cyan", breaks = seq(0 , 1, 0.01), main = '')
+  hist(Round1Mixtures_2014_Estimates$Output$SALITC14_2_Middle[seq(from = (chain - 1) * posterior.length + 1, length.out = posterior.length), which(KMA15GroupsPC == "Ayakulik")],
+       add = TRUE, col = "blue", breaks = seq(0 , 1, 0.01), xlab = '', main = '')
+  if(chain == 1) {legend("topright", legend = c("Frazer", "Ayakulik"), fill = c("cyan", "blue"), bty = 'n', cex = 2)}
+})
+mtext(text = "Alitak 2014 Middle Strata", side = 3, outer = TRUE, cex = 1.5)
+mtext(text = "Posterior", side = 1, outer = TRUE, cex = 1.5, line = 1.5)
+mtext(text = "Iteration (5 chains each)", side = 2, outer = TRUE, cex = 1.5, line = 1.5)
+par(mfrow = c(1, 1), mar = c(5.1, 4.1, 4.1, 2.1), oma = c(0, 0, 0, 0))
+
+# These fish are clearly bouncing back and forth between Frazer and Ayakulik Late
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#### Re-doing some baselin proof tests with only early-Ayakulik and only early-Karluk ####
+#### Round 1 Middle Alitak Final Decisions ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Compare Results from 40K to 80K
+Round1Mixtures200K_2014_Estimates <- CustomCombineBAYESOutput.GCL(groupvec = seq(KMA15GroupsPC), groupnames = KMA15GroupsPC, 
+                                                                  maindir = "BAYES/2014-2015 Mixtures 46loci/Output/200K Iterations/", 
+                                                                  mixvec = "SALITC14_2_Middle", prior = "",  
+                                                                  ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1, PosteriorOutput = TRUE)
+
+str(Round1Mixtures200K_2014_Estimates)
+
+Round1Mixtures200K_2014_EstimatesStats <- Round1Mixtures200K_2014_Estimates$Stats
+Round1Mixtures_2014_EstimatesStats <- dget(file = "Estimates objects/Round1Mixtures_2014_EstimatesStats.txt")
+
+sapply(Round1Mixtures_2014[5], function(Mix) {
+  par(mar = c(3.1, 5.1, 3.1, 2.1))
+  Barplot <- barplot2(height = t(matrix(data = c(Round1Mixtures_2014_EstimatesStats[[Mix]][, "median"],
+                                                 Round1Mixtures200K_2014_EstimatesStats[[Mix]][, "median"]) * 100, 
+                                        ncol = 2, dimnames = list(KMA15GroupsPC, c("40K", "80K")))),
+                      beside = TRUE, plot.ci = TRUE, ci.lwd = 2, 
+                      ci.l = t(matrix(data = c(Round1Mixtures_2014_EstimatesStats[[Mix]][, "5%"],
+                                               Round1Mixtures200K_2014_EstimatesStats[[Mix]][, "5%"]) * 100,
+                                      ncol = 2, dimnames = list(KMA15GroupsPC, c("40K", "80K")))),
+                      ci.u = t(matrix(data = c(Round1Mixtures_2014_EstimatesStats[[Mix]][, "95%"],
+                                               Round1Mixtures200K_2014_EstimatesStats[[Mix]][, "95%"]) * 100,
+                                      ncol = 2, dimnames = list(KMA15GroupsPC, c("40K", "80K")))),
+                      ylim = c(0, 100), col = c("white", "skyblue"), yaxt = 'n', xaxt = 'n', 
+                      main = Round1Mixtures_2014_Header[Mix], ylab = "Percent of Mixture", cex.lab = 2, cex.main = 2)
+  axis(side = 2, at = seq(0, 100, 25), labels = formatC(x = seq(0, 100, 25), big.mark = "," , digits = 0, format = "f"), cex.axis = 1.5)
+  abline(h = 0, xpd = FALSE)
+  mtext(text = KMA15GroupsPC2Rows, side = 1, line = 1, at = apply(Barplot, 2, mean), adj = 0.5, cex = 0.6)
+  legend("topleft", legend = c("40K Iterations", "200K Iterations"), fill = c("White", "skyblue"), bty = 'n', cex = 2)
+})
+
+# No difference in summary statistics (median and 90% CI) between 40K and 200K iterations
+# Keep 40K output as results
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Re-doing some baseline proof tests with only early-Ayakulik and only early-Karluk ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 rm(list = ls(all = TRUE))
@@ -1721,12 +1853,6 @@ sapply(Round2Mixtures_2014[c(3, 4, 2, 1)], function(Mix) {
 
 # Quick look at raw posterior output
 str(Round2Mixtures80K_2014_Estimates$Output)
-Round2Mixtures_2014_Header <- setNames(object = c("Ayakulik Section Middle June 28-July 25, 2014",
-                                                  "Karluk Section Middle June 28-July 25, 2014",
-                                                  "Uganik Section Middle June 28-July 25, 2014",
-                                                  "Uyak Section Middle June 28-July 25, 2014"), 
-                                       nm = Round2Mixtures_2014)
-dput(x = Round2Mixtures_2014_Header, file = "Objects/Round2Mixtures_2014_Header.txt")
 
 PlotPosterior(mixvec = Round2Mixtures_2014[c(3, 4, 2, 1)], output = Round2Mixtures80K_2014_Estimates$Output, 
               groups = KMA15GroupsPC, colors = KMA15Colors, 
@@ -1817,7 +1943,6 @@ QuickBarplot(mixvec = Round2Mixtures_2014[c(3, 4, 2, 1)], estimatesstats = Round
 QuickBarplot(mixvec = Round1Mixtures_2014[5], estimatesstats = Round1Mixtures_2014_31RG_Estimates$Stats, groups = KMA31GroupsPC, header = Round1Mixtures_2014_Header[5])
 
 
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Dputting Final Round 2 Estimates ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1825,7 +1950,7 @@ QuickBarplot(mixvec = Round1Mixtures_2014[5], estimatesstats = Round1Mixtures_20
 # Using 80K iteration results from SAYAKC14_2_Middle and SUYAKC14_2_Middle
 
 sapply(Round2Mixtures_2014_Estimates$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # Issues with SAYAKC14_2_Middle and SUYAKC14_2_
-sapply(Round2Mixtures80K_2014_Estimates$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # Issues with SAYAKC14_2_Middle and SUYAKC14_2_
+sapply(Round2Mixtures80K_2014_Estimates$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # Resolved
 
 str(Round2Mixtures_2014_Estimates)
 
@@ -1842,11 +1967,11 @@ dput(x = Round2Mixtures_2014_Estimates_Final$Stats, file = "Estimates objects/Ro
 Round2Mixtures_2014_Estimates_Final <- dget(file = "Estimates objects/Round2Mixtures_2014_Estimates_Final.txt")
 Round2Mixtures_2014_EstimatesStats_Final <- dget(file = "Estimates objects/Round2Mixtures_2014_EstimatesStats_Final.txt")
 
-sapply(Round2Mixtures_2014_Estimates_Final$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # Issues with SAYAKC14_2_Middle and SUYAKC14_2_
+sapply(Round2Mixtures_2014_Estimates_Final$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # No issues
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#### Round 3 MSA files for BAYES 2014 Middle Strata ####
+#### Round 3 MSA files for BAYES 2014 Late Strata ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Indetify Strata to Run
 KMA2014Strata_3_Late <- grep(pattern = "3_Late", x = KMA2014Strata, value = TRUE)
@@ -1911,9 +2036,9 @@ sapply(Round3Mixtures_2014[c(3, 4, 2, 1)], function(Mix) {
 # Quick look at raw posterior output
 str(Round3Mixtures_2014_Estimates$Output)
 Round3Mixtures_2014_Header <- setNames(object = c("Ayakulik Section Middle July 26-August 29, 2014",
-                                                  "Karluk Section Middle July 26-August 29, 2014",
-                                                  "Uganik Section Middle July 26-August 29, 2014",
-                                                  "Uyak Section Middle July 26-August 29, 2014"), 
+                                                  "Karluk Section Middle July 26-August 25, 2014",
+                                                  "Uganik Section Middle July 26-August 25, 2014",
+                                                  "Uyak Section Middle July 26-August 25, 2014"), 
                                        nm = Round3Mixtures_2014)
 dput(x = Round3Mixtures_2014_Header, file = "Objects/Round3Mixtures_2014_Header.txt")
 
@@ -1957,13 +2082,241 @@ sapply(Round3Mixtures_2014[3], function(Mix) {dir.create(paste("BAYES/2014-2015 
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Summarize Round 3 Repeated 80K Output ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Round3Mixtures80K_2014_Estimates <- CustomCombineBAYESOutput.GCL(groupvec = seq(KMA15GroupsPC), groupnames = KMA15GroupsPC, 
+                                                                 maindir = "BAYES/2014-2015 Mixtures 46loci/Output/80K Iterations", 
+                                                                 mixvec = Round3Mixtures_2014[3], prior = "",  
+                                                                 ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1, PosteriorOutput = TRUE)
+
+# Dput 1) estimates stats + posterior output & 2) estimates stats
+dput(Round3Mixtures80K_2014_Estimates, file = "Estimates objects/Round3Mixtures80K_2014_Estimates.txt")
+dput(Round3Mixtures80K_2014_Estimates$Stats, file = "Estimates objects/Round3Mixtures80K_2014_EstimatesStats.txt")
+
+Round3Mixtures80K_2014_Estimates <- dget(file = "Estimates objects/Round3Mixtures80K_2014_Estimates.txt")
+Round3Mixtures80K_2014_EstimatesStats <- dget(file = "Estimates objects/Round3Mixtures80K_2014_EstimatesStats.txt")
+
+
+# Verify that Gelman-Rubin < 1.2
+sapply(Round3Mixtures80K_2014_Estimates$Stats, function(Mix) {Mix[, "GR"]})
+sapply(Round3Mixtures80K_2014_Estimates$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # Issues with SAYAKC14_2_Middle and SUYAKC14_2_
+require(gplots)
+sapply(Round3Mixtures_2014[c(3, 4, 2, 1)], function(Mix) {
+  par(mfrow = c(1, 1))
+  BarPlot <- barplot2(Round3Mixtures80K_2014_EstimatesStats[[Mix]][, "GR"], col = "blue", ylim = c(1, pmax(1.5, max(Round3Mixtures80K_2014_EstimatesStats[[Mix]][, "GR"]))), ylab = "Gelman-Rubin", xpd = FALSE, main = Mix, names.arg = '')
+  abline(h = 1.2, lwd = 3, xpd = FALSE)
+  text(x = BarPlot, y = 1, labels = KMA15GroupsPC2Rows, srt = 0, pos = 1, xpd = TRUE, cex = 0.55)
+})
+
+# Quick look at raw posterior output
+str(Round3Mixtures80K_2014_Estimates$Output)
+
+PlotPosterior(mixvec = Round3Mixtures_2014[3], output = Round3Mixtures80K_2014_Estimates$Output, 
+              groups = KMA15GroupsPC, colors = KMA15Colors, 
+              header = Round3Mixtures_2014_Header[3], set.mfrow = c(5, 3), thin = 10)
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Plot Round 3 Repeated 80K Results ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Quick and dirty plot
+QuickPlot(mixvec = Round3Mixtures_2014[3], estimatesstats = Round3Mixtures80K_2014_Estimates, groups = KMA15GroupsPC, groups2rows = KMA15GroupsPC2Rows, colors = KMA15Colors, header = Round3Mixtures_2014_Header[3])
+
+## Quick barplot
+QuickBarplot(mixvec = Round3Mixtures_2014[3], estimatesstats = Round3Mixtures80K_2014_Estimates, groups = KMA15GroupsPC, groups2rows = KMA15GroupsPC2Rows, header = Round3Mixtures_2014_Header[3])
+
+## Make violin plots of posteriors with RGs sorted
+ViolinPlot(mixvec = Round3Mixtures_2014[3], estimates = Round3Mixtures80K_2014_Estimates, groups = KMA15GroupsPC2Rows, colors = KMA15Colors, header = Round3Mixtures_2014_Header)
+rm(Round3Mixtures80K_2014_Estimates)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Compare Results from 40K to 80K
+Round3Mixtures_2014_EstimatesStats <- dget(file = "Estimates objects/Round3Mixtures_2014_EstimatesStats.txt")
+
+sapply(Round3Mixtures_2014[3], function(Mix) {
+  par(mar = c(3.1, 5.1, 3.1, 2.1))
+  Barplot <- barplot2(height = t(matrix(data = c(Round3Mixtures_2014_EstimatesStats[[Mix]][, "median"],
+                                                 Round3Mixtures80K_2014_EstimatesStats[[Mix]][, "median"]) * 100, 
+                                        ncol = 2, dimnames = list(KMA15GroupsPC, c("40K", "80K")))),
+                      beside = TRUE, plot.ci = TRUE, ci.lwd = 2, 
+                      ci.l = t(matrix(data = c(Round3Mixtures_2014_EstimatesStats[[Mix]][, "5%"],
+                                               Round3Mixtures80K_2014_EstimatesStats[[Mix]][, "5%"]) * 100,
+                                      ncol = 2, dimnames = list(KMA15GroupsPC, c("40K", "80K")))),
+                      ci.u = t(matrix(data = c(Round3Mixtures_2014_EstimatesStats[[Mix]][, "95%"],
+                                               Round3Mixtures80K_2014_EstimatesStats[[Mix]][, "95%"]) * 100,
+                                      ncol = 2, dimnames = list(KMA15GroupsPC, c("40K", "80K")))),
+                      ylim = c(0, 100), col = c("white", "skyblue"), yaxt = 'n', xaxt = 'n', 
+                      main = Round3Mixtures_2014_Header[Mix], ylab = "Percent of Mixture", cex.lab = 2, cex.main = 2)
+  axis(side = 2, at = seq(0, 100, 25), labels = formatC(x = seq(0, 100, 25), big.mark = "," , digits = 0, format = "f"), cex.axis = 1.5)
+  abline(h = 0, xpd = FALSE)
+  mtext(text = KMA15GroupsPC2Rows, side = 1, line = 1, at = apply(Barplot, 2, mean), adj = 0.5, cex = 0.6)
+  legend("topleft", legend = c("40K Iterations", "80K Iterations"), fill = c("White", "skyblue"), bty = 'n', cex = 2)
+})
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Dputting Final Round 3 Estimates ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Keeping 40K iteration results from SAYAKC14_3_Late, SKARLC14_3_Late, and SUYAKC14_3_Late as GR was < 1.2 and thats "our business rule"
+# Using 80K iteration results from SUGANC14_3_Late
+Round3Mixtures_2014_Estimates <- dget(file = "Estimates objects/Round3Mixtures_2014_Estimates.txt")
+
+sapply(Round3Mixtures_2014_EstimatesStats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # Issues with SUGANC14_3_Late
+sapply(Round3Mixtures80K_2014_EstimatesStats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # Resolved
+
+str(Round3Mixtures_2014_Estimates)
+str(Round3Mixtures80K_2014_Estimates)
+
+Round3Mixtures_2014_Estimates_Final <- list(Stats = c(Round3Mixtures_2014_Estimates$Stats[1:2],
+                                                      Round3Mixtures80K_2014_Estimates$Stats[1],
+                                                      Round3Mixtures_2014_Estimates$Stats[4]),
+                                            Output = c(Round3Mixtures_2014_Estimates$Output[1:2],
+                                                       Round3Mixtures80K_2014_Estimates$Output[1],
+                                                       Round3Mixtures_2014_Estimates$Output[4]))
+str(Round3Mixtures_2014_Estimates_Final)
+dput(x = Round3Mixtures_2014_Estimates_Final, file = "Estimates objects/Round3Mixtures_2014_Estimates_Final.txt")
+dput(x = Round3Mixtures_2014_Estimates_Final$Stats, file = "Estimates objects/Round3Mixtures_2014_EstimatesStats_Final.txt")
+
+Round3Mixtures_2014_Estimates_Final <- dget(file = "Estimates objects/Round3Mixtures_2014_Estimates_Final.txt")
+Round3Mixtures_2014_EstimatesStats_Final <- dget(file = "Estimates objects/Round3Mixtures_2014_EstimatesStats_Final.txt")
+
+sapply(Round3Mixtures_2014_Estimates_Final$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # No issues
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Sneak Peak Round 3 Results with Finer Scale Reporting Groups ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Round3Mixtures_2014_31RG_Estimates <- CustomCombineBAYESOutput.GCL(groupvec = KMA473PopsGroupVec31, groupnames = KMA31GroupsPC, 
+                                                                   maindir = "BAYES/2014-2015 Mixtures 46loci/Output/40K Iterations", 
+                                                                   mixvec = Round3Mixtures_2014, prior = "",  
+                                                                   ext = "BOT", nchains = 5, burn = 0.5, alpha = 0.1, PosteriorOutput = TRUE)
+str(Round3Mixtures_2014_31RG_Estimates)
+QuickBarplot(mixvec = Round3Mixtures_2014[c(3, 4, 2, 1)], estimatesstats = Round3Mixtures_2014_31RG_Estimates$Stats, groups = KMA31GroupsPC, header = Round3Mixtures_2014_Header[c(3, 4, 2, 1)])
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Round 4 MSA files for BAYES 2014 LateLate + Alitak Late Strata ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Indetify Strata to Run
+KMA2014Strata_4_LateLate <- grep(pattern = "4_LateLate", x = KMA2014Strata, value = TRUE)
+Round4Mixtures_2014 <- c("SALITC14_3_Late", KMA2014Strata_4_LateLate)  # Add SALITC14_3_Late now that we've decided to keep 40K results
+dput(x = Round4Mixtures_2014, file = "Objects/Round4Mixtures_2014.txt")
+
+# Create rolling prior based on Round 1 and 3 estimates
+str(Round1Mixtures_2014_EstimatesStats)
+sapply(Round1Mixtures_2014_EstimatesStats, function(Mix) {table(Mix[, "GR"] > 1.2)})
+str(Round3Mixtures_2014_EstimatesStats_Final)
+sapply(Round3Mixtures_2014_EstimatesStats_Final, function(Mix) {table(Mix[, "GR"] > 1.2)})
+
+str(c(Round1Mixtures_2014_EstimatesStats["SALITC14_2_Middle"], Round3Mixtures_2014_EstimatesStats_Final[c("SKARLC14_3_Late", "SUGANC14_3_Late", "SUYAKC14_3_Late")]))
+
+Round4Mixtures_2014_Prior <- sapply(c(Round1Mixtures_2014_EstimatesStats["SALITC14_2_Middle"], Round3Mixtures_2014_EstimatesStats_Final[c("SKARLC14_3_Late", "SUGANC14_3_Late", "SUYAKC14_3_Late")]),
+                                    function(Mix) {Prior.GCL(groupvec = KMA473PopsGroupVec15, groupweights = Mix[, "mean"], minval = 0.01)}, simplify = FALSE)
+names(Round4Mixtures_2014_Prior) <- gsub(pattern = "3_Late", replacement = "4_LateLate", x = names(Round4Mixtures_2014_Prior))  # This changes the names
+names(Round4Mixtures_2014_Prior) <- gsub(pattern = "2_Middle", replacement = "3_Late", x = names(Round4Mixtures_2014_Prior))  # This changes the names
+dput(x = Round4Mixtures_2014_Prior, file = "Objects/Round4Mixtures_2014_Prior.txt")
+str(Round4Mixtures_2014_Prior)
+
+
+## Dumping Mixture files
+sapply(Round4Mixtures_2014, function(Mix) {CreateMixture.GCL(sillys = Mix, loci = loci46, IDs = NULL, mixname = Mix, dir = "BAYES/2014-2015 Mixtures 46loci/Mixture", type = "BAYES", PT = FALSE)} )
+
+## Dumping Control files
+sapply(Round4Mixtures_2014, function(Mix) {
+  CreateControlFile.GCL(sillyvec = KMA473Pops, loci = loci46, mixname = Mix, basename = "KMA473Pops46Markers", suffix = "", nreps = 40000, nchains = 5,
+                        groupvec = KMA473PopsGroupVec15, priorvec = Round4Mixtures_2014_Prior[[Mix]], initmat = KMA473PopsInits, dir = "BAYES/2014-2015 Mixtures 46loci/Control",
+                        seeds = WASSIPSockeyeSeeds, thin = c(1, 1, 100), mixfortran = KMA47346MixtureFormat, basefortran = KMA47346Baseline, switches = "F T F T T T F")
+})
+
+## Create output directory
+sapply(Round4Mixtures_2014, function(Mix) {dir.create(paste("BAYES/2014-2015 Mixtures 46loci/Output/", Mix, sep = ""))})
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Go run BAYES
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Summarize Round 4 Output ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Round4Mixtures_2014_Estimates <- CustomCombineBAYESOutput.GCL(groupvec = seq(KMA15GroupsPC), groupnames = KMA15GroupsPC, 
+                                                                 maindir = "BAYES/2014-2015 Mixtures 46loci/Output", 
+                                                                 mixvec = Round4Mixtures_2014, prior = "",  
+                                                                 ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1, PosteriorOutput = TRUE)
+
+# Dput 1) estimates stats + posterior output & 2) estimates stats
+dput(Round4Mixtures_2014_Estimates, file = "Estimates objects/Round4Mixtures_2014_Estimates.txt")
+dput(Round4Mixtures_2014_Estimates$Stats, file = "Estimates objects/Round4Mixtures_2014_EstimatesStats.txt")
+
+Round4Mixtures_2014_Estimates <- dget(file = "Estimates objects/Round4Mixtures_2014_Estimates.txt")
+Round4Mixtures_2014_EstimatesStats <- dget(file = "Estimates objects/Round4Mixtures_2014_EstimatesStats.txt")
+
+
+# Verify that Gelman-Rubin < 1.2
+sapply(Round4Mixtures_2014_Estimates$Stats, function(Mix) {Mix[, "GR"]})
+sapply(Round4Mixtures_2014_Estimates$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # Issues with
+require(gplots)
+sapply(Round4Mixtures_2014[c(3, 4, 2, 1)], function(Mix) {
+  par(mfrow = c(1, 1))
+  BarPlot <- barplot2(Round4Mixtures_2014_EstimatesStats[[Mix]][, "GR"], col = "blue", ylim = c(1, pmax(1.5, max(Round4Mixtures_2014_EstimatesStats[[Mix]][, "GR"]))), ylab = "Gelman-Rubin", xpd = FALSE, main = Mix, names.arg = '')
+  abline(h = 1.2, lwd = 3, xpd = FALSE)
+  text(x = BarPlot, y = 1, labels = KMA15GroupsPC2Rows, srt = 0, pos = 1, xpd = TRUE, cex = 0.55)
+})
+
+# Quick look at raw posterior output
+str(Round4Mixtures_2014_Estimates$Output)
+Round4Mixtures_2014_Header <- setNames(object = c("Alitak Section Middle July 26-August 29, 2014",
+                                                  "Karluk Section Middle August 25-29, 2014",
+                                                  "Uganik Section Middle August 25-29, 2014",
+                                                  "Uyak Section Middle August 25-29, 2014"), 
+                                       nm = Round4Mixtures_2014)
+dput(x = Round4Mixtures_2014_Header, file = "Objects/Round4Mixtures_2014_Header.txt")
+
+PlotPosterior(mixvec = Round4Mixtures_2014, output = Round4Mixtures_2014_Estimates$Output, 
+              groups = KMA15GroupsPC, colors = KMA15Colors, 
+              header = Round4Mixtures_2014_Header, set.mfrow = c(5, 3), thin = 10)
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Plot Round 4 Results ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Quick and dirty plot
+QuickPlot(mixvec = Round4Mixtures_2014[c(3, 4, 2, 1)], estimatesstats = Round4Mixtures_2014_Estimates, groups = KMA15GroupsPC, groups2rows = KMA15GroupsPC2Rows, colors = KMA15Colors, header = Round4Mixtures_2014_Header)
+
+## Quick barplot
+QuickBarplot(mixvec = Round4Mixtures_2014[c(3, 4, 2, 1)], estimatesstats = Round4Mixtures_2014_Estimates, groups = KMA15GroupsPC, groups2rows = KMA15GroupsPC2Rows, header = Round4Mixtures_2014_Header)
+
+## Make violin plots of posteriors with RGs sorted
+ViolinPlot(mixvec = Round4Mixtures_2014[c(3, 4, 2, 1)], estimates = Round4Mixtures_2014_Estimates, groups = KMA15GroupsPC2Rows, colors = KMA15Colors, header = Round4Mixtures_2014_Header)
+rm(Round4Mixtures_2014_Estimates)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Stratified Estimator for Uganik, Uyak and Karluk 3_Late + 4_LateLate ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Using KMA Sockeye Harvest data to apply stratified estimator to combine the
+# 380 fish in 3_Late with the 285 fish in 4_LateLate to get at a "final"
+# estimate for the "Late" strata from July 26 - August 29, 2014
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Create Final Estimates Objects for Each Temporal Strata ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Plot results KMA Mixtures ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Round1Mixtures_2014_EstimatesStats <- dget("Estimates objects/Round1Mixtures_2014_EstimatesStats.txt")
 Round2Mixtures_2014_EstimatesStats_Final <- dget("Estimates objects/Round2Mixtures_2014_EstimatesStats_Final.txt")
-Round3Mixtures_2014_EstimatesStats <- dget("Estimates objects/Round3Mixtures_2014_EstimatesStats.txt")
+Round3Mixtures_2014_EstimatesStats_Final <- dget("Estimates objects/Round3Mixtures_2014_EstimatesStats_Final.txt.txt")
 
-KMA2014Strata_EstimatesStats <- c(Round1Mixtures_2014_EstimatesStats, Round2Mixtures_2014_EstimatesStats_Final, Round3Mixtures_2014_EstimatesStats)
+KMA2014Strata_EstimatesStats <- c(Round1Mixtures_2014_EstimatesStats, Round2Mixtures_2014_EstimatesStats_Final, Round3Mixtures_2014_EstimatesStats_Final)
 str(KMA2014Strata_EstimatesStats)
 
 
