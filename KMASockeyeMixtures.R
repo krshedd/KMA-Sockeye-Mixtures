@@ -2455,6 +2455,158 @@ dput(x = KMA2014Strata_1_Early_EstimatesStats, file = "Estimates objects/Final/K
 dput(x = KMA2014Strata_2_Middle_EstimatesStats, file = "Estimates objects/Final/KMA2014Strata_2_Middle_EstimatesStats.txt")
 dput(x = KMA2014Strata_3_Late_EstimatesStats, file = "Estimates objects/Final/KMA2014Strata_3_Late_EstimatesStats.txt")
 
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Plot stock composition results 2014 KMA Mixtures ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+KMA2014Strata_1_Early_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2014Strata_1_Early_EstimatesStats.txt")
+KMA2014Strata_2_Middle_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2014Strata_2_Middle_EstimatesStats.txt")
+KMA2014Strata_3_Late_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2014Strata_3_Late_EstimatesStats.txt")
+
+KMA2014Strata_EstimatesStats <- c(KMA2014Strata_1_Early_EstimatesStats, 
+                                  KMA2014Strata_2_Middle_EstimatesStats, 
+                                  KMA2014Strata_3_Late_EstimatesStats)
+dput(x = KMA2014Strata_EstimatesStats, file = "Estimates objects/Final/KMA2014Strata_EstimatesStats.txt")
+KMA2014Strata_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2014Strata_EstimatesStats.txt")
+
+str(KMA2014Strata_EstimatesStats)
+
+
+TempMix14 <- sapply(KMA2014, function(geo) {grep(pattern = geo, x = names(KMA2014Strata_EstimatesStats), value = TRUE)} )
+
+Legend14 <- setNames(object = c("June 1-27", "June 28-July 25", "July 26-August 29"), 
+                     nm = c("1_Early", "2_Middle", "3_Late"))
+TempLegend14 <- sapply(KMA2014, function(geo) {
+  Legend14[sapply(TempMix14[[geo]], function(strata) {unlist(strsplit(x = strata, split = paste(geo, "_", sep = '')))[2]} )]
+} )
+
+GeoHeader <- setNames(object = c(paste("Cape Alitak/Humpy Deadman 257-10,20,50,60,70", sep = ''),
+                                 paste("Ayakulik/Halibut Bay 256-10", "\u2013", "256-30", sep = ''),
+                                 paste("Karluk/Sturgeon 255-10", "\u2013", "255-20; 256-40", sep = ''),
+                                 paste("Uganik/Kupreanof 253", sep = ''),
+                                 paste("Uyak Bay 254", sep = '')),
+                      nm = unlist(strsplit(x = KMA2014, split = "14")))
+
+ProportionColors <- colorpanel(n = 3, low = "blue", high = "white")
+TempProportionColors14 <- sapply(KMA2014, function(geo) {
+  ProportionColors[sapply(TempMix14[[geo]], function(strata) {as.numeric(unlist(strsplit(x = strata, split = "_"))[2])} )]
+} )
+
+Estimates <- KMA2014Strata_EstimatesStats
+Groups <- KMA15GroupsPC
+Groups2Rows <- KMA15GroupsPC2Rows
+cex.lab <- 1.5
+cex.yaxis <- 1.3
+cex.xaxis <- 0.6
+cex.main <- 1.7
+cex.leg <- 1.3
+ci.lwd <- 2.5
+
+sapply(names(TempMix14[c(4, 5, 3, 2, 1)]), function(geomix) {
+  # emf(file = paste("Figures/2014/", geomix, ".emf", sep = ''), width = 8.5, height = 6.5, family = "sans", bg = "white")
+  par(mar = c(2.1, 4.1, 2.6, 0.6))
+
+  Barplot1 <- barplot2(height = t(sapply(TempMix14[[geomix]], function(tempmix) {Estimates[[tempmix]][, "median"]})) * 100, 
+                       beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
+                       ci.l = t(sapply(TempMix14[[geomix]], function(tempmix) {Estimates[[tempmix]][, "5%"]})) * 100, 
+                       ci.u = t(sapply(TempMix14[[geomix]], function(tempmix) {Estimates[[tempmix]][, "95%"]})) * 100, 
+                       ylim = c(0, 100), col = TempProportionColors14[[geomix]], cex.axis = cex.yaxis, yaxt = "n", xaxt = 'n')
+  axis(side = 2, at = seq(0, 100, 25), labels = formatC(x = seq(0, 100, 25), big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+  legend(legend = TempLegend14[[geomix]], x = "topleft", fill = TempProportionColors14[[geomix]], border = "black", bty = "n", cex = cex.leg, title="2014")
+  abline(h = 0, xpd = FALSE)
+  
+  mtext(text = "Percentage of Catch", side = 2, cex = cex.yaxis, line = 3)
+  mtext(text = Groups2Rows, side = 1, line = 1, at = apply(Barplot1, 2, mean), adj = 0.5, cex = cex.xaxis)
+  mtext(text = GeoHeader[unlist(strsplit(geomix, split = "14"))], side = 3, cex = cex.main, line = 1)
+  # dev.off()
+})
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Plot stock specific harvest results 2014 KMA Mixtures ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Multiply by harvest
+HarvestByStrata2014
+# Collapse 3_Late and 4_LateLate into 3_Late Final
+HarvestByStrata2014_Final <- cbind(HarvestByStrata2014[, 1:2], "3_Late" = rowSums(HarvestByStrata2014[, 3:4], na.rm = TRUE))
+dput(x = HarvestByStrata2014_Final, file = "Objects/HarvestByStrata2014_Final.txt")
+
+
+KMA2014Strata_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2014Strata_EstimatesStats.txt")
+str(KMA2014Strata_EstimatesStats)
+names(KMA2014Strata_EstimatesStats)
+dimnames(KMA2014Strata_EstimatesStats[[1]])
+
+
+KMA2014Strata_HarvestEstimatesStats <- sapply(names(KMA2014Strata_EstimatesStats), function(strata) {
+  strata.split <- unlist(strsplit(x = strata, split = "_"))
+  strata.split <- c(strata.split[1], paste(c(strata.split[2], strata.split[3]), collapse = "_"))
+  
+  cbind(KMA2014Strata_EstimatesStats[[strata]][, c("mean", "sd", "median", "5%", "95%")] * HarvestByStrata2014_Final[strata.split[1], strata.split[2]],
+        KMA2014Strata_EstimatesStats[[strata]][, c("P=0", "GR")])
+}, simplify = FALSE )
+
+dput(x = KMA2014Strata_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2014Strata_HarvestEstimatesStats.txt")
+str(KMA2014Strata_HarvestEstimatesStats)
+
+# What should ymax be?
+max(sapply(KMA2014Strata_HarvestEstimatesStats, function(strata) strata[, "95%"]))
+
+
+TempMix14 <- sapply(KMA2014, function(geo) {grep(pattern = geo, x = names(KMA2014Strata_EstimatesStats), value = TRUE)} )
+
+Legend14 <- setNames(object = c("June 1-27", "June 28-July 25", "July 26-August 29"), 
+                     nm = c("1_Early", "2_Middle", "3_Late"))
+TempLegend14 <- sapply(KMA2014, function(geo) {
+  Legend14[sapply(TempMix14[[geo]], function(strata) {unlist(strsplit(x = strata, split = paste(geo, "_", sep = '')))[2]} )]
+} )
+
+GeoHeader <- setNames(object = c(paste("Cape Alitak/Humpy Deadman 257-10,20,50,60,70", sep = ''),
+                                 paste("Ayakulik/Halibut Bay 256-10", "\u2013", "256-30", sep = ''),
+                                 paste("Karluk/Sturgeon 255-10", "\u2013", "255-20; 256-40", sep = ''),
+                                 paste("Uganik/Kupreanof 253", sep = ''),
+                                 paste("Uyak Bay 254", sep = '')),
+                      nm = unlist(strsplit(x = KMA2014, split = "14")))
+
+HarvestColors <- colorpanel(n = 3, low = "green", high = "white")
+TempHarvestColors14 <- sapply(KMA2014, function(geo) {
+  HarvestColors[sapply(TempMix14[[geo]], function(strata) {as.numeric(unlist(strsplit(x = strata, split = "_"))[2])} )]
+} )
+
+Estimates <- KMA2014Strata_HarvestEstimatesStats
+Groups <- KMA15GroupsPC
+Groups2Rows <- KMA15GroupsPC2Rows
+cex.lab <- 1.5
+cex.yaxis <- 1.3
+cex.xaxis <- 0.6
+cex.main <- 1.7
+cex.leg <- 1.3
+ci.lwd <- 2.5
+ymax <- 140000
+
+sapply(names(TempMix14[c(4, 5, 3, 2, 1)]), function(geomix) {
+  # emf(file = paste("Figures/2014/", geomix, "Harvest.emf", sep = ''), width = 8.5, height = 6.5, family = "sans", bg = "white")
+  par(mar = c(2.1, 4.1, 2.6, 0.6))
+  
+  Barplot1 <- barplot2(height = t(sapply(TempMix14[[geomix]], function(tempmix) {Estimates[[tempmix]][, "median"]})), 
+                       beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
+                       ci.l = t(sapply(TempMix14[[geomix]], function(tempmix) {Estimates[[tempmix]][, "5%"]})), 
+                       ci.u = t(sapply(TempMix14[[geomix]], function(tempmix) {Estimates[[tempmix]][, "95%"]})), 
+                       ylim = c(0, ymax), col = TempHarvestColors14[[geomix]], cex.axis = cex.yaxis, yaxt = "n", xaxt = 'n')
+  axis(side = 2, at = seq(0, ymax, 20000), labels = formatC(x = seq(0, ymax, 20000) / 1000, big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+  legend(legend = TempLegend14[[geomix]], x = "topleft", fill = TempHarvestColors14[[geomix]], border = "black", bty = "n", cex = cex.leg, title="2014")
+  abline(h = 0, xpd = FALSE)
+  
+  mtext(text = "Number of Fish Harvested (Thousands)", side = 2, cex = cex.yaxis, line = 3)
+  mtext(text = Groups2Rows, side = 1, line = 1, at = apply(Barplot1, 2, mean), adj = 0.5, cex = cex.xaxis)
+  mtext(text = GeoHeader[unlist(strsplit(geomix, split = "14"))], side = 3, cex = cex.main, line = 1)
+  # dev.off()
+})
+
+
+
+
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Plot results KMA Mixtures ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2466,6 +2618,7 @@ KMA2014Strata_EstimatesStats <- c(KMA2014Strata_1_Early_EstimatesStats,
                                   KMA2014Strata_2_Middle_EstimatesStats, 
                                   KMA2014Strata_3_Late_EstimatesStats)
 dput(x = KMA2014Strata_EstimatesStats, file = "Estimates objects/Final/KMA2014Strata_EstimatesStats.txt")
+KMA2014Strata_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2014Strata_EstimatesStats.txt")
 
 str(KMA2014Strata_EstimatesStats)
 
@@ -2491,7 +2644,13 @@ TempMix14 <- sapply(KMA2014, function(geo) {grep(pattern = geo, x = names(KMA201
 # TempMix14 <- c("_1_Early", "_2_Middle", "_3_Late")
 
 # Make TempLegend14 a list object like TempMix14
-TempLegend14 <- c("June 1-27", "June 28-July 25", "July 26-August 29")
+Legend14 <- setNames(object = c("June 1-27", "June 28-July 25", "July 26-August 29"), 
+                         nm = c("1_Early", "2_Middle", "3_Late"))
+TempLegend14 <- sapply(KMA2014, function(geo) {
+  Legend14[sapply(TempMix14[[geo]], function(strata) {unlist(strsplit(x = strata, split = paste(geo, "_", sep = '')))[2]} )]
+  } )
+
+
 TempLegend15 <- c("June 1-July 3", "July 4-August 1", "August 2-August 29")
 TempLegend16 <- c("June 1-27", "June 28-July 25", "July 26-August 29")
 GeoHeader <- setNames(object = c(paste("Cape Alitak/Humpy Deadman 257-10,20,50,60,70", sep = ''),
@@ -2505,10 +2664,10 @@ Estimates <- KMA2014Strata_EstimatesStats
 Groups <- KMA15GroupsPC
 Groups2Rows <- KMA15GroupsPC2Rows
 cex.lab <- 1.5
-cex.yaxis <- 1.5
-cex.xaxis <- 0.7
-cex.main <- 2
-cex.leg <- 1.5
+cex.yaxis <- 1.3
+cex.xaxis <- 0.6
+cex.main <- 1.7
+cex.leg <- 1.3
 ci.lwd <- 2.5
 
 
@@ -2526,8 +2685,10 @@ ci.lwd <- 2.5
 # par(mar = c(1, 1, 1, 1))
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Temp - Comment this section out for 3 panel plot!!!
-par(mar = c(3.6, 5.1, 3.1, 1.1))
+# par(mar = c(1.1, 5.6, 4.1, 0.1))
 sapply(names(TempMix14[c(4, 5, 3, 2, 1)]), function(geomix) {
+  # emf(file = paste("Figures/2014/", geomix, ".emf", sep = ''), width = 8.5, height = 6.5, family = "sans", bg = "white")
+  par(mar = c(2.1, 4.1, 2.6, 0.6))
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   Barplot1 <- barplot2(height = t(sapply(TempMix14[[geomix]], function(tempmix) {Estimates[[tempmix]][, "median"]})) * 100, 
                        beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
@@ -2535,14 +2696,15 @@ sapply(names(TempMix14[c(4, 5, 3, 2, 1)]), function(geomix) {
                        ci.u = t(sapply(TempMix14[[geomix]], function(tempmix) {Estimates[[tempmix]][, "95%"]})) * 100, 
                        ylim = c(0, 100), col = colorpanel(length(TempMix14[[geomix]]), low = darkcolor, high = "white"), cex.axis = cex.yaxis, yaxt = "n", xaxt = 'n')
   axis(side = 2, at = seq(0, 100, 25), labels = formatC(x = seq(0, 100, 25), big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
-  legend(legend = TempLegend14, x = "topleft", fill = colorpanel(length(TempMix14[[geomix]]), low = darkcolor, high = "white"), border = "black", bty = "n", cex = cex.leg, title="2014")
-  abline(h = 0)
+  legend(legend = TempLegend14[[geomix]], x = "topleft", fill = colorpanel(length(TempMix14[[geomix]]), low = darkcolor, high = "white"), border = "black", bty = "n", cex = cex.leg, title="2014")
+  abline(h = 0, xpd = FALSE)
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Temp - Comment this section out for 3 panel plot!!! 
   mtext(text = "Percentage of Catch", side = 2, cex = cex.yaxis, line = 3)
   mtext(text = Groups2Rows, side = 1, line = 1, at = apply(Barplot1, 2, mean), adj = 0.5, cex = cex.xaxis)
-  mtext(text = GeoHeader[unlist(strsplit(geomix, split = "14"))], side = 3, cex = cex.main)
+  mtext(text = GeoHeader[unlist(strsplit(geomix, split = "14"))], side = 3, cex = cex.main, line = 1)
+  # dev.off()
 })
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
