@@ -1621,6 +1621,10 @@ dput(x = KMA473PopsGroupVec17, file = "Objects/KMA473PopsGroupVec17.txt")
 # New Groups
 KMA17GroupsPC <- c(PCGroups15[1:5], "Ayakulik Early", "Ayakulik Late", "Karluk Early", "Karluk Late", PCGroups15[8:15])
 dput(x = KMA17GroupsPC, file = "Objects/KMA17GroupsPC.txt")
+
+# Confirm that groupvec is correct
+sapply(KMA17GroupsPC[5:9], function(group) {KMA473Pops[which(KMA473PopsGroupVec17 == which(KMA17GroupsPC == group))]} )
+
 # New Regionally Flat Prior
 KMA473Pops17FlatPrior <- Prior.GCL(groupvec = KMA473PopsGroupVec17, groupweights = rep(1 / length(KMA17GroupsPC), length(KMA17GroupsPC)), minval = 0.01)
 dput(x = KMA473Pops17FlatPrior, file = "Objects/KMA473Pops17FlatPrior.txt")
@@ -1633,6 +1637,8 @@ KMA473Pops
 KMA473Pops.SampleSize <- sapply(paste(KMA473Pops.named, ".gcl", sep = ''), function(x) get(x)$n)
 
 # RG samples sizes
+KMA473Pops.15RG.SampleSize <- setNames(object = sapply(seq(KMA15GroupsPC), function(RG) {sum(KMA473Pops.SampleSize[which(KMA473PopsGroupVec15 == RG)])} ), nm = KMA15GroupsPC)
+
 KMA473Pops.17RG.SampleSize <- setNames(object = sapply(seq(KMA17GroupsPC), function(RG) {sum(KMA473Pops.SampleSize[which(KMA473PopsGroupVec17 == RG)])} ), nm = KMA17GroupsPC)
 
 ## Mixture proof test
@@ -1708,6 +1714,11 @@ dput(x = KMA473PopsGroups17RepeatedMixProofTests, file = "Objects/KMA473PopsGrou
 dir.create("MixtureProofTests objects/RG17")
 invisible(sapply(KMA473PopsGroups17RepeatedMixProofTests, function(proof) {dput(x = get(paste(proof, "Proof", sep = "")), file = paste("MixtureProofTests objects/RG17/", proof, "Proof.txt", sep = ""))} ))
 
+# Doesn't work, but should...
+invisible(sapply(KMA473PopsGroups17RepeatedMixProofTests, function(proof) {
+  assign(x = dget(file = paste("MixtureProofTests objects/RG17/", proof, "Proof.txt", sep = "")), 
+         value = paste(proof, "Proof", sep = ""), pos = 1)
+} ))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## Create BAYES.output folders
@@ -1717,6 +1728,82 @@ dir.create(dir) }))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## Summarize Output
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# early.Ayakulik1
+
+# BOT file
+KMA473PopsGroups17RepeatedMixProofTests_early.Ayakulik1_Estimates_BOT_Stats <- dget(file = "Estimates objects/loci46 KarlukAyakulikSplit/KMA473PopsGroups17RepeatedMixProofTests_early.Ayakulik1_Estimates_BOT_Stats.txt")
+
+
+# Summarize pop means
+KMA473PopsGroups17RepeatedMixProofTests_early.Ayakulik1_Estimates_BOT_Stats$early.Ayakulik1[KMA473PopsGroupVec17 %in% c(5,6,7), ]
+
+# Determine true pop means
+early.Ayakulik1Proof <- dget(file = "MixtureProofTests objects/RG17/early.Ayakulik1Proof.txt")
+sapply(c("Frazer", "Ayakulik Early", "Ayakulik Late"), function(RG) {sapply(early.Ayakulik1Proof[[RG]], function(pop) {length(pop) / length(unlist(early.Ayakulik1Proof))} )} )
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# middle.Alitak.early1
+
+# BOT file
+KMA473PopsGroups17RepeatedMixProofTests_middle.Alitak.early1_Estimates_BOT_Stats <- CustomCombineBAYESOutput.GCL(
+  groupvec = seq(KMA473Pops), groupnames = KMA473Pops, 
+  maindir = "BAYES/Mixture Proof Tests/loci46 KarlukAyakulikSplit/BAYES.output", 
+  mixvec = paste(FisheryProofTestScenarioNames17RG[2], 1, sep = ''), prior = "",  
+  ext = "BOT", nchains = 5, burn = 0.5, alpha = 0.1, PosteriorOutput = FALSE); beep(5)
+
+dput(x = KMA473PopsGroups17RepeatedMixProofTests_middle.Alitak.early1_Estimates_BOT_Stats,
+     file = "Estimates objects/loci46 KarlukAyakulikSplit/KMA473PopsGroups17RepeatedMixProofTests_middle.Alitak.early1_Estimates_BOT_Stats.txt")
+
+KMA473PopsGroups17RepeatedMixProofTests_middle.Alitak.early1_Estimates_BOT_Stats <- dget(file = "Estimates objects/loci46 KarlukAyakulikSplit/KMA473PopsGroups17RepeatedMixProofTests_middle.Alitak.early1_Estimates_BOT_Stats.txt")
+
+str(KMA473PopsGroups17RepeatedMixProofTests_middle.Alitak.early1_Estimates_BOT_Stats)
+
+
+# Summarize pop means
+KMA473PopsGroups17RepeatedMixProofTests_middle.Alitak.early1_Estimates_BOT_Stats$middle.Alitak.early1[KMA473PopsGroupVec17 %in% c(5,6,7), ]
+
+# Determine true pop means
+middle.Alitak.early1Proof <- dget(file = "MixtureProofTests objects/RG17/middle.Alitak.early1Proof.txt")
+sapply(c("Frazer", "Ayakulik Early", "Ayakulik Late"), function(RG) {sapply(middle.Alitak.early1Proof[[RG]], function(pop) {length(pop) / length(unlist(middle.Alitak.early1Proof))} )} )
+
+# Both "SAYAK00.SAYAK08L.SAYAK11L.SAYAK12L" "SAYAK12E" are sucking fish!!!
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# middle.Alitak.501
+
+# BOT file
+KMA473PopsGroups17RepeatedMixProofTests_middle.Alitak.501_Estimates_BOT_Stats <- dget(file = "Estimates objects/loci46 KarlukAyakulikSplit/KMA473PopsGroups17RepeatedMixProofTests_middle.Alitak.501_Estimates_BOT_Stats.txt")
+
+
+# Summarize pop means
+KMA473PopsGroups17RepeatedMixProofTests_middle.Alitak.501_Estimates_BOT_Stats$middle.Alitak.501[KMA473PopsGroupVec17 %in% c(5,6,7), ]
+
+# Determine true pop means
+middle.Alitak.501Proof <- dget(file = "MixtureProofTests objects/RG17/middle.Alitak.501Proof.txt")
+sapply(c("Frazer", "Ayakulik Early", "Ayakulik Late"), function(RG) {sapply(middle.Alitak.501Proof[[RG]], function(pop) {length(pop) / length(unlist(middle.Alitak.501Proof))} )} )
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# middle.Alitak.late1
+
+# BOT file
+KMA473PopsGroups17RepeatedMixProofTests_middle.Alitak.late1_Estimates_BOT_Stats <- dget(file = "Estimates objects/loci46 KarlukAyakulikSplit/KMA473PopsGroups17RepeatedMixProofTests_middle.Alitak.late1_Estimates_BOT_Stats.txt")
+
+
+# Summarize pop means
+KMA473PopsGroups17RepeatedMixProofTests_middle.Alitak.late1_Estimates_BOT_Stats$middle.Alitak.late1[KMA473PopsGroupVec17 %in% c(5,6,7), ]
+
+# Determine true pop means
+middle.Alitak.late1Proof <- dget(file = "MixtureProofTests objects/RG17/middle.Alitak.late1Proof.txt")
+sapply(c("Frazer", "Ayakulik Early", "Ayakulik Late"), function(RG) {sapply(middle.Alitak.late1Proof[[RG]], function(pop) {length(pop) / length(unlist(middle.Alitak.late1Proof))} )} )
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# No Burnin
 KMA473PopsGroups17RepeatedMixProofTests_Repeat1_Estimates_NoBurnin <- CustomCombineBAYESOutput.GCL(
   groupvec = seq(KMA17GroupsPC), groupnames = KMA17GroupsPC, 
   maindir = "BAYES/Mixture Proof Tests/loci46 KarlukAyakulikSplit/BAYES.output", 
@@ -2142,7 +2229,7 @@ sapply(Round2Mixtures_2014_Estimates_Final$Stats, function(Mix) {table(Mix[, "GR
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Round 3 MSA files for BAYES 2014 Late Strata ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Indetify Strata to Run
+# Identify Strata to Run
 KMA2014Strata_3_Late <- grep(pattern = "3_Late", x = KMA2014Strata, value = TRUE)
 Round3Mixtures_2014 <- KMA2014Strata_3_Late[-which(KMA2014Strata_3_Late == "SALITC14_3_Late")]  # Remove SALITC14_3_Late as I want to run that out further
 dput(x = Round3Mixtures_2014, file = "Objects/Round3Mixtures_2014.txt")
@@ -3016,6 +3103,83 @@ sapply(Round1Mixtures_2015[4:5], function(Mix) {dir.create(paste("BAYES/2014-201
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Summarize Round 1 Repeated 80K Output ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Round1Mixtures80K_2015_Estimates <- CustomCombineBAYESOutput.GCL(groupvec = seq(KMA15GroupsPC), groupnames = KMA15GroupsPC, 
+                                                                 maindir = "BAYES/2014-2015 Mixtures 46loci/Output/80K Iterations", 
+                                                                 mixvec = Round1Mixtures_2015[4:5], prior = "",  
+                                                                 ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1, PosteriorOutput = TRUE)
+
+# Dput 1) estimates stats + posterior output & 2) estimates stats
+dput(Round1Mixtures80K_2015_Estimates, file = "Estimates objects/Round1Mixtures80K_2015_Estimates.txt")
+dput(Round1Mixtures80K_2015_Estimates$Stats, file = "Estimates objects/Round1Mixtures80K_2015_EstimatesStats.txt")
+
+Round1Mixtures80K_2015_Estimates <- dget(file = "Estimates objects/Round1Mixtures80K_2015_Estimates.txt")
+Round1Mixtures80K_2015_EstimatesStats <- dget(file = "Estimates objects/Round1Mixtures80K_2015_EstimatesStats.txt")
+
+
+# Verify that Gelman-Rubin < 1.2
+sapply(Round1Mixtures80K_2015_Estimates$Stats, function(Mix) {Mix[, "GR"]})
+sapply(Round1Mixtures80K_2015_Estimates$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # SUGANC15_1_Early still has PWS SEAK issues
+require(gplots)
+sapply(Round1Mixtures_2015[4:5], function(Mix) {
+  par(mfrow = c(1, 1))
+  BarPlot <- barplot2(Round1Mixtures80K_2015_EstimatesStats[[Mix]][, "GR"], col = "blue", ylim = c(1, pmax(1.5, max(Round1Mixtures80K_2015_EstimatesStats[[Mix]][, "GR"]))), ylab = "Gelman-Rubin", xpd = FALSE, main = Mix, names.arg = '')
+  abline(h = 1.2, lwd = 3, xpd = FALSE)
+  text(x = BarPlot, y = 1, labels = KMA15GroupsPC2Rows, srt = 0, pos = 1, xpd = TRUE, cex = 0.55)
+})
+
+# Quick look at raw posterior output
+str(Round1Mixtures80K_2015_Estimates$Output)
+
+PlotPosterior(mixvec = Round1Mixtures_2015[4:5], output = Round1Mixtures80K_2015_Estimates$Output, 
+              groups = KMA15GroupsPC, colors = KMA15Colors, 
+              header = Round1Mixtures_2015_Header[4:5], set.mfrow = c(5, 3), thin = 10)
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Plot Round 1 Repeated 80K Results ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Quick and dirty plot
+QuickPlot(mixvec = Round1Mixtures_2015[4:5], estimatesstats = Round1Mixtures80K_2015_Estimates, groups = KMA15GroupsPC, groups2rows = KMA15GroupsPC2Rows, colors = KMA15Colors, header = Round1Mixtures_2015_Header[3])
+
+## Quick barplot
+QuickBarplot(mixvec = Round1Mixtures_2015[4:5], estimatesstats = Round1Mixtures80K_2015_Estimates, groups = KMA15GroupsPC, groups2rows = KMA15GroupsPC2Rows, header = Round1Mixtures_2015_Header[4:5])
+
+## Make violin plots of posteriors with RGs sorted
+ViolinPlot(mixvec = Round1Mixtures_2015[4:5], estimates = Round1Mixtures80K_2015_Estimates, groups = KMA15GroupsPC2Rows, colors = KMA15Colors, header = Round1Mixtures_2015_Header)
+rm(Round1Mixtures80K_2015_Estimates)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Compare Results from 40K to 80K
+Round1Mixtures_2015_EstimatesStats <- dget(file = "Estimates objects/Round1Mixtures_2015_EstimatesStats.txt")
+
+sapply(Round1Mixtures_2015[4:5], function(Mix) {
+  par(mar = c(3.1, 5.1, 3.1, 2.1))
+  Barplot <- barplot2(height = t(matrix(data = c(Round1Mixtures_2015_EstimatesStats[[Mix]][, "median"],
+                                                 Round1Mixtures80K_2015_EstimatesStats[[Mix]][, "median"]) * 100, 
+                                        ncol = 2, dimnames = list(KMA15GroupsPC, c("40K", "80K")))),
+                      beside = TRUE, plot.ci = TRUE, ci.lwd = 2, 
+                      ci.l = t(matrix(data = c(Round1Mixtures_2015_EstimatesStats[[Mix]][, "5%"],
+                                               Round1Mixtures80K_2015_EstimatesStats[[Mix]][, "5%"]) * 100,
+                                      ncol = 2, dimnames = list(KMA15GroupsPC, c("40K", "80K")))),
+                      ci.u = t(matrix(data = c(Round1Mixtures_2015_EstimatesStats[[Mix]][, "95%"],
+                                               Round1Mixtures80K_2015_EstimatesStats[[Mix]][, "95%"]) * 100,
+                                      ncol = 2, dimnames = list(KMA15GroupsPC, c("40K", "80K")))),
+                      ylim = c(0, 100), col = c("white", "skyblue"), yaxt = 'n', xaxt = 'n', 
+                      main = Round1Mixtures_2015_Header[Mix], ylab = "Percent of Mixture", cex.lab = 2, cex.main = 2)
+  axis(side = 2, at = seq(0, 100, 25), labels = formatC(x = seq(0, 100, 25), big.mark = "," , digits = 0, format = "f"), cex.axis = 1.5)
+  abline(h = 0, xpd = FALSE)
+  mtext(text = KMA15GroupsPC2Rows, side = 1, line = 1, at = apply(Barplot, 2, mean), adj = 0.5, cex = 0.6)
+  legend("topleft", legend = c("40K Iterations", "80K Iterations"), fill = c("White", "skyblue"), bty = 'n', cex = 2)
+})
+
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Plot results KMA Mixtures ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 KMA2014Strata_1_Early_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2014Strata_1_Early_EstimatesStats.txt")
@@ -3420,38 +3584,123 @@ Groups13.Kodiak <- dget(file = "Objects/Groups13.Kodiak.txt")
 Colors13 <- c("darkred", "red", "brown", "cyan", "darkblue", "blue", "purple", "grey", "darkorange", "magenta", "yellow3", "green", "darkgreen")
 dput(x = Colors13, file = "Objects/Colors13.txt")
 
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 46 loci
-Kodiak57Pops_13groups_46loci_Likelihood_Profile <- LeaveOneOutDist.GCL(sillyvec = Kodiak57Pops, loci = loci46, groupvec = Kodiak57PopsGroupVec13); beep(5)
-dput(x = Kodiak57Pops_13groups_46loci_Likelihood_Profile, file = "Likelihood Profiles/Kodiak57Pops_13groups_46loci_Likelihood_Profile.txt")
 
-Kodiak57Pops_13groups_46loci_Confusion <- ConfusionMatrices.GCL(LeaveOneOutDist = Kodiak57Pops_13groups_46loci_Likelihood_Profile, groupnames = Groups13.Kodiak, groupvec = Kodiak57PopsGroupVec13, sillyvec = Kodiak57Pops); beep(2)
-dput(x = Kodiak57Pops_13groups_46loci_Confusion, file = "Objects/Kodiak57Pops_13groups_46loci_Confusion.txt")
+# Kodiak57Pops_13groups_46loci_Likelihood_Profile <- LeaveOneOutDist.GCL(sillyvec = Kodiak57Pops, loci = loci46, groupvec = Kodiak57PopsGroupVec13); beep(5)
+# dput(x = Kodiak57Pops_13groups_46loci_Likelihood_Profile, file = "Likelihood Profiles/Kodiak57Pops_13groups_46loci_Likelihood_Profile.txt")
+Kodiak57Pops_13groups_46loci_Likelihood_Profile <- dget(file = "Likelihood Profiles/Kodiak57Pops_13groups_46loci_Likelihood_Profile.txt")
 
+# Kodiak57Pops_13groups_46loci_Confusion <- ConfusionMatrices.GCL(LeaveOneOutDist = Kodiak57Pops_13groups_46loci_Likelihood_Profile, groupnames = Groups13.Kodiak, groupvec = Kodiak57PopsGroupVec13, sillyvec = Kodiak57Pops); beep(2)
+# dput(x = Kodiak57Pops_13groups_46loci_Confusion, file = "Objects/Kodiak57Pops_13groups_46loci_Confusion.txt")
+Kodiak57Pops_13groups_46loci_Confusion <- dget(file = "Objects/Kodiak57Pops_13groups_46loci_Confusion.txt")
+
+# Group to Group
 require(lattice)
 new.colors <- colorRampPalette(c("white", "black"))
-levelplot(Kodiak57Pops_13groups_46loci_Confusion[[1]], col.regions = new.colors, xlab = "Known Origin", ylab = "Mean Genotype Likelihood", main = "loci46", at = seq(0, 1, length.out = 100), scales = list(x = list(rot = 45)))
+levelplot(Kodiak57Pops_13groups_46loci_Confusion[[1]], col.regions = new.colors, xlab = "Known Origin", 
+          ylab = "Mean Genotype Likelihood", main = "loci46", at = seq(0, 1, length.out = 100), 
+          scales = list(x = list(rot = 45)),
+          panel = function(...) {
+            panel.levelplot(...)
+          })
 str(Kodiak57Pops_13groups_46loci_Confusion)
+abline(v = 1, col = "red")
 apply(Kodiak57Pops_13groups_46loci_Confusion[[1]], 2, sum)
 
-levelplot(Kodiak57Pops_13groups_46loci_Confusion[[3]], col.regions = new.colors, xlab = "Known Origin", ylab = "Mean Genotype Likelihood", main = "loci46", at = seq(0, 1, length.out = 100), scales = list(x = list(rot = 0), labels = 1:57))
+
+
+# Pop to Pop
+low <- c(sapply(seq(Groups13.Kodiak), function(grp) {which.max(sort(Kodiak57PopsGroupVec13) == grp)} ), length(Kodiak57PopsGroupVec13) + 1) - 0.5
+
+levelplot(Kodiak57Pops_13groups_46loci_Confusion[[3]], col.regions = new.colors, xlab = "Known Origin", 
+          ylab = "Mean Genotype Likelihood", main = "loci46", at = seq(0, 1, length.out = 100), 
+          scales = list(x = list(rot = 0), labels = 1:57),
+          panel = function(...) {
+            panel.levelplot(...)
+            panel.segments(x0 = low[1:13], x1 = low[1:13], y0 = low[1:13], y1 = low[2:14], col = Colors13, lwd = 3)
+            panel.segments(x0 = low[2:14], x1 = low[2:14], y0 = low[1:13], y1 = low[2:14], col = Colors13, lwd = 3)
+            panel.segments(x0 = low[1:13], x1 = low[2:14], y0 = low[1:13], y1 = low[1:13], col = Colors13, lwd = 3)
+            panel.segments(x0 = low[1:13], x1 = low[2:14], y0 = low[2:14], y1 = low[2:14], col = Colors13, lwd = 3)
+          })
+
+
+
 rownames(Kodiak57Pops_13groups_46loci_Confusion[[3]])
 
+# Assignment into Boxplots
 suppressWarnings(invisible(lapply(Kodiak57Pops_13groups_46loci_Likelihood_Profile[[1]], function(lst) {boxplot(lst, pch=16, notch=TRUE, col=Colors13[sort(Kodiak57PopsGroupVec13)], ylab="Probability")} )))  # Regional Flat Prior
 
+# Jim's New
+# Kodiak57Pops_13groups_46loci_Likelihood_ProfileNEW <- LeaveOneOutLikeProfile.GCL(popvec = Kodiak57Pops, loci = loci46, groupvec = Kodiak57PopsGroupVec13, groupnames = Groups13.Kodiak, ncores = 4)
+# dput(x = Kodiak57Pops_13groups_46loci_Likelihood_ProfileNEW, file = "Likelihood Profiles/Kodiak57Pops_13groups_46loci_Likelihood_ProfileNEW.txt")
+Kodiak57Pops_13groups_46loci_Likelihood_ProfileNEW <- dget(file = "Likelihood Profiles/Kodiak57Pops_13groups_46loci_Likelihood_ProfileNEW.txt")
+str(Kodiak57Pops_13groups_46loci_Likelihood_ProfileNEW)
+head(Kodiak57Pops_13groups_46loci_Likelihood_ProfileNEW$IndividualByGroup)
 
-source("V:/Analysis/_DATA_JunkDrawer/R_GEN/JJs GCL/LeaveOneOutLikeProfile.GCL.R")
-Kodiak57Pops_13groups_46loci_Likelihood_ProfileNEW <- LeaveOneOutLikeProfile.GCL(popvec = Kodiak57Pops, loci = loci46, groupvec = Kodiak57PopsGroupVec13, groupnames = Groups13.Kodiak, ncores = 4)
-dput(x = Kodiak57Pops_13groups_46loci_Likelihood_ProfileNEW, file = "Likelihood Profiles/Kodiak57Pops_13groups_46loci_Likelihood_ProfileNEW.txt")
-PlotLikeProfileKS.GCL(likeprof = Kodiak57Pops_13groups_46loci_Likelihood_ProfileNEW, popvec = Kodiak57Pops, loci = loci46, groupvec = Kodiak57PopsGroupVec13, groupnames = Groups13.Kodiak, dir = "Likelihood Profiles", filename = "Kodiak57Pops_13groups_46loci_Likelihood_ProfileNEW", col = Colors13)
 
 
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Heatmap of individuals and which RG they go to
+which(Kodiak57Pops_13groups_46loci_Likelihood_ProfileNEW$Attributes$FromGroup == "Frazer")
+
+RGpops <- Kodiak57Pops[which(Kodiak57PopsGroupVec13 == which(Groups13.Kodiak == "Frazer"))]
+
+low <- c(sapply(RGpops, function(pop) {which.max(Kodiak57Pops_13groups_46loci_Likelihood_ProfileNEW$Attributes$FromPop == pop)} ) - which.max(Kodiak57Pops_13groups_46loci_Likelihood_ProfileNEW$Attributes$FromPop == RGpops[1]),
+         length(which(Kodiak57Pops_13groups_46loci_Likelihood_ProfileNEW$Attributes$FromGroup == "Frazer")) - 1) + 0.5
+
+levelplot(Kodiak57Pops_13groups_46loci_Likelihood_ProfileNEW$IndividualByGroup[which(Kodiak57Pops_13groups_46loci_Likelihood_ProfileNEW$Attributes$FromGroup == "Frazer"), ],
+          col.regions = new.colors, xlab = "Individuals", ylab = "Genotype Likelihood", main = "loci46", aspect = "fill",
+          panel = function(...) {
+            panel.levelplot(...)
+            panel.segments(x0 = low[1:(length(low)-1)], x1 = low[1:(length(low)-1)], y0 = low[1:(length(low)-1)], y1 = low[2:length(low)], col = "red", lwd = 3)
+            panel.segments(x0 = low[2:length(low)], x1 = low[2:length(low)], y0 = low[1:(length(low)-1)], y1 = low[2:length(low)], col = "red", lwd = 3)
+            panel.segments(x0 = low[1:(length(low)-1)], x1 = low[2:length(low)], y0 = low[1:(length(low)-1)], y1 = low[1:(length(low)-1)], col = "red", lwd = 3)
+            panel.segments(x0 = low[1:(length(low)-1)], x1 = low[2:length(low)], y0 = low[2:length(low)], y1 = low[2:length(low)], col = "red", lwd = 3)
+          })
+
+# Heatmap of individuals and which Pop they go to
+levelplot(Kodiak57Pops_13groups_46loci_Likelihood_ProfileNEW$IndividualByPop[which(Kodiak57Pops_13groups_46loci_Likelihood_ProfileNEW$Attributes$FromGroup == "Frazer"), ],
+          col.regions = new.colors, xlab = "Individuals", ylab = "Genotype Likelihood", main = "loci46", aspect = "fill")
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+
+
+
+# Heatmap of individuals and which Pop they go to
+sapply(Groups13.Kodiak, function(Group) {
+  myplot <- levelplot(Kodiak57Pops_13groups_46loci_Likelihood_ProfileNEW$IndividualByPop[which(Kodiak57Pops_13groups_46loci_Likelihood_ProfileNEW$Attributes$FromGroup == Group), ],
+                      col.regions = new.colors, xlab = "Individuals", ylab = "Genotype Likelihood", main = paste("loci46: Individuals from ", Group, sep = ''), aspect = "fill")
+  print(myplot)
+})
+
+
+
+
+
+
+
+sapply(Groups13.Kodiak, function (Group) {boxplot(Kodiak57Pops_13groups_46loci_Likelihood_ProfileNEW$IndividualByGroup[which(Kodiak57Pops_13groups_46loci_Likelihood_ProfileNEW$Attributes$FromGroup == Group), ], pch = 16, notch = TRUE, col = Colors13, main = Group)} )
+sapply(Groups13.Kodiak, function (Group) {boxplot(Kodiak57Pops_13groups_46loci_Likelihood_ProfileNEW$IndividualByPop[which(Kodiak57Pops_13groups_46loci_Likelihood_ProfileNEW$Attributes$FromGroup == Group), ], pch = 16, notch = TRUE, col = Colors13[Kodiak57PopsGroupVec13], main = Group)} )
+
+
+
+PlotLikeProfile.GCL(likeprof = Kodiak57Pops_13groups_46loci_Likelihood_ProfileNEW, popvec = Kodiak57Pops, loci = loci46, groupvec = Kodiak57PopsGroupVec13, groupnames = Groups13.Kodiak, dir = "Likelihood Profiles", filename = "Kodiak57Pops_13groups_46loci_Likelihood_ProfileNEW", col = Colors13)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 89 loci
-Kodiak57Pops_13groups_89loci_Likelihood_Profile <- LeaveOneOutDist.GCL(sillyvec = Kodiak57Pops, loci = loci89, groupvec = Kodiak57PopsGroupVec13); beep(5)
-dput(x = Kodiak57Pops_13groups_89loci_Likelihood_Profile, file = "Likelihood Profiles/Kodiak57Pops_13groups_89loci_Likelihood_Profile.txt")
+# Kodiak57Pops_13groups_89loci_Likelihood_Profile <- LeaveOneOutDist.GCL(sillyvec = Kodiak57Pops, loci = loci89, groupvec = Kodiak57PopsGroupVec13); beep(5)
+# dput(x = Kodiak57Pops_13groups_89loci_Likelihood_Profile, file = "Likelihood Profiles/Kodiak57Pops_13groups_89loci_Likelihood_Profile.txt")
+Kodiak57Pops_13groups_89loci_Likelihood_Profile <- dget(file = "Likelihood Profiles/Kodiak57Pops_13groups_89loci_Likelihood_Profile.txt")
 
-Kodiak57Pops_13groups_89loci_Confusion <- ConfusionMatrices.GCL(LeaveOneOutDist = Kodiak57Pops_13groups_89loci_Likelihood_Profile, groupnames = Groups13.Kodiak, groupvec = Kodiak57PopsGroupVec13, sillyvec = Kodiak57Pops); beep(2)
-dput(x = Kodiak57Pops_13groups_89loci_Confusion, file = "Objects/Kodiak57Pops_13groups_89loci_Confusion.txt")
+# Kodiak57Pops_13groups_89loci_Confusion <- ConfusionMatrices.GCL(LeaveOneOutDist = Kodiak57Pops_13groups_89loci_Likelihood_Profile, groupnames = Groups13.Kodiak, groupvec = Kodiak57PopsGroupVec13, sillyvec = Kodiak57Pops); beep(2)
+# dput(x = Kodiak57Pops_13groups_89loci_Confusion, file = "Objects/Kodiak57Pops_13groups_89loci_Confusion.txt")
+Kodiak57Pops_13groups_89loci_Confusion <- dget(file = "Objects/Kodiak57Pops_13groups_89loci_Confusion.txt")
 
 require(lattice)
 new.colors <- colorRampPalette(c("white", "black"))
@@ -3459,13 +3708,104 @@ levelplot(Kodiak57Pops_13groups_89loci_Confusion[[1]], col.regions = new.colors,
 str(Kodiak57Pops_13groups_89loci_Confusion)
 apply(Kodiak57Pops_13groups_89loci_Confusion[[1]], 2, sum)
 
-levelplot(Kodiak57Pops_13groups_89loci_Confusion[[3]], col.regions = new.colors, xlab = "Known Origin", ylab = "Mean Genotype Likelihood", main = "loci89", at = seq(0, 1, length.out = 100), scales = list(x = list(rot = 0), labels = 1:57))
+low <- c(sapply(seq(Groups13.Kodiak), function(grp) {which.max(sort(Kodiak57PopsGroupVec13) == grp)} ), length(Kodiak57PopsGroupVec13) + 1) - 0.5
+
+levelplot(Kodiak57Pops_13groups_89loci_Confusion[[3]], col.regions = new.colors, xlab = "Known Origin", 
+          ylab = "Mean Genotype Likelihood", main = "loci89", at = seq(0, 1, length.out = 100), 
+          scales = list(x = list(rot = 0), labels = 1:57),
+          panel = function(...) {
+            panel.levelplot(...)
+            panel.segments(x0 = low[1:13], x1 = low[1:13], y0 = low[1:13], y1 = low[2:14], col = Colors13, lwd = 3)
+            panel.segments(x0 = low[2:14], x1 = low[2:14], y0 = low[1:13], y1 = low[2:14], col = Colors13, lwd = 3)
+            panel.segments(x0 = low[1:13], x1 = low[2:14], y0 = low[1:13], y1 = low[1:13], col = Colors13, lwd = 3)
+            panel.segments(x0 = low[1:13], x1 = low[2:14], y0 = low[2:14], y1 = low[2:14], col = Colors13, lwd = 3)
+          })
+
 rownames(Kodiak57Pops_13groups_89loci_Confusion[[3]])
 
+# Assignment into Boxplots
 suppressWarnings(invisible(lapply(Kodiak57Pops_13groups_89loci_Likelihood_Profile[[1]], function(lst) {boxplot(lst, pch=16, notch=TRUE, col=Colors13[sort(Kodiak57PopsGroupVec13)], ylab="Probability")} )))  # Regional Flat Prior
 
 
-source("V:/Analysis/_DATA_JunkDrawer/R_GEN/JJs GCL/LeaveOneOutLikeProfile.GCL.R")
-Kodiak57Pops_13groups_89loci_Likelihood_ProfileNEW <- LeaveOneOutLikeProfile.GCL(popvec = Kodiak57Pops, loci = loci89, groupvec = Kodiak57PopsGroupVec13, groupnames = Groups13.Kodiak, ncores = 4)
-dput(x = Kodiak57Pops_13groups_89loci_Likelihood_ProfileNEW, file = "Likelihood Profiles/Kodiak57Pops_13groups_89loci_Likelihood_ProfileNEW.txt")
+# Kodiak57Pops_13groups_89loci_Likelihood_ProfileNEW <- LeaveOneOutLikeProfile.GCL(popvec = Kodiak57Pops, loci = loci89, groupvec = Kodiak57PopsGroupVec13, groupnames = Groups13.Kodiak, ncores = 4)
+# dput(x = Kodiak57Pops_13groups_89loci_Likelihood_ProfileNEW, file = "Likelihood Profiles/Kodiak57Pops_13groups_89loci_Likelihood_ProfileNEW.txt")
+Kodiak57Pops_13groups_89loci_Likelihood_ProfileNEW <- dget(file = "Likelihood Profiles/Kodiak57Pops_13groups_89loci_Likelihood_ProfileNEW.txt")
+
+sapply(Groups13.Kodiak, function (Group) {boxplot(Kodiak57Pops_13groups_89loci_Likelihood_ProfileNEW$IndividualByGroup[which(Kodiak57Pops_13groups_46loci_Likelihood_ProfileNEW$Attributes$FromGroup == Group), ], pch = 16, notch = TRUE, col = Colors13, main = Group)} )
+sapply(Groups13.Kodiak, function (Group) {boxplot(Kodiak57Pops_13groups_89loci_Likelihood_ProfileNEW$IndividualByPop[which(Kodiak57Pops_13groups_46loci_Likelihood_ProfileNEW$Attributes$FromGroup == Group), ], pch = 16, notch = TRUE, col = Colors13[Kodiak57PopsGroupVec13], main = Group)} )
+
+
+
 PlotLikeProfileKS.GCL(likeprof = Kodiak57Pops_13groups_89loci_Likelihood_ProfileNEW, popvec = Kodiak57Pops, loci = loci89, groupvec = Kodiak57PopsGroupVec13, groupnames = Groups13.Kodiak, dir = "Likelihood Profiles", filename = "Kodiak57Pops_13groups_89loci_Likelihood_ProfileNEW", col = Colors13)
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 46 loci No Ayakulik Weir Samples!!!!
+weirpops <- c(grep(pattern = "SAYAK00.SAYAK08L.SAYAK11L.SAYAK12L", x = Kodiak57Pops), grep(pattern = "SAYAK12E", x = Kodiak57Pops))
+
+Kodiak55Pops <- Kodiak57Pops[-weirpops]
+Kodiak55PopsGroupVec13 <- Kodiak57PopsGroupVec13[-weirpops]
+
+
+# Kodiak55Pops_13groups_46loci_Likelihood_Profile <- LeaveOneOutDist.GCL(sillyvec = Kodiak55Pops, loci = loci46, groupvec = Kodiak55PopsGroupVec13); beep(5)
+# dput(x = Kodiak55Pops_13groups_46loci_Likelihood_Profile, file = "Likelihood Profiles/Kodiak55Pops_13groups_46loci_Likelihood_Profile.txt")
+Kodiak55Pops_13groups_46loci_Likelihood_Profile <- dget(file = "Likelihood Profiles/Kodiak55Pops_13groups_46loci_Likelihood_Profile.txt")
+
+# Kodiak55Pops_13groups_46loci_Confusion <- ConfusionMatrices.GCL(LeaveOneOutDist = Kodiak55Pops_13groups_46loci_Likelihood_Profile, groupnames = Groups13.Kodiak, groupvec = Kodiak55PopsGroupVec13, sillyvec = Kodiak55Pops); beep(2)
+# dput(x = Kodiak55Pops_13groups_46loci_Confusion, file = "Objects/Kodiak55Pops_13groups_46loci_Confusion.txt")
+Kodiak55Pops_13groups_46loci_Confusion <- dget(file = "Objects/Kodiak55Pops_13groups_46loci_Confusion.txt")
+
+# Pop to Pop
+low <- c(sapply(seq(Groups13.Kodiak), function(grp) {which.max(sort(Kodiak55PopsGroupVec13) == grp)} ), length(Kodiak55PopsGroupVec13) + 1) - 0.5
+
+levelplot(Kodiak55Pops_13groups_46loci_Confusion[[3]], col.regions = new.colors, xlab = "Known Origin", 
+          ylab = "Mean Genotype Likelihood", main = "loci46", at = seq(0, 1, length.out = 100), 
+          scales = list(x = list(rot = 0), labels = 1:55),
+          panel = function(...) {
+            panel.levelplot(...)
+            panel.segments(x0 = low[1:13], x1 = low[1:13], y0 = low[1:13], y1 = low[2:14], col = Colors13, lwd = 3)
+            panel.segments(x0 = low[2:14], x1 = low[2:14], y0 = low[1:13], y1 = low[2:14], col = Colors13, lwd = 3)
+            panel.segments(x0 = low[1:13], x1 = low[2:14], y0 = low[1:13], y1 = low[1:13], col = Colors13, lwd = 3)
+            panel.segments(x0 = low[1:13], x1 = low[2:14], y0 = low[2:14], y1 = low[2:14], col = Colors13, lwd = 3)
+          })
+
+
+# Jim's
+# Kodiak55Pops_13groups_46loci_Likelihood_ProfileNEW <- LeaveOneOutLikeProfile.GCL(popvec = Kodiak55Pops, loci = loci46, groupvec = Kodiak55PopsGroupVec13, groupnames = Groups13.Kodiak, ncores = 4)
+# dput(x = Kodiak55Pops_13groups_46loci_Likelihood_ProfileNEW, file = "Likelihood Profiles/Kodiak55Pops_13groups_46loci_Likelihood_ProfileNEW.txt")
+Kodiak55Pops_13groups_46loci_Likelihood_ProfileNEW <- dget(file = "Likelihood Profiles/Kodiak55Pops_13groups_46loci_Likelihood_ProfileNEW.txt")
+PlotLikeProfile.GCL(likeprof = Kodiak55Pops_13groups_46loci_Likelihood_ProfileNEW, popvec = Kodiak55Pops, loci = loci46, groupvec = Kodiak55PopsGroupVec13, groupnames = Groups13.Kodiak, dir = "Likelihood Profiles", filename = "Kodiak55Pops_13groups_46loci_Likelihood_ProfileNEW", col = Colors13)
+
+# Heatmap of individuals and which Pop they go to
+sapply(Groups13.Kodiak, function(Group) {
+  myplot <- levelplot(Kodiak55Pops_13groups_46loci_Likelihood_ProfileNEW$IndividualByPop[which(Kodiak55Pops_13groups_46loci_Likelihood_ProfileNEW$Attributes$FromGroup == Group), ],
+                      col.regions = new.colors, xlab = "Individuals", ylab = "Genotype Likelihood", main = paste("loci46: Individuals from ", Group, sep = ''), aspect = "fill")
+  print(myplot)
+})
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Looking into HWE and Fis for Ayakulik Weir samples
+KMA473Pops[186:187]
+
+
+HWE <- ReadGenepopHWE.GCL(file = "Genepop/KMA473Pops_93nuclearloci_MCMC.txt.P")
+
+# Histogram of Fis for SAYAK12E
+hist(HWE$DataByPop[as.numeric(HWE$DataByPop$Pop) == 187, "WC Fis"], col=8, xlim = c(-0.5, 0.5), breaks = seq(-0.5, 0.5, 0.01))
+
+# How does distribution of Fis compare to other Frazer/Ayakulik pops
+invisible(sapply(which(KMA473PopsGroupVec17 %in% c(5,6,7)), function(pop) {
+  hist(HWE$DataByPop[as.numeric(HWE$DataByPop$Pop) == pop, "WC Fis"], 
+       col=8, xlim = c(-0.5, 0.5), breaks = seq(-0.5, 0.5, 0.01), main = KMA473Pops[pop])
+}) )
+
+
+# How do HWE p-values compare to other Frazer/Ayakulik pops
+invisible(sapply(which(KMA473PopsGroupVec17 %in% c(5,6,7)), function(pop) {
+  hist(HWE$DataByPop[as.numeric(HWE$DataByPop$Pop) == pop, "PValue"], 
+       col=8, xlim = c(0, 1), breaks = seq(0, 1, 0.05), main = KMA473Pops[pop])
+}) )
+
+# Do not appear to see any p-value anomolies
