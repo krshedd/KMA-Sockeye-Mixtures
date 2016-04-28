@@ -1965,6 +1965,42 @@ sapply(mixvec, function(mix) {
 } )
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# More proof tests, 5 repeats, 1 chain each, 40K
+
+# Create mixture proof tests
+sapply(FisheryProofTestScenarioNames17RG, function(Scenario) {
+  sapply(1:5, function(Rpt) {
+    assign(x = paste(Scenario, Rpt, "40KProof", sep = ''), 
+           value = ProofTest.GCL(sillyvec = KMA473Pops, loci = loci46, groupnames = KMA17GroupsPC, groupvec = KMA473PopsGroupVec17,
+                                 samplesize = MixtureProofTest17RG.SampleSize[Scenario, ], prefix = paste(Scenario, Rpt, sep = ''), 
+                                 dir = "BAYES/Mixture Proof Tests/loci46 KarlukAyakulikSplit", prprtnl = TRUE, type = "BAYES",
+                                 suffix = '', nreps = 40000, nchains = 1, priorvec = KMA473Pops17FlatPrior, initmat = KMA473PopsInits, 
+                                 thin = c(1, 1, 100), switches = "F T F T T T F"), pos = 1)
+  } )
+} ); beep(8)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Dput proof test objects
+objects(pattern = "Proof$")
+KMA473PopsGroups17RepeatedMixProofTests40K <- paste(rep(FisheryProofTestScenarioNames17RG, each = 5), 1:5, "40K", sep = '')
+dput(x = KMA473PopsGroups17RepeatedMixProofTests40K, file = "Objects/KMA473PopsGroups17RepeatedMixProofTests40K.txt")
+
+# dir.create("MixtureProofTests objects/RG17")
+invisible(sapply(KMA473PopsGroups17RepeatedMixProofTests40K, function(proof) {dput(x = get(paste(proof, "Proof", sep = "")), file = paste("MixtureProofTests objects/RG17/", proof, "Proof.txt", sep = ""))} ))
+
+# Doesn't work, but should...
+invisible(sapply(KMA473PopsGroups17RepeatedMixProofTests, function(proof) {
+  assign(x = dget(file = paste("MixtureProofTests objects/RG17/", proof, "Proof.txt", sep = "")), 
+         value = paste(proof, "Proof", sep = ""), pos = 1)
+} ))
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Create BAYES.output folders
+invisible(sapply(KMA473PopsGroups17RepeatedMixProofTests, function(proof) {dir <- paste(getwd(), "/BAYES/Mixture Proof Tests/loci46 KarlukAyakulikSplit/BAYES.output/", proof, sep = "")
+dir.create(dir) }))
+
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -3119,8 +3155,8 @@ Round1Mixtures80K_2015_EstimatesStats <- dget(file = "Estimates objects/Round1Mi
 
 
 # Verify that Gelman-Rubin < 1.2
-sapply(Round1Mixtures80K_2015_Estimates$Stats, function(Mix) {Mix[, "GR"]})
-sapply(Round1Mixtures80K_2015_Estimates$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # SUGANC15_1_Early still has PWS SEAK issues
+sapply(Round1Mixtures80K_2015_EstimatesStats, function(Mix) {Mix[, "GR"]})
+sapply(Round1Mixtures80K_2015_EstimatesStats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # SUGANC15_1_Early still has PWS SEAK issues
 require(gplots)
 sapply(Round1Mixtures_2015[4:5], function(Mix) {
   par(mfrow = c(1, 1))
@@ -3177,6 +3213,91 @@ sapply(Round1Mixtures_2015[4:5], function(Mix) {
 })
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Dputting Final Round 1 2015 Estimates ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Keeping 40K iteration results from SALITC15_1_Early, SAYAKC15_1_Early, and SKARLC15_1_Early as GR was < 1.2 and thats "our business rule"
+# Using 80K iteration results from SUGANC15_1_Early and SUYAKC15_1_Early, even though SUGANC15_1_Early did NOT converge with GR < 1.2 with 80K
+Round1Mixtures_2015_Estimates <- dget(file = "Estimates objects/Round1Mixtures_2015_Estimates.txt")
+
+sapply(Round1Mixtures_2015_EstimatesStats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # Issues with SUGANC15_1_Early and SUYAKC15_1_Early
+sapply(Round1Mixtures80K_2015_EstimatesStats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # SUYAKC15_1_Early resolved, but SUGANC15_1_Early still has issues
+
+str(Round1Mixtures_2015_Estimates)
+str(Round1Mixtures80K_2015_Estimates)
+
+Round1Mixtures_2015_Estimates_Final <- list(Stats = c(Round1Mixtures_2015_Estimates$Stats[Round1Mixtures_2015[1:3]],
+                                                      Round1Mixtures80K_2015_Estimates$Stats[Round1Mixtures_2015[4:5]]),
+                                            Output = c(Round1Mixtures_2015_Estimates$Output[Round1Mixtures_2015[1:3]],
+                                                       Round1Mixtures80K_2015_Estimates$Output[Round1Mixtures_2015[4:5]]))
+str(Round1Mixtures_2015_Estimates_Final)
+dput(x = Round1Mixtures_2015_Estimates_Final, file = "Estimates objects/Round1Mixtures_2015_Estimates_Final.txt")
+dput(x = Round1Mixtures_2015_Estimates_Final$Stats, file = "Estimates objects/Round1Mixtures_2015_EstimatesStats_Final.txt")
+
+Round1Mixtures_2015_Estimates_Final <- dget(file = "Estimates objects/Round1Mixtures_2015_Estimates_Final.txt")
+Round1Mixtures_2015_EstimatesStats_Final <- dget(file = "Estimates objects/Round1Mixtures_2015_EstimatesStats_Final.txt")
+
+sapply(Round1Mixtures_2015_Estimates_Final$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # SUGANC15_1_Early still has issues, but we are going to live with it
+
+# Dput final Early Strata Estimates from 2015
+dput(x = Round1Mixtures_2015_EstimatesStats_Final, file = "Estimates objects/Final/KMA2015Strata_1_Early_EstimatesStats.txt")
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Sneak Peak Round 1 Results with Finer Scale Reporting Groups ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Round1Mixtures_2015_31RG_Estimates <- CustomCombineBAYESOutput.GCL(groupvec = KMA473PopsGroupVec31, groupnames = KMA31GroupsPC, 
+                                                                   maindir = "BAYES/2014-2015 Mixtures 46loci/Output", 
+                                                                   mixvec = Round1Mixtures_2015, prior = "",  
+                                                                   ext = "BOT", nchains = 5, burn = 0.5, alpha = 0.1, PosteriorOutput = TRUE)
+str(Round1Mixtures_2015_31RG_Estimates)
+QuickBarplot(mixvec = Round1Mixtures_2015[c(4, 5, 3, 2, 1)], estimatesstats = Round1Mixtures_2015_31RG_Estimates$Stats, groups = KMA31GroupsPC, header = Round1Mixtures_2015_Header[c(4, 5, 3, 2, 1)])
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Round 2 MSA files for BAYES 2015 Middle Strata ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+require(reshape)
+samp.df.2015 <- data.frame(t(sapply(KMA2015Strata, function(strata) {
+  location <- unlist(strsplit(x = strata, split = "_"))[1]
+  temporal.strata <- as.numeric(unlist(strsplit(x = strata, split = "_"))[2])
+  n <- get(paste(strata, ".gcl", sep = ""))$n
+  c(location = location, temporal.strata = temporal.strata, n = n)
+})))
+cast(data = samp.df.2015, location ~ temporal.strata)
+
+# Indetify Strata to Run
+KMA2015Strata_2_Middle <- grep(pattern = "2_Middle", x = KMA2015Strata, value = TRUE)
+Round2Mixtures_2015 <- KMA2015Strata_2_Middle
+dput(x = Round2Mixtures_2015, file = "Objects/Round2Mixtures_2015.txt")
+
+
+# Create rolling prior based on Round 1 estimates
+Round2Mixtures_2015_Prior <- sapply(Round1Mixtures_2015_EstimatesStats_Final, function(Mix) {
+  Prior.GCL(groupvec = KMA473PopsGroupVec15, groupweights = Mix[, "mean"], minval = 0.01)}, simplify = FALSE)
+names(Round2Mixtures_2015_Prior) <- gsub(pattern = "1_Early", replacement = "2_Middle", 
+                                         x = names(Round2Mixtures_2015_Prior))  # This changes the names
+dput(x = Round2Mixtures_2015_Prior, file = "Objects/Round2Mixtures_2015_Prior.txt")
+str(Round2Mixtures_2015_Prior)
+
+
+## Dumping Mixture files
+sapply(Round2Mixtures_2015, function(Mix) {CreateMixture.GCL(sillys = Mix, loci = loci46, IDs = NULL, mixname = Mix, dir = "BAYES/2014-2015 Mixtures 46loci/Mixture", type = "BAYES", PT = FALSE)} )
+
+## Dumping Control files
+sapply(Round2Mixtures_2015, function(Mix) {
+  CreateControlFile.GCL(sillyvec = KMA473Pops, loci = loci46, mixname = Mix, basename = "KMA473Pops46Markers", suffix = "", nreps = 40000, nchains = 5,
+                        groupvec = KMA473PopsGroupVec15, priorvec = Round2Mixtures_2015_Prior[[Mix]], initmat = KMA473PopsInits, dir = "BAYES/2014-2015 Mixtures 46loci/Control",
+                        seeds = WASSIPSockeyeSeeds, thin = c(1, 1, 100), mixfortran = KMA47346MixtureFormat, basefortran = KMA47346Baseline, switches = "F T F T T T F")
+})
+
+## Create output directory
+sapply(Round2Mixtures_2015, function(Mix) {dir.create(paste("BAYES/2014-2015 Mixtures 46loci/Output/", Mix, sep = ""))})
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Go run BAYES
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
