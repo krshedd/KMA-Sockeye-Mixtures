@@ -2262,30 +2262,30 @@ dir.create(dir) }))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Pull posterior with burnin
-KMA473PopsGroups17RepeatedMixProofTests_Repeats5_Estimates <- CustomCombineBAYESOutput.GCL(
+KMA473PopsGroups17RepeatedMixProofTests_Repeats5.2_Estimates <- CustomCombineBAYESOutput.GCL(
   groupvec = seq(KMA17GroupsPC), groupnames = KMA17GroupsPC, 
   maindir = "BAYES/Mixture Proof Tests/loci46 KarlukAyakulikSplit/BAYES.output", 
-  mixvec = KMA473PopsGroups17RepeatedMixProofTests, prior = "",  
+  mixvec = paste(rep(FisheryProofTestScenarioNames17RG, each = 5), 6:10, sep = ''), prior = "",  
   ext = "RGN", nchains = 1, burn = 0.5, alpha = 0.1, PosteriorOutput = TRUE)
-str(KMA473PopsGroups17RepeatedMixProofTests_Repeats5_Estimates)
+str(KMA473PopsGroups17RepeatedMixProofTests_Repeats5.2_Estimates)
 
 
 # Dput 1) estimates stats + posterior output & 2) estimates stats
 # dir.create("Estimates objects/loci46 KarlukAyakulikSplit")
-dput(KMA473PopsGroups17RepeatedMixProofTests_Repeats5_Estimates, file = "Estimates objects/loci46 KarlukAyakulikSplit/KMA473PopsGroups17RepeatedMixProofTests_Repeats5_Estimates.txt")
-dput(KMA473PopsGroups17RepeatedMixProofTests_Repeats5_Estimates$Stats, file = "Estimates objects/loci46 KarlukAyakulikSplit/KMA473PopsGroups17RepeatedMixProofTests_Repeats5_EstimatesStats.txt")
+dput(KMA473PopsGroups17RepeatedMixProofTests_Repeats5.2_Estimates, file = "Estimates objects/loci46 KarlukAyakulikSplit/KMA473PopsGroups17RepeatedMixProofTests_Repeats5.2_Estimates.txt")
+dput(KMA473PopsGroups17RepeatedMixProofTests_Repeats5.2_Estimates$Stats, file = "Estimates objects/loci46 KarlukAyakulikSplit/KMA473PopsGroups17RepeatedMixProofTests_Repeats5.2_EstimatesStats.txt")
 
-KMA473PopsGroups17RepeatedMixProofTests_Repeats5_Estimates <- dget(file = "Estimates objects/loci46 KarlukAyakulikSplit/KMA473PopsGroups17RepeatedMixProofTests_Repeats5_Estimates.txt")
-KMA473PopsGroups17RepeatedMixProofTests_Repeats5_EstimatesStats <- dget(file = "Estimates objects/loci46 KarlukAyakulikSplit/KMA473PopsGroups17RepeatedMixProofTests_Repeats5_EstimatesStats.txt")
+KMA473PopsGroups17RepeatedMixProofTests_Repeats5.2_Estimates <- dget(file = "Estimates objects/loci46 KarlukAyakulikSplit/KMA473PopsGroups17RepeatedMixProofTests_Repeats5.2_Estimates.txt")
+KMA473PopsGroups17RepeatedMixProofTests_Repeats5.2_EstimatesStats <- dget(file = "Estimates objects/loci46 KarlukAyakulikSplit/KMA473PopsGroups17RepeatedMixProofTests_Repeats5.2_EstimatesStats.txt")
 
 
 # Verify that Gelman-Rubin < 1.2 ## No GR for 1 chain....
 
 # Quick look at raw posterior output
-str(KMA473PopsGroups17RepeatedMixProofTests_Repeats5_Estimates$Output)
+str(KMA473PopsGroups17RepeatedMixProofTests_Repeats5.2_Estimates$Output)
 
-PlotPosterior(mixvec = KMA473PopsGroups17RepeatedMixProofTests, 
-              output = KMA473PopsGroups17RepeatedMixProofTests_Repeats5_Estimates$Output, 
+PlotPosterior(mixvec = paste(rep(FisheryProofTestScenarioNames17RG, each = 5), 6:10, sep = ''), 
+              output = KMA473PopsGroups17RepeatedMixProofTests_Repeats5.2_Estimates$Output, 
               groups = KMA17GroupsPC, 
               colors = Colors17, 
               header = NULL, set.mfrow = c(6, 3), thin = 1, chains = 1)
@@ -2336,11 +2336,11 @@ PlotProof.GCL <- function(x, scenario, groups, filedir, percent = TRUE) {
     percent.multiplier <- 100
     x <- sapply(x, function(rpt) {rpt[, 1:5] * percent.multiplier}, simplify = FALSE)
     MixtureProofTestProportions <- MixtureProofTestProportions * percent.multiplier
-    file = paste(filedir, "/", scenario, ".percent.emf", sep = "")
+    file = paste(filedir, "/", scenario, "10repeats.percent.emf", sep = "")
     y.label = "Percent"
   } else {
     percent.multiplier <- 1
-    file = paste(filedir, "/", scenario, ".emf", sep = "")
+    file = paste(filedir, "/", scenario, "10repeats.emf", sep = "")
     y.label = "Proportion"
   }
   
@@ -2363,28 +2363,28 @@ PlotProof.GCL <- function(x, scenario, groups, filedir, percent = TRUE) {
       plotCI(x = plot.ci.extract(x = x, scenario = scenario, group = groups[i], stat.col = "median"),
              ui = plot.ci.extract(x = x, scenario = scenario, group = groups[i], stat.col = "95%"),
              li = plot.ci.extract(x = x, scenario = scenario, group = groups[i], stat.col = "5%"),
-             xlim = c(0.5, 5.5), ylim = c(-0, 0.65 * percent.multiplier), gap = 0, pch = 16, ylab = '', xlab = '', xaxt = "n", cex = 1.5)
+             xlim = c(0.5, 10.5), ylim = c(-0, 0.65 * percent.multiplier), gap = 0, pch = 16, ylab = '', xlab = '', xaxt = "n", cex = 1.5)
     }
     
     if(i == 16) {
       plotCI(x = plot.ci.extract(x = x, scenario = scenario, group = groups[i], stat.col = "median"),
              ui = plot.ci.extract(x = x, scenario = scenario, group = groups[i], stat.col = "95%"),
              li = plot.ci.extract(x = x, scenario = scenario, group = groups[i], stat.col = "5%"),
-             xlim = c(0.5, 5.5), ylim = c(-0, 0.65 * percent.multiplier), gap = 0, pch = 16, ylab = '', xlab = '', cex = 1.5)
+             xlim = c(0.5, 10.5), ylim = c(-0, 0.65 * percent.multiplier), gap = 0, pch = 16, ylab = '', xlab = '', cex = 1.5)
     }
     
     if(i == 17) {
       plotCI(x = plot.ci.extract(x = x, scenario = scenario, group = groups[i], stat.col = "median"),
              ui = plot.ci.extract(x = x, scenario = scenario, group = groups[i], stat.col = "95%"),
              li = plot.ci.extract(x = x, scenario = scenario, group = groups[i], stat.col = "5%"),
-             xlim = c(0.5, 5.5), ylim = c(-0, 0.65 * percent.multiplier), gap = 0, pch = 16, ylab = '', xlab = '', yaxt = "n", cex = 1.5)
+             xlim = c(0.5, 10.5), ylim = c(-0, 0.65 * percent.multiplier), gap = 0, pch = 16, ylab = '', xlab = '', yaxt = "n", cex = 1.5)
     }
     
     if(i %in% c(2, 3, 5, 6, 8, 9, 11, 12, 14, 15)) {
       plotCI(x = plot.ci.extract(x = x, scenario = scenario, group = groups[i], stat.col = "median"),
              ui = plot.ci.extract(x = x, scenario = scenario, group = groups[i], stat.col = "95%"),
              li = plot.ci.extract(x = x, scenario = scenario, group = groups[i], stat.col = "5%"),
-             xlim = c(0.5, 5.5), ylim = c(0, 0.65 * percent.multiplier), gap = 0, pch = 16, ylab = '', xlab = '', xaxt = "n", yaxt = "n", cex = 1.5)
+             xlim = c(0.5, 10.5), ylim = c(0, 0.65 * percent.multiplier), gap = 0, pch = 16, ylab = '', xlab = '', xaxt = "n", yaxt = "n", cex = 1.5)
     }
     
     abline(h = MixtureProofTestProportions[i, scenario], col = "red", lwd = 2)
@@ -2396,7 +2396,7 @@ PlotProof.GCL <- function(x, scenario, groups, filedir, percent = TRUE) {
   plotCI(x = rep(50, 5),
          ui = rep(60, 5),
          li = rep(40, 5),
-         xlim = c(0.5, 5.5), ylim = c(-0, 0.65 * percent.multiplier), gap = 0, pch = 16, ylab = '', xlab = '', yaxt = "n", cex = 1.5, col = "white")  
+         xlim = c(0.5, 10.5), ylim = c(-0, 0.65 * percent.multiplier), gap = 0, pch = 16, ylab = '', xlab = '', yaxt = "n", cex = 1.5, col = "white")  
   
   # Plot 20 - Blank Corner
   plot.new()
@@ -2413,14 +2413,64 @@ PlotProof.GCL <- function(x, scenario, groups, filedir, percent = TRUE) {
 ## Create figures
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+KMA473PopsGroups17RepeatedMixProofTests_Repeats5_EstimatesStats <- dget(file = "Estimates objects/loci46 KarlukAyakulikSplit/KMA473PopsGroups17RepeatedMixProofTests_Repeats5_EstimatesStats.txt")
+KMA473PopsGroups17RepeatedMixProofTests_Repeats5.2_EstimatesStats <- dget(file = "Estimates objects/loci46 KarlukAyakulikSplit/KMA473PopsGroups17RepeatedMixProofTests_Repeats5.2_EstimatesStats.txt")
+
+KMA473PopsGroups17RepeatedMixProofTests_Repeats10_EstimatesStats <- c(KMA473PopsGroups17RepeatedMixProofTests_Repeats5_EstimatesStats, KMA473PopsGroups17RepeatedMixProofTests_Repeats5.2_EstimatesStats)
+dput(x = KMA473PopsGroups17RepeatedMixProofTests_Repeats10_EstimatesStats, file = "Estimates objects/loci46 KarlukAyakulikSplit/KMA473PopsGroups17RepeatedMixProofTests_Repeats10_EstimatesStats.txt")
+
 # loci46 KarlukAyakulikSplit
 sapply(FisheryProofTestScenarioNames17RG, function(scenario){
-  PlotProof.GCL(x = dget(file = "Estimates objects/loci46 KarlukAyakulikSplit/KMA473PopsGroups17RepeatedMixProofTests_Repeats5_EstimatesStats.txt"), 
+  PlotProof.GCL(x = KMA473PopsGroups17RepeatedMixProofTests_Repeats10_EstimatesStats, 
                 scenario = scenario, groups = KMA17GroupsPC,
                 filedir = "BAYES/Mixture Proof Tests/loci46 KarlukAyakulikSplit/Figures",
                 percent = TRUE)
 })
 
+
+
+BiasRMSE.GCL <- function(stats, scenario, proportions, estimator = "median", percent = TRUE) {
+  if(percent) {
+    stats <- sapply(stats, function(rpt) {rpt[, 1:5] * 100}, simplify = FALSE)
+    proportions <- proportions * 100
+  }  
+  stats.nums <- grep(pattern = scenario, x = names(stats))
+  estimator.values <- sapply(stats[stats.nums], function(rpt) {rpt[, estimator]} )
+  rmse <- sqrt(rowSums((estimator.values - proportions[, scenario])^2) / length(stats.nums))
+  bias <- apply((estimator.values - proportions[, scenario]), 1, mean)
+  average <- apply(estimator.values, 1, mean)
+  ci.width <- apply(sapply(stats[stats.nums], function(rpt) {rpt[, "95%"]} ) - sapply(stats[stats.nums], function(rpt) {rpt[, "5%"]} ), 1, mean)
+  
+  return(cbind(average = average, bias = bias, rmse = rmse, ci.width = ci.width))
+}
+
+
+
+
+Proof.BiasRMSE.46FrazerAyakulikloci.list <- 
+  sapply(FisheryProofTestScenarioNames17RG, function(scenario) {
+    BiasRMSE.GCL(stats = KMA473PopsGroups17RepeatedMixProofTests_Repeats10_EstimatesStats, 
+                 scenario = scenario, proportions = t(dget(file = "Objects/MixtureProofTestProportions17RG.txt")),
+                 estimator = "median")}, simplify = FALSE )
+
+
+# across all scenarios
+x.array.46 <- array(unlist(Proof.BiasRMSE.46FrazerAyakulikloci.list), dim = c(17,4,4), dimnames = list(KMA17GroupsPC, c("average", "bias", "rmse", "ci.width"), FisheryProofTestScenarioNames17RG))
+round(apply(X = x.array.46[, , ], MARGIN = 1:2, FUN = mean)[, 2:4], 1)
+round(apply(X = x.array.46[, , ], MARGIN = 1:2, FUN = min)[, 2:4], 1)
+round(apply(X = x.array.46[, , ], MARGIN = 1:2, FUN = max)[, 2:4], 1)
+
+require(gplots)
+lapply(FisheryProofTestScenarioNames17RG, function(scenario) {
+  scenario.mat <- Proof.BiasRMSE.46FrazerAyakulikloci.list[[scenario]]
+  barcolor <- ifelse(scenario.mat[, "bias"] > 0, "green", "red")
+  locations <- barplot2(height = scenario.mat[, "bias"], col = barcolor, ylim = c(-5, 5), ylab = "Bias", xlab = "Reporting Group", xaxt = 'n', main = scenario, cex.main = 1.5)
+  text(x = locations[, 1], y = -5.5, srt = 90, labels = KMA17GroupsPC, adj = 0)
+})
+
+
+
+# Make dotplot of medians (green/red), with transparency with line showing mean of medians
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -4141,12 +4191,12 @@ sapply(Round3Mixtures_2015[c(1, 4)], function(Mix) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Dputting Final Round 3 2015 Estimates ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Keeping 40K iteration results from SALITC15_3_Late, SAYAKC15_3_Late, SKARLC15_3_Late, and SUGANC15_3_Late as GR was < 1.2 and thats "our business rule"
-# Using 80K iteration results from  and SUYAKC15_3_Late
+# Keeping 40K iteration results from SAYAKC15_3_Late, SKARLC15_3_Late, and SUYAKC15_3_Late as GR was < 1.2 and thats "our business rule"
+# Using 80K iteration results from  and SALITC15_3_Late and SUGANC15_3_Late
 Round3Mixtures_2015_Estimates <- dget(file = "Estimates objects/Round3Mixtures_2015_Estimates.txt")
 
-sapply(Round3Mixtures_2015_EstimatesStats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # Issues with SUYAKC15_3_Late
-sapply(Round3Mixtures80K_2015_EstimatesStats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # SUYAKC15_3_Late resolved
+sapply(Round3Mixtures_2015_EstimatesStats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # Issues with SALITC15_3_Late & SUGANC15_3_Late
+sapply(Round3Mixtures80K_2015_EstimatesStats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # Both resolved
 
 str(Round3Mixtures_2015_Estimates)
 str(Round3Mixtures80K_2015_Estimates)
@@ -4240,8 +4290,10 @@ cex.main <- 1.7
 cex.leg <- 1.3
 ci.lwd <- 2.5
 
+# dir.create("Figures/2015")
+
 sapply(names(TempMix15[c(4, 5, 3, 2, 1)]), function(geomix) {
-  # emf(file = paste("Figures/2015/", geomix, ".emf", sep = ''), width = 8.5, height = 6.5, family = "sans", bg = "white")
+  emf(file = paste("Figures/2015/", geomix, ".emf", sep = ''), width = 8.5, height = 6.5, family = "sans", bg = "white")
   par(mar = c(2.1, 4.1, 2.6, 0.6))
   
   Barplot1 <- barplot2(height = t(sapply(TempMix15[[geomix]], function(tempmix) {Estimates[[tempmix]][, "median"]})) * 100, 
@@ -4256,7 +4308,7 @@ sapply(names(TempMix15[c(4, 5, 3, 2, 1)]), function(geomix) {
   mtext(text = "Percentage of Catch", side = 2, cex = cex.yaxis, line = 3)
   mtext(text = Groups2Rows, side = 1, line = 1, at = apply(Barplot1, 2, mean), adj = 0.5, cex = cex.xaxis)
   mtext(text = GeoHeader[unlist(strsplit(geomix, split = "15"))], side = 3, cex = cex.main, line = 1)
-  # dev.off()
+  dev.off()
 })
 
 
@@ -4287,10 +4339,6 @@ KMA2015Strata_HarvestEstimatesStats <- sapply(names(KMA2015Strata_EstimatesStats
 dput(x = KMA2015Strata_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2015Strata_HarvestEstimatesStats.txt")
 str(KMA2015Strata_HarvestEstimatesStats)
 
-# What should ymax be?
-max(sapply(KMA2015Strata_HarvestEstimatesStats, function(strata) strata[, "95%"]))
-
-
 TempMix15 <- sapply(KMA2015, function(geo) {grep(pattern = geo, x = names(KMA2015Strata_EstimatesStats), value = TRUE)}, simplify = FALSE)
 
 Legend15 <- setNames(object = c("June 1-July 3", "July 4-August 1", "August 2-29"), 
@@ -4311,6 +4359,12 @@ TempHarvestColors15 <- sapply(KMA2015, function(geo) {
   HarvestColors[sapply(TempMix15[[geo]], function(strata) {as.numeric(unlist(strsplit(x = strata, split = "_"))[2])} )]
 }, simplify = FALSE)
 
+
+
+# What should ymax be?
+max(sapply(KMA2015Strata_HarvestEstimatesStats, function(strata) strata[, "95%"]))
+
+
 Estimates <- KMA2015Strata_HarvestEstimatesStats
 Groups <- KMA15GroupsPC
 Groups2Rows <- KMA15GroupsPC2Rows
@@ -4323,7 +4377,7 @@ ci.lwd <- 2.5
 ymax <- 200000
 
 sapply(names(TempMix15[c(4, 5, 3, 2, 1)]), function(geomix) {
-  # emf(file = paste("Figures/2015/", geomix, "Harvest.emf", sep = ''), width = 8.5, height = 6.5, family = "sans", bg = "white")
+  emf(file = paste("Figures/2015/", geomix, "Harvest.emf", sep = ''), width = 8.5, height = 6.5, family = "sans", bg = "white")
   par(mar = c(2.1, 4.1, 2.6, 0.6))
   
   Barplot1 <- barplot2(height = t(sapply(TempMix15[[geomix]], function(tempmix) {Estimates[[tempmix]][, "median"]})), 
@@ -4338,7 +4392,7 @@ sapply(names(TempMix15[c(4, 5, 3, 2, 1)]), function(geomix) {
   mtext(text = "Number of Fish Harvested (Thousands)", side = 2, cex = cex.yaxis, line = 3)
   mtext(text = Groups2Rows, side = 1, line = 1, at = apply(Barplot1, 2, mean), adj = 0.5, cex = cex.xaxis)
   mtext(text = GeoHeader[unlist(strsplit(geomix, split = "15"))], side = 3, cex = cex.main, line = 1)
-  # dev.off()
+  dev.off()
 })
 
 
@@ -4390,26 +4444,138 @@ dput(x = KMA2015_Annual_HarvestEstimatesStats, file = "Estimates objects/Final/K
 str(KMA2015_Annual_HarvestEstimatesStats)
 
 
-
-
-
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Create a matrix of annual means
+#~~~~~~~~~~~~~~~~~~
+# 2014
+KMA2014_Annual_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2014_Annual_EstimatesStats.txt")
+Annual2014_Stratified_Estimates <- sapply(KMA2014, function(geomix) {
+  KMA2014_Annual_EstimatesStats[[geomix]][, "mean"]
+})
+
+
+KMA2014_Annual_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2014_Annual_HarvestEstimatesStats.txt")
+Annual2014_Stratified_HarvestEstimates <- sapply(KMA2014, function(geomix) {
+  round(KMA2014_Annual_HarvestEstimatesStats[[geomix]][, "mean"])
+})
+
+
+
+#~~~~~~~~~~~~~~~~~~
+# 2015
+
 Annual2015_Stratified_Estimates <- sapply(KMA2015, function(geomix) {
   KMA2015_Annual_EstimatesStats[[geomix]][, "mean"]
 })
+
+
+require(lattice)
+new.colors <- colorRampPalette(c("white", "black"))
+levelplot(t(Annual2015_Stratified_Estimates[15:1, c(4,5,3,2,1)]), col.regions = new.colors, xlab = "Reporting Group", 
+          ylab = "Fishery", main = "2015 Proportion", at = seq(0, 1, length.out = 100), aspect = "fill", 
+          scales = list(x = list(rot = 45)),
+          panel = function(...) {
+            panel.levelplot(...)
+          })
+
+require(lattice)
+new.colors <- colorRampPalette(c("white", "black"))
+levelplot(t(Annual2014_Stratified_Estimates[15:1, c(4,5,3,2,1)]), col.regions = new.colors, xlab = "Reporting Group", 
+          ylab = "Fishery", main = "2014 Proportion", at = seq(0, 1, length.out = 100), aspect = "fill", 
+          scales = list(x = list(rot = 45)),
+          panel = function(...) {
+            panel.levelplot(...)
+          })
+
+
+# Bubble chart
+require(ggplot2)
+require(reshape2)
+Annual2015_Stratified_Estimates_df <- melt(Annual2015_Stratified_Estimates)
+names(Annual2015_Stratified_Estimates_df) <- c("RG", "Fishery", "Proportion")
+ggplot(data = Annual2015_Stratified_Estimates_df, aes(x = Fishery, y = RG, size = Proportion)) + geom_point()
+
+
+# Create a matrix of annual median harvest
+Annual2015_Stratified_HarvestEstimates <- sapply(KMA2015, function(geomix) {
+  round(KMA2015_Annual_HarvestEstimatesStats[[geomix]][, "mean"])
+})
+
+
+require(lattice)
+max(Annual2015_Stratified_HarvestEstimates)
+
+new.colors <- colorRampPalette(c("white", "black"))
+levelplot(t(Annual2015_Stratified_HarvestEstimates[15:1, c(4,5,3,2,1)]), col.regions = new.colors, xlab = "Reporting Group", 
+          ylab = "Fishery", main = "2015 Harvest", at = seq(0, 250000, length.out = 100), aspect = "fill", 
+          scales = list(x = list(rot = 45)),
+          panel = function(...) {
+            panel.levelplot(...)
+          })
+
+new.colors <- colorRampPalette(c("white", "black"))
+levelplot(t(Annual2014_Stratified_HarvestEstimates[15:1, c(4,5,3,2,1)]), col.regions = new.colors, xlab = "Reporting Group", 
+          ylab = "Fishery", main = "2014 Harvest", at = seq(0, 250000, length.out = 100), aspect = "fill", 
+          scales = list(x = list(rot = 45)),
+          panel = function(...) {
+            panel.levelplot(...)
+          })
+
+sort(rowSums(Annual2015_Stratified_HarvestEstimates))
+sort(rowSums(Annual2014_Stratified_HarvestEstimates))
+
+
+
+# Bubble chart example
+apply(col2rgb(KMA15Colors), 2, function(col) {rgb(red = col[1], green = col[2], blue = col[3], maxColorValue = 255)} )
+
+# 2015
+Annual2015_Stratified_HarvestEstimates_df <- melt(Annual2015_Stratified_HarvestEstimates)
+names(Annual2015_Stratified_HarvestEstimates_df) <- c("RG", "Fishery", "Harvest")
+Annual2015_Stratified_HarvestEstimates_df$RG <- factor(Annual2015_Stratified_HarvestEstimates_df$RG, levels = rev(KMA15GroupsPC))
+Annual2015_Stratified_HarvestEstimates_df$Fishery <- factor(Annual2015_Stratified_HarvestEstimates_df$Fishery, levels = KMA2015[c(4,5,3,2,1)])
+Annual2015_Stratified_HarvestEstimates_df$Color <- rep(rev(KMA15Colors), 5)
+str(Annual2015_Stratified_HarvestEstimates_df)
+
+
+ggplot(data = Annual2015_Stratified_HarvestEstimates_df, aes(x = Fishery, y = RG, size = Harvest, color = RG)) + geom_point() + scale_size_area(max_size = 25) + scale_color_manual(values = rev(rep(KMA15Colors, 5)))
+
+
+ggplot(data = Annual2015_Stratified_HarvestEstimates_df, aes(x = Fishery, y = RG, size = Harvest, color = RG)) + 
+  geom_point() + 
+  scale_size_continuous(limits = c(0, 250000), breaks = seq(50000, 250000, 50000), range = c(0, 25)) + 
+  scale_color_manual(values = rev(rep(KMA15Colors, 5))) +
+  ggtitle("2015 Harvest")
+
+
+# 2014
+Annual2014_Stratified_HarvestEstimates_df <- melt(Annual2014_Stratified_HarvestEstimates)
+names(Annual2014_Stratified_HarvestEstimates_df) <- c("RG", "Fishery", "Harvest")
+Annual2014_Stratified_HarvestEstimates_df$RG <- factor(Annual2014_Stratified_HarvestEstimates_df$RG, levels = rev(KMA15GroupsPC))
+Annual2014_Stratified_HarvestEstimates_df$Fishery <- factor(Annual2014_Stratified_HarvestEstimates_df$Fishery, levels = KMA2014[c(4,5,3,2,1)])
+Annual2014_Stratified_HarvestEstimates_df$Color <- rep(rev(KMA15Colors), 5)
+str(Annual2014_Stratified_HarvestEstimates_df)
+
+ggplot(data = Annual2014_Stratified_HarvestEstimates_df, aes(x = Fishery, y = RG, size = Harvest, color = RG)) + geom_point() + scale_size_area(max_size = 25) + scale_color_manual(values = rev(rep(KMA15Colors, 5)))
+
+ggplot(data = Annual2014_Stratified_HarvestEstimates_df, aes(x = Fishery, y = RG, size = Harvest, color = RG)) + 
+  geom_point() + 
+  scale_size_continuous(limits = c(0, 250000), breaks = seq(50000, 250000, 50000), range = c(0, 25)) + 
+  scale_color_manual(values = rev(rep(KMA15Colors, 5))) +
+  ggtitle("2014 Harvest")
+
 
 # Create a matrix of early strata means
 KMA2015Strata_1_Early_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2015Strata_1_Early_EstimatesStats.txt")
 EarlyStrata2015_Estimates <- sapply(KMA2015Strata_1_Early_EstimatesStats, function(geomix) {
   geomix[, "mean"]
 })
-colnames(EarlyStrata2015_Estimates) <- KMA2015[-1]
+colnames(EarlyStrata2015_Estimates) <- KMA2015
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Plot Annual vs. Early Means
 par(mar = c(4.1, 5.1, 3.1, 1.1))
-sapply(KMA2015[-1], function(geomix) {
+sapply(KMA2015, function(geomix) {
   Barplot <- barplot2(height = rbind(Annual2015_Stratified_Estimates[, geomix], EarlyStrata2015_Estimates[, geomix]) * 100, 
                       beside = TRUE, col = c("blue", "white"), yaxt = 'n', xaxt = 'n', main = geomix, ylab = "Precent of Mixture",
                       cex.lab = 2, cex.main = 2, ylim = c(0, 100))
