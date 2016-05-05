@@ -2389,7 +2389,7 @@ PlotProof.GCL <- function(x, scenario, groups, filedir, percent = TRUE) {
     
     abline(h = MixtureProofTestProportions[i, scenario], col = "red", lwd = 2)
     abline(h = 0, lwd = 1, lty = 2)
-    text(KMA17GroupsPC[i], x = 5, y = 0.6 * percent.multiplier, adj = 1, cex = 1)
+    text(KMA17GroupsPC[i], x = 1, y = 0.6 * percent.multiplier, adj = 0, cex = 1)
   } )
   
   # Plot 19 - Blank Corner
@@ -2418,6 +2418,7 @@ KMA473PopsGroups17RepeatedMixProofTests_Repeats5.2_EstimatesStats <- dget(file =
 
 KMA473PopsGroups17RepeatedMixProofTests_Repeats10_EstimatesStats <- c(KMA473PopsGroups17RepeatedMixProofTests_Repeats5_EstimatesStats, KMA473PopsGroups17RepeatedMixProofTests_Repeats5.2_EstimatesStats)
 dput(x = KMA473PopsGroups17RepeatedMixProofTests_Repeats10_EstimatesStats, file = "Estimates objects/loci46 KarlukAyakulikSplit/KMA473PopsGroups17RepeatedMixProofTests_Repeats10_EstimatesStats.txt")
+KMA473PopsGroups17RepeatedMixProofTests_Repeats10_EstimatesStats <- dget(file = "Estimates objects/loci46 KarlukAyakulikSplit/KMA473PopsGroups17RepeatedMixProofTests_Repeats10_EstimatesStats.txt")
 
 # loci46 KarlukAyakulikSplit
 sapply(FisheryProofTestScenarioNames17RG, function(scenario){
@@ -2469,8 +2470,71 @@ lapply(FisheryProofTestScenarioNames17RG, function(scenario) {
 })
 
 
-
 # Make dotplot of medians (green/red), with transparency with line showing mean of medians
+
+str(KMA473PopsGroups17RepeatedMixProofTests_Repeats10_EstimatesStats)
+
+Bias.GCL <- function(stats, scenario, proportions, estimator = "median", percent = TRUE) {
+  if(percent) {
+    stats <- sapply(stats, function(rpt) {rpt[, 1:5] * 100}, simplify = FALSE)
+    proportions <- proportions * 100
+  }  
+  stats.nums <- grep(pattern = scenario, x = names(stats))
+  estimator.values <- sapply(stats[stats.nums], function(rpt) {rpt[, estimator]} )
+  bias <- estimator.values - proportions[, scenario]
+  
+  return(bias)
+}
+
+Proof.Bias.46FrazerAyakulikloci.list <- 
+  sapply(FisheryProofTestScenarioNames17RG, function(scenario) {
+    Bias.GCL(stats = KMA473PopsGroups17RepeatedMixProofTests_Repeats10_EstimatesStats, 
+             scenario = scenario, proportions = t(dget(file = "Objects/MixtureProofTestProportions17RG.txt")),
+             estimator = "median")}, simplify = FALSE )
+
+str(Proof.Bias.46FrazerAyakulikloci.list)
+
+
+
+estimates <- Proof.Bias.46FrazerAyakulikloci.list
+scenario <- FisheryProofTestScenarioNames17RG[1]
+
+sapply(FisheryProofTestScenarioNames17RG, function(scenario) {
+  png(file = paste("BAYES/Mixture Proof Tests/loci46 KarlukAyakulikSplit/Figures/BiasBoxplot_", scenario, ".png", sep = ''), width = 7, height = 7, units = "in", res = 600, family = "Times")
+  # Make as vector
+  bias.mat <- t(estimates[[scenario]])
+  bias.vec <- c(bias.mat)
+  range(bias.vec)
+  
+  # Assign colors
+  bias.col <- rep("darkgreen", length(bias.vec))
+  bias.col[bias.vec < 0] <- "darkred"
+  bias.col <- adjustcolor(col = bias.col, alpha.f = 0.5)
+  
+  # Plot
+  # par(mar = c(9.1, 4.1, 2.1, 1.1))
+  # plot(x = rep(1:17, each = 10), y = bias.vec, pch = 16, col = bias.col, cex = 2.5, ylim = c(-10, 10), axes = FALSE, xlab = "", ylab = "")
+  # axis(side = 1, at = 1:17, labels = NA)
+  # axis(side = 2)
+  # text(x = 1:17, y = rep(-11.5, 17), labels = KMA17GroupsPC, adj = 1, srt = 45, xpd = TRUE)
+  # mtext(text = "Reporting Group", side = 1, line = 7, cex = 1.5)
+  # mtext(text = "Bias", side = 2, line = 3, cex = 1.5)
+  # mtext(text = scenario, side = 3, cex = 2)
+  
+  # Boxplot
+  par(mar = c(9.1, 4.6, 2.1, 1.1))
+  boxplot(bias.mat, axes = FALSE, ylim = c(-15, 10))
+  abline(h = 0, lwd = 4, lty = 3)
+  points(x = rep(1:17, each = 10), y = bias.vec, pch = 16, col = bias.col, cex = 2.5)
+  axis(side = 1, at = 1:17, labels = NA)
+  axis(side = 2)
+  text(x = 1:17, y = rep(-17, 17), labels = KMA17GroupsPC, adj = 1, srt = 45, xpd = TRUE)
+  mtext(text = "Reporting Group", side = 1, line = 7, cex = 1.5)
+  mtext(text = "Bias Over 10 Replicates (Percentage)", side = 2, line = 3, cex = 1.5)
+  mtext(text = scenario, side = 3, cex = 2)
+  dev.off()
+})
+
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
