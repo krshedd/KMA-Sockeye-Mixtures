@@ -2469,7 +2469,7 @@ lapply(FisheryProofTestScenarioNames17RG, function(scenario) {
   text(x = locations[, 1], y = -5.5, srt = 90, labels = KMA17GroupsPC, adj = 0)
 })
 
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Make dotplot of medians (green/red), with transparency with line showing mean of medians
 
 str(KMA473PopsGroups17RepeatedMixProofTests_Repeats10_EstimatesStats)
@@ -2543,6 +2543,49 @@ sapply(FisheryProofTestScenarioNames17RG, function(scenario) {
   dev.off()
 })
 
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Make tables of Bias, RMSE, etc.
+
+str(Proof.BiasRMSE.46FrazerAyakulikloci.list)
+
+PCFisheryProofTestScenarioNames17RG <- c("June Ayakulik (early-run)", "July Alitak (early-run)", "July Alitak (50/50 early/late-run)", "July Alitak (late-run)")
+dput(x = PCFisheryProofTestScenarioNames17RG, file = "Objects/PCFisheryProofTestScenarioNames17RG.txt")
+
+MasterProofTableMaker <- function(loci = "loci89", BiasRMSElist, table.file, percent = TRUE) {
+  
+  require(xlsx)
+  
+  if(percent) {
+    digits = 1
+  } else {
+    digits = 2
+  }
+  
+  x <- NULL
+  x.mat <- suppressWarnings(matrix(data = seq(FisheryProofTestScenarioNames17RG), ncol = 2, byrow = TRUE))
+  scenario <- FisheryProofTestScenarioNames17RG
+  proportions <- dget(file = "Objects/MixtureProofTestProportions17RG.txt")
+  if(percent) {proportions <- proportions * 100}
+  
+  for(i in seq(nrow(x.mat))){
+    x <- rbind(x, cbind('', paste("Hypothetical", PCFisheryProofTestScenarioNames17RG[x.mat[i, 1]], "Scenario"), '', '', '', '', '', paste("Hypothetical", PCFisheryProofTestScenarioNames17RG[x.mat[i, 2]], "Scenario"), '', '', '', ''),
+               cbind("Reporting Group", "True", "Average", "Bias", "RMSE", "CI Width", "", "True", "Average", "Bias", "RMSE", "CI Width"),
+               cbind(KMA17GroupsPC,
+                     formatC(x = proportions[x.mat[i, 1], ], digits = digits, format = "f"),
+                     formatC(x = BiasRMSElist[[scenario[x.mat[i, 1]]]], digits = digits, format = "f"),
+                     rep('', length(KMA17GroupsPC)),
+                     formatC(x = proportions[x.mat[i, 2], ], digits = digits, format = "f"),
+                     formatC(x = BiasRMSElist[[scenario[x.mat[i, 2]]]], digits = digits, format = "f"))
+    )
+  }
+  suppressWarnings(write.xlsx(x = x, file = table.file, sheetName = paste("Fishery Proof Summary", loci), col.names = FALSE, row.names = FALSE, append = TRUE))
+  print(apply(MixtureProofTest.SampleSize, 1, sum))
+  
+}
+
+MasterProofTableMaker(loci = "loci46 17RG", BiasRMSElist = Proof.BiasRMSE.46FrazerAyakulikloci.list, table.file = "Estimates tables/KMA473PopsGroups15RepeatedProofTestsTables.xlsx", percent = TRUE)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
