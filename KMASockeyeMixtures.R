@@ -2498,6 +2498,12 @@ str(Proof.Bias.46FrazerAyakulikloci.list)
 
 estimates <- Proof.Bias.46FrazerAyakulikloci.list
 scenario <- FisheryProofTestScenarioNames17RG[1]
+proportions <- t(dget(file = "Objects/MixtureProofTestProportions17RG.txt"))
+scenario.names.PC <- setNames(object = c("June Ayakulik (only early-run fish)",
+                                         "July Alitak (only early-run fish)",
+                                         "July Alitak (50/50 early-run/late-run fish)",
+                                         "July Alitak (only late-run fish)"),
+                              nm = FisheryProofTestScenarioNames17RG)
 
 sapply(FisheryProofTestScenarioNames17RG, function(scenario) {
   png(file = paste("BAYES/Mixture Proof Tests/loci46 KarlukAyakulikSplit/Figures/BiasBoxplot_", scenario, ".png", sep = ''), width = 7, height = 7, units = "in", res = 600, family = "Times")
@@ -2529,9 +2535,11 @@ sapply(FisheryProofTestScenarioNames17RG, function(scenario) {
   axis(side = 1, at = 1:17, labels = NA)
   axis(side = 2)
   text(x = 1:17, y = rep(-17, 17), labels = KMA17GroupsPC, adj = 1, srt = 45, xpd = TRUE)
+  text(x = 1:17, y = rep(-14.5, 17), labels = proportions[, scenario] * 100)
+  text(x = 17/2, y = -13.5, labels = "True Percentage in Mixture Scenario")
   mtext(text = "Reporting Group", side = 1, line = 7, cex = 1.5)
   mtext(text = "Bias Over 10 Replicates (Percentage)", side = 2, line = 3, cex = 1.5)
-  mtext(text = scenario, side = 3, cex = 2)
+  mtext(text = scenario.names.PC[scenario], side = 3, cex = 2)
   dev.off()
 })
 
