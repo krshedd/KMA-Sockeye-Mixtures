@@ -5555,3 +5555,238 @@ invisible(sapply(which(KMA473PopsGroupVec17 %in% c(5,6,7)), function(pop) {
 }) )
 
 # Do not appear to see any p-value anomolies
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Quick look at Karluk / Frazer / Ayakulik PostQC Collections MDS ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+rm(list = ls(all = TRUE))
+setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Baseline")
+source("H:/R Source Scripts/Functions.GCL_KS.R")
+source("C:/Users/krshedd/Documents/R/Functions.GCL.R")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### 96 Loci
+## Locus Control
+LocusControl <- dget(file = "Objects/OriginalLocusControl.txt")
+loci96 <- dget(file = "Objects/loci96.txt")
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### SSUMMM09
+LOKI2R.GCL(sillyvec = "SSUMMM09", username = "krshedd", password = password)
+rm(password)
+
+str(SSUMMM09.gcl)
+
+dput(x = SSUMMM09.gcl, file = "Raw genotypes/OriginalCollections/SSUMMM09.txt")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# QC SSUMMM09
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Check loci
+## Get sample size by locus
+Original_SSUMMM09_SampleSizebyLocus <- SampSizeByLocus.GCL(sillyvec = "SSUMMM09", loci = loci96)
+min(Original_SSUMMM09_SampleSizebyLocus)  ## 85/95
+apply(Original_SSUMMM09_SampleSizebyLocus, 1, min) / apply(Original_SSUMMM09_SampleSizebyLocus, 1, max)  ## Good, 0.90
+
+Original_SSUMMM09_PercentbyLocus <- apply(Original_SSUMMM09_SampleSizebyLocus, 1, function(row) {row / max(row)} )
+which(apply(Original_SSUMMM09_PercentbyLocus, 2, min) < 0.8)  # no re-runs!
+
+require(lattice)
+new.colors <- colorRampPalette(c("black", "white"))
+levelplot(t(Original_SSUMMM09_PercentbyLocus), 
+          col.regions = new.colors, 
+          at = seq(from = 0, to = 1, length.out = 100), 
+          main = "% Genotyped", xlab = "SILLY", ylab = "Locus", 
+          scales = list(x = list(rot = 90)), 
+          aspect = "fill")  # aspect = "iso" will make squares
+
+
+#### Check individuals
+## View Histogram of Failure Rate by Strata
+invisible(sapply("SSUMMM09", function(mix) {
+  my.gcl <- get(paste(mix, ".gcl", sep = ''))
+  failure <- apply(my.gcl$scores[, , 1], 1, function(ind) {sum(ind == "0") / length(ind)} )
+  hist(x = failure, main = mix, xlab = "Failure Rate", col = 8, xlim = c(0, 1), ylim = c(0, 20), breaks = seq(from = 0, to = 1, by = 0.02))
+  abline(v = 0.2, lwd = 3)
+}))
+
+
+
+SSUMMM09_SampleSizes <- matrix(data = NA, nrow = length("SSUMMM09"), ncol = 5, 
+                                         dimnames = list("SSUMMM09", c("Genotyped", "Alternate", "Missing", "Duplicate", "Final")))
+
+### Initial
+## Get number of individuals per silly before removing missing loci individuals
+Original_SSUMMM09_ColSize <- sapply(paste("SSUMMM09", ".gcl", sep = ''), function(x) get(x)$n)
+SSUMMM09_SampleSizes[, "Genotyped"] <- Original_SSUMMM09_ColSize
+
+
+### Alternate
+## Indentify alternate species individuals
+SSUMMM09_Alternate <- FindAlternateSpecies.GCL(sillyvec = "SSUMMM09", species = "sockeye")
+
+## Remove Alternate species individuals
+RemoveAlternateSpecies.GCL(AlternateSpeciesReport = SSUMMM09_Alternate, AlternateCutOff = 0.5, FailedCutOff = 0.5)
+
+## Get number of individuals per silly after removing alternate species individuals
+ColSize_SSUMMM09_PostAlternate <- sapply(paste("SSUMMM09", ".gcl", sep = ''), function(x) get(x)$n)
+SSUMMM09_SampleSizes[, "Alternate"] <- Original_SSUMMM09_ColSize-ColSize_SSUMMM09_PostAlternate
+
+
+### Missing
+## Remove individuals with >20% missing data
+SSUMMM09_MissLoci <- RemoveIndMissLoci.GCL(sillyvec = "SSUMMM09", proportion = 0.8)
+
+## Get number of individuals per silly after removing missing loci individuals
+ColSize_SSUMMM09_PostMissLoci <- sapply(paste("SSUMMM09", ".gcl", sep = ''), function(x) get(x)$n)
+SSUMMM09_SampleSizes[, "Missing"] <- ColSize_SSUMMM09_PostAlternate-ColSize_SSUMMM09_PostMissLoci
+
+
+### Duplicate
+## Check within collections for duplicate individuals.
+SSUMMM09_DuplicateCheck95MinProportion <- CheckDupWithinSilly.GCL(sillyvec = "SSUMMM09", loci = loci96, quantile = NULL, minproportion = 0.95)
+SSUMMM09_DuplicateCheckReportSummary <- sapply("SSUMMM09", function(x) SSUMMM09_DuplicateCheck95MinProportion[[x]]$report)
+SSUMMM09_DuplicateCheckReportSummary
+
+## Remove duplicate individuals
+SSUMMM09_RemovedDups <- RemoveDups.GCL(SSUMMM09_DuplicateCheck95MinProportion)
+
+## Get number of individuals per silly after removing duplicate individuals
+ColSize_SSUMMM09_PostDuplicate <- sapply(paste("SSUMMM09", ".gcl", sep = ''), function(x) get(x)$n)
+SSUMMM09_SampleSizes[, "Duplicate"] <- ColSize_SSUMMM09_PostMissLoci-ColSize_SSUMMM09_PostDuplicate
+
+
+### Final
+SSUMMM09_SampleSizes[, "Final"] <- ColSize_SSUMMM09_PostDuplicate
+SSUMMM09_SampleSizes
+
+# Lost two fish for missing.
+
+dput(x = SSUMMM09.gcl, file = "Raw genotypes/PostQCCollections/SSUMMM09.txt")
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Get PostQC Collections
+# FrazerKarlukAyakulik41Collections <- readClipboard()
+# dput(x = FrazerKarlukAyakulik41Collections, file = "Objects/FrazerKarlukAyakulik41Collections.txt")
+FrazerKarlukAyakulik41Collections <- dget(file = "Objects/FrazerKarlukAyakulik41Collections.txt")
+
+FrazerKarlukAyakulik42Collections <- c("SSUMMM09", FrazerKarlukAyakulik41Collections)
+# dput(x = FrazerKarlukAyakulik42Collections, file = "Objects/FrazerKarlukAyakulik42Collections.txt")
+
+
+require(beepr)
+invisible(sapply(FrazerKarlukAyakulik42Collections, function(silly) {assign(x = paste(silly, ".gcl", sep = ""), value = dget(file = paste(getwd(), "/Raw genotypes/PostQCCollections/", silly, ".txt", sep = "")), pos = 1)})); beep(2)
+length(objects(pattern = "\\.gcl"))
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Get objects
+KMAobjects <- list.files(path = "Objects", recursive = FALSE)
+KMAobjects <- KMAobjects[!KMAobjects %in% c("OLD", "Likelihood Profiles", "OriginalLocusControl.txt")]
+KMAobjects
+
+invisible(sapply(KMAobjects, function(objct) {assign(x = unlist(strsplit(x = objct, split = ".txt")), value = dget(file = paste(getwd(), "Objects", objct, sep = "/")), pos = 1) })); beep(2)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# FrazerKarlukAyakulik41CollectionsGroupVec3 <- as.numeric(readClipboard())
+# dput(x = FrazerKarlukAyakulik41CollectionsGroupVec3, file = "Objects/FrazerKarlukAyakulik41CollectionsGroupVec3.txt")
+FrazerKarlukAyakulik41CollectionsGroupVec3 <- dget(file = "Objects/FrazerKarlukAyakulik41CollectionsGroupVec3.txt")
+
+FrazerKarlukAyakulik42CollectionsGroupVec3 <- c(5, FrazerKarlukAyakulik41CollectionsGroupVec3)
+# dput(x = FrazerKarlukAyakulik41CollectionsGroupVec3, file = "Objects/FrazerKarlukAyakulik41CollectionsGroupVec3.txt")
+
+
+# FrazerKarlukAyakulik41CollectionsCommonNames <- readClipboard()
+# dput(x = FrazerKarlukAyakulik41CollectionsCommonNames, file = "Objects/FrazerKarlukAyakulik41CollectionsCommonNames.txt")
+FrazerKarlukAyakulik41CollectionsCommonNames <- dget(file = "Objects/FrazerKarlukAyakulik41CollectionsCommonNames.txt")
+
+FrazerKarlukAyakulik42CollectionsCommonNames <- c("Frazer Lake - Summit Creek", FrazerKarlukAyakulik41CollectionsCommonNames)
+# dput(x = FrazerKarlukAyakulik42CollectionsCommonNames, file = "Objects/FrazerKarlukAyakulik42CollectionsCommonNames.txt")
+
+
+Groups3 <- c("Frazer", "Ayakulik", "Karluk")
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Allele Frequencies
+# Counts
+FrazerKarlukAyakulik42CollectionsPostRemovalsAlleleCounts <- FreqPop.GCL(sillyvec = FrazerKarlukAyakulik42Collections, loci = loci96)
+str(FrazerKarlukAyakulik42CollectionsPostRemovalsAlleleCounts)
+
+# Frequencies
+FrazerKarlukAyakulik42CollectionsPostRemovalsFreqs <- FrazerKarlukAyakulik42CollectionsPostRemovalsAlleleCounts[,,"Allele 1"] / (FrazerKarlukAyakulik42CollectionsPostRemovalsAlleleCounts[,,"Allele 2"] + FrazerKarlukAyakulik42CollectionsPostRemovalsAlleleCounts[,,"Allele 1"])
+str(FrazerKarlukAyakulik42CollectionsPostRemovalsFreqs)
+
+## Plot points and smoothing line
+getwd()
+pdf(file = "FreqPlots/FrazerKarlukAyakulik42Collections_96SNPs_GroupVec3_FreqPlots.pdf", width = 11, height = 8.5, family = "Times", pointsize = 20)
+par(mar = c(2.1, 4.1, 4.1, 4.6))
+for(locus in loci96){
+  plot(FrazerKarlukAyakulik42CollectionsPostRemovalsFreqs[, locus], main = locus, col = Colors15[FrazerKarlukAyakulik42CollectionsGroupVec3], pch = 19, ylim = c(0, 1), ylab = "Frequency", xlab = "Collections", xaxt = 'n', cex = 0.7)
+  lines(supsmu(seq(length(FrazerKarlukAyakulik42Collections)), FrazerKarlukAyakulik42CollectionsPostRemovalsFreqs[, locus]), lwd = 2)
+  mtext(text = "Collections", side = 1, line = 0.7)
+  text(x = seq(FrazerKarlukAyakulik42Collections), y = FrazerKarlukAyakulik42CollectionsPostRemovalsFreqs[, locus], labels = seq(FrazerKarlukAyakulik42Collections), cex = 0.3, col = c("black", "white", "white")[FrazerKarlukAyakulik42CollectionsGroupVec3 - 4])
+  legend(x = 44, y = 0.9, legend = Groups3, fill = Colors15[5:7], xpd = TRUE, bty = "n", cex = 0.7)
+}; rm(locus)
+dev.off()
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Combine Loci
+CombineLoci.GCL(sillyvec = FrazerKarlukAyakulik42Collections, markerset = c("One_CO1", "One_Cytb_17", "One_Cytb_26"), update = TRUE); beep(2)
+CombineLoci.GCL(sillyvec = FrazerKarlukAyakulik42Collections, markerset = c("One_Tf_ex10-750", "One_Tf_ex3-182"), update = TRUE); beep(2)
+
+loci89
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## MDS 89 loci
+# gcl2Genepop.GCL(sillyvec = FrazerKarlukAyakulik42Collections, loci = loci89, path = "Genepop/FrazerKarlukAyakulik42Collections_89loci.gen", VialNums = TRUE)
+
+detach("package:adegenet", unload = TRUE)
+require(package = adegenet, lib.loc = "C:/Users/krshedd/Documents/R/win-library/3.1")
+
+genind <- read.genepop(file = "Genepop/FrazerKarlukAyakulik42Collections_89loci.gen")
+
+genpop <- genind2genpop(genind)
+
+# AdegenetNei42Col89loci <- dist.genpop(genpop, method = 1, diag = TRUE, upper = TRUE)
+# dput(x = AdegenetNei42Col89loci, file = "Trees/AdegenetNei42Col89loci.txt")
+AdegenetNei42Col89loci <- dget(file = "Trees/AdegenetNei42Col89loci.txt")
+str(AdegenetNei42Col89loci)
+
+require(ape)
+Nei42NJtree <- nj(AdegenetNei42Col89loci)
+str(Nei42NJtree)
+Nei42NJtree$tip.label <- readClipboard()
+plot.phylo(x = Nei42NJtree, cex = 0.5, no.margin = TRUE)
+
+library('rgl')
+
+MDS <- cmdscale(as.matrix(AdegenetNei42Col89loci), k = 3)
+# MDS <- cmdscale(as.matrix(AdegenetNei42Col89loci), k = 40, eig = TRUE)  # Do with all possible dimensions
+# dput(x = MDS, file = "Objects/MDSAdegenetNei42Col89loci.txt")
+# dput(x = MDS, file = "Objects/MDSAdegenetNei42Col89loci_alldim.txt")
+MDS <- dget(file = "Objects/MDSAdegenetNei42Col89loci.txt")
+
+x <- as.vector(MDS[, 1])   
+y <- as.vector(MDS[, 2])
+z <- as.vector(MDS[, 3])
+
+FrazerKarlukAyakulik42CollectionsGroupVec3
+Colors15 <- dget(file = "Objects/Colors15.txt")
+
+
+open3d()
+par(family = "serif")
+plot3d(x, y, z + abs(range(z)[1]), xlab = '', ylab = '', zlab = '', aspect = FALSE, col = Colors15[FrazerKarlukAyakulik42CollectionsGroupVec3], size = 0.5, type = 's', axes = TRUE, box = TRUE, top = TRUE, cex = 1)
+box3d()
+# plot3d(x, y, z + abs(range(z)[1]), aspect = FALSE, col = "black", size = 0.5, type = 'h', box = TRUE, axes = FALSE, top = FALSE, add = TRUE)  # adds pins to spheres
+# texts3d(x, y, z + abs(range(z)[1]), adj = c(-0.8, 0.8), text = seq(FrazerKarlukAyakulik42Collections), font = 2, cex = 0.8, add = TRUE, top = TRUE, axes = FALSE)  # adds numbers to points(adj moves the numbers around the points)
+texts3d(x, y, z + abs(range(z)[1]), adj = c(-0.2, 0.2), text = FrazerKarlukAyakulik42Collections, font = 2, cex = 0.8, add = TRUE, top = TRUE, axes = FALSE)  # adds numbers to points(adj moves the numbers around the points)
+
+rgl.snapshot("MDS/MDSAdegenetNei42ColFrazerKarlukAyakulik89loci2.png", fmt="png", top=TRUE )
+# SSUMMM09 looks very similar SMIDWM08
