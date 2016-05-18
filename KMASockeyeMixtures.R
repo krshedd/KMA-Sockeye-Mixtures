@@ -5790,3 +5790,50 @@ texts3d(x, y, z + abs(range(z)[1]), adj = c(-0.2, 0.2), text = FrazerKarlukAyaku
 
 rgl.snapshot("MDS/MDSAdegenetNei42ColFrazerKarlukAyakulik89loci2.png", fmt="png", top=TRUE )
 # SSUMMM09 looks very similar SMIDWM08
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Create gsi_sim input file
+dir.create("gsi_sim")
+LocusControl <- dget(file = "Objects/LocusControl103.txt")
+write_snps_gsi_sim.GCL(collections = FrazerKarlukAyakulik42Collections, loci = c(loci89[-which(LocusControl$ploidy[loci89] == 1)], "One_Tf_ex3-182"), path.name = "gsi_sim/FrazerKarlukAyakulik42Collections88diploidloci.txt")
+
+
+
+setwd("gsi_sim")  # Where you want your output to be saved
+
+setwd("C:/Users/krshedd/Documents/R/gsi_sim")  # Where you want your output to be saved
+dir.create("AyakulikFrazerKarluk")
+file.copy(from = "V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Baseline/gsi_sim/FrazerKarlukAyakulik42Collections88diploidloci.txt",
+          to = "AyakulikFrazerKarluk")  # copy baseline from V: drive
+setwd("AyakulikFrazerKarluk")
+
+system2(command = "C:/Users/krshedd/Documents/R/gsi_sim/gsi_sim-MINGW64_NT-6.1",  # Where the executable is
+        args = c("-b FrazerKarlukAyakulik42Collections88diploidloci.txt",  # Where the baseline file is
+                 "--self-assign"), 
+        stdout = "dumpfile")  # What to name the big output file
+
+# Splitting output with Eric's code, may not work, depends on baseline format and naming conventions!
+system2(command = shQuote("awk -F";" 'BEGIN {print "ID TopPop Score"} /SELF_ASSIGN_A_LA_GC_CSV:/ {print $1, $2, $3}' FrazerKarlukAyakulik42Collections88diploidloci_Output.txt | sed 's/SELF_ASSIGN_A_LA_GC_CSV:\///g;'"),
+        stdout = "self-ass-results.txt")
+
+
+x <- paste0("awk -F\";\" \'BEGIN {print \"ID TopPop Score\"} /SELF_ASSIGN_A_LA_GC_CSV:/ {print $1, $2, $3}\' dumpfile | sed \'s/SELF_ASSIGN_A_LA_GC_CSV:\\///g;\'")
+writeLines(x)
+system2(command = writeLines(x),
+        stdout = "self-ass-results.txt")
+
+
+# Typed into command line bash and that worked...
+
+library(dplyr)
+library(stringr)
+
+AssignmentTally <- read.table("self-ass-results.txt", header = TRUE) %>%
+  tbl_df %>%
+  mutate(FromPop = paste(str_split_fixed(ID, "_", 3)[,1], str_split_fixed(ID, "_", 3)[,2], sep ="_")) %>%
+  group_by(FromPop, TopPop) %>%
+  tally %>%
+  arrange(FromPop, desc(n))
+str(AssignmentTally)
+as.data.frame(AssignmentTally)[1:25,]
