@@ -2588,6 +2588,116 @@ MasterProofTableMaker <- function(loci = "loci89", BiasRMSElist, table.file, per
 MasterProofTableMaker(loci = "loci46 17RG", BiasRMSElist = Proof.BiasRMSE.46FrazerAyakulikloci.list, table.file = "Estimates tables/KMA473PopsGroups15RepeatedProofTestsTables.xlsx", percent = TRUE)
 
 
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Composite reporting group
+
+KMA14GroupsPC <- c(KMA17GroupsPC[1:4], "Frazer / Ayakulik", "Karluk", KMA17GroupsPC[10:17])
+dput(x = KMA14GroupsPC, file = "Objects/KMA14GroupsPC.txt")
+
+KMA473PopsGroupVec14 <- as.numeric(gsub(pattern = 6, replacement = 5, x = KMA473PopsGroupVec15))
+KMA473PopsGroupVec14 <- c(KMA473PopsGroupVec14[KMA473PopsGroupVec14 < 6], KMA473PopsGroupVec14[KMA473PopsGroupVec14 > 6] - 1)
+dput(x = KMA473PopsGroupVec14, file = "Objects/KMA473PopsGroupVec14.txt")
+
+
+KMA473PopsGroups14RepeatedMixProofTests_Repeats10_Estimates <- CustomCombineBAYESOutput.GCL(
+  groupvec = KMA473PopsGroupVec14, groupnames = KMA14GroupsPC, 
+  maindir = "BAYES/Mixture Proof Tests/loci46 KarlukAyakulikSplit/BAYES.output", 
+  mixvec = paste(rep(FisheryProofTestScenarioNames17RG, each = 10), 1:10, sep = ''), prior = "",  
+  ext = "BOT", nchains = 1, burn = 0.5, alpha = 0.1, PosteriorOutput = FALSE); beep(5)
+
+str(KMA473PopsGroups14RepeatedMixProofTests_Repeats10_Estimates)
+
+fishery.proportions <- t(dget(file = "Objects/MixtureProofTestProportions17RG.txt"))
+fishery.proportions <- rbind(fishery.proportions[1:4, ],
+                             "Frazer / Ayakulik" = colSums(fishery.proportions[5:7, ]),
+                             "Karluk" = colSums(fishery.proportions[8:9, ]),
+                             fishery.proportions[10:17, ])
+
+
+
+Proof.BiasRMSE.46FrazerAyakulikloci.14RG.list <- 
+  sapply(FisheryProofTestScenarioNames17RG, function(scenario) {
+    BiasRMSE.GCL(stats = KMA473PopsGroups14RepeatedMixProofTests_Repeats10_Estimates, 
+                 scenario = scenario, proportions = fishery.proportions,
+                 estimator = "median")}, simplify = FALSE )
+
+x.array.46 <- array(unlist(Proof.BiasRMSE.46FrazerAyakulikloci.14RG.list), dim = c(14,4,4), dimnames = list(KMA14GroupsPC, c("average", "bias", "rmse", "ci.width"), FisheryProofTestScenarioNames17RG))
+round(apply(X = x.array.46[, , ], MARGIN = 1:2, FUN = mean)[, 2:4], 1)
+round(apply(X = x.array.46[, , ], MARGIN = 1:2, FUN = min)[, 2:4], 1)
+round(apply(X = x.array.46[, , ], MARGIN = 1:2, FUN = max)[, 2:4], 1)
+
+
+
+
+
+Bias.GCL <- function(stats, scenario, proportions, estimator = "median", percent = TRUE) {
+  if(percent) {
+    stats <- sapply(stats, function(rpt) {rpt[, 1:5] * 100}, simplify = FALSE)
+    proportions <- proportions * 100
+  }  
+  stats.nums <- grep(pattern = scenario, x = names(stats))
+  estimator.values <- sapply(stats[stats.nums], function(rpt) {rpt[, estimator]} )
+  bias <- estimator.values - proportions[, scenario]
+  
+  return(bias)
+}
+
+Proof.Bias.46FrazerAyakulikloci.14RG.list <- 
+  sapply(FisheryProofTestScenarioNames17RG, function(scenario) {
+    Bias.GCL(stats = KMA473PopsGroups14RepeatedMixProofTests_Repeats10_Estimates, 
+             scenario = scenario, proportions = fishery.proportions,
+             estimator = "median")}, simplify = FALSE )
+
+
+estimates <- Proof.Bias.46FrazerAyakulikloci.14RG.list
+scenario <- FisheryProofTestScenarioNames17RG[1]
+proportions <- fishery.proportions
+scenario.names.PC <- setNames(object = c("June Ayakulik (only early-run fish)",
+                                         "July Alitak (only early-run fish)",
+                                         "July Alitak (50/50 early-run/late-run fish)",
+                                         "July Alitak (only late-run fish)"),
+                              nm = FisheryProofTestScenarioNames17RG)
+
+sapply(FisheryProofTestScenarioNames17RG, function(scenario) {
+  png(file = paste("BAYES/Mixture Proof Tests/loci46 KarlukAyakulikSplit/Figures/BiasBoxplot_14RG_", scenario, ".png", sep = ''), width = 7, height = 7, units = "in", res = 600, family = "Times")
+  # Make as vector
+  bias.mat <- t(estimates[[scenario]])
+  bias.vec <- c(bias.mat)
+  range(bias.vec)
+  
+  # Assign colors
+  bias.col <- rep("darkgreen", length(bias.vec))
+  bias.col[bias.vec < 0] <- "darkred"
+  bias.col <- adjustcolor(col = bias.col, alpha.f = 0.5)
+  
+  # Plot
+  # par(mar = c(9.1, 4.1, 2.1, 1.1))
+  # plot(x = rep(1:17, each = 10), y = bias.vec, pch = 16, col = bias.col, cex = 2.5, ylim = c(-10, 10), axes = FALSE, xlab = "", ylab = "")
+  # axis(side = 1, at = 1:17, labels = NA)
+  # axis(side = 2)
+  # text(x = 1:17, y = rep(-11.5, 17), labels = KMA17GroupsPC, adj = 1, srt = 45, xpd = TRUE)
+  # mtext(text = "Reporting Group", side = 1, line = 7, cex = 1.5)
+  # mtext(text = "Bias", side = 2, line = 3, cex = 1.5)
+  # mtext(text = scenario, side = 3, cex = 2)
+  
+  # Boxplot
+  par(mar = c(9.1, 4.6, 2.1, 1.1))
+  boxplot(bias.mat, axes = FALSE, ylim = c(-15, 10))
+  abline(h = 0, lwd = 4, lty = 3)
+  points(x = rep(1:14, each = 10), y = bias.vec, pch = 16, col = bias.col, cex = 2.5)
+  axis(side = 1, at = 1:14, labels = NA)
+  axis(side = 2)
+  text(x = 1:14, y = rep(-17, 14), labels = KMA14GroupsPC, adj = 1, srt = 45, xpd = TRUE)
+  text(x = 1:14, y = rep(-14.5, 14), labels = proportions[, scenario] * 100)
+  text(x = 14/2, y = -13.5, labels = "True Percentage in Mixture Scenario")
+  mtext(text = "Reporting Group", side = 1, line = 7, cex = 1.5)
+  mtext(text = "Bias Over 10 Replicates (Percentage)", side = 2, line = 3, cex = 1.5)
+  mtext(text = scenario.names.PC[scenario], side = 3, cex = 2)
+  dev.off()
+})
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 rm(list = ls(all = TRUE))
 setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Mixtures")
