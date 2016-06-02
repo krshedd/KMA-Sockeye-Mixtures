@@ -955,7 +955,7 @@ source("H:/R Source Scripts/Functions.GCL_KS.R")
 LocusControl <- dget(file = "Objects/LocusControl50.txt")
 
 KMAobjects <- list.files(path = "Objects", recursive = FALSE)
-KMAobjects <- KMAobjects[!KMAobjects %in% c("EASSIP-LateAugust2014", "OriginalLocusControl96.txt", "OriginalLocusControl48.txt", "LocusControl98.txt", "LocusControl99.txt")]
+KMAobjects <- KMAobjects[!KMAobjects %in% c("EASSIP-LateAugust2014", "OriginalLocusControl96.txt", "OriginalLocusControl48.txt", "LocusControl98.txt", "LocusControl99.txt", "OLD 15RG")]
 KMAobjects
 
 invisible(sapply(KMAobjects, function(objct) {assign(x = unlist(strsplit(x = objct, split = ".txt")), value = dget(file = paste(getwd(), "Objects", objct, sep = "/")), pos = 1) })); beep(2)
@@ -966,7 +966,7 @@ invisible(sapply(KMA2014_2015Strata, function(silly) {assign(x = paste(silly, ".
 objects(pattern = "\\.gcl")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#### Get MSA Objects ####
+#### Get/Create New 14RG MSA Objects ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # ## Get baseline objects needed for MSA
@@ -997,14 +997,51 @@ objects(pattern = "\\.gcl")
 # dput(x = KMA15GroupsPC2Rows, file = "Objects/KMA15GroupsPC2Rows.txt")
 # # Note, I changed the names for CommonNames473.txt -> KMA473CommonNames.txt & PCGroups15 -> KMA15GroupsPC.txt
 
-dir.create(path = "BAYES/2014-2015 Mixtures 46loci")
-sapply(c("Control", "Mixture", "Output"), function(folder) {dir.create(path = paste(getwd(), "BAYES/2014-2015 Mixtures 46loci", folder, sep = "/"))} )
+
+## Create baseline objects needed for MSA
+setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Baseline/Objects")
+
+KMA473PopsGroupVec14 <- dget(file = "KMA473PopsGroupVec14.txt")
+KMA473Pops14FlatPrior <- Prior.GCL(groupvec = KMA473PopsGroupVec14, groupweights = rep(1 / 14, 14), minval = 0.01)
+  dput(x = KMA473Pops14FlatPrior, file = "KMA473Pops14FlatPrior.txt")
+KMA473PopsInits <- dget(file = "KMA473PopsInits.txt")
+KMA14GroupsPC <- dget(file = "KMA14GroupsPC.txt")
+KMA14GroupsPC2Rows <- c("West of\nChignik", "Black\nLake", "Chignik\nLake", "U. Station\nAkalura", 
+                        "Frazer\nAyakulik", "Karluk\n", "Uganik\n", "Northwest\nKodiak", 
+                        "Afognak\n", "Eastside\nKodiak", "Saltery\n", "Cook\nInlet", 
+                        "PWS\n", "South of\nCape Suckling")
+  dput(x = KMA14GroupsPC2Rows, file = "KMA14GroupsPC2Rows.txt")
+KMA47346Baseline <- dget(file = "KMA47346Baseline.txt")
+WASSIPSockeyeSeeds <- dget("V:/Analysis/5_Coastwide/Sockeye/WASSIP/Mixture/Objects/WASSIPSockeyeSeeds.txt")
+KMA473CommonNames <- dget(file = "CommonNames473.txt")
+KMA14Colors <- c(KMA15Colors[1:4], "dodgerblue", KMA15Colors[7:15])
+  dput(x = KMA14Colors, file = "KMA14Colors.txt")
+KMA14ColorsRGB <- t(col2rgb(KMA14Colors))
+rownames(KMA14ColorsRGB) <- KMA14GroupsPC
+  dput(x = KMA14ColorsRGB, file = "KMA14ColorsRGB.txt")
+
+  
+
+setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Mixtures/Objects")
+dput(x = KMA473PopsGroupVec14, file = "KMA473PopsGroupVec14.txt")
+dput(x = KMA473Pops14FlatPrior, file = "KMA473Pops14FlatPrior.txt")
+dput(x = KMA14GroupsPC, file = "KMA14GroupsPC.txt")
+dput(x = KMA14GroupsPC2Rows, file = "KMA14GroupsPC2Rows.txt")
+dput(x = KMA14Colors, file = "KMA14Colors.txt")
+dput(x = KMA14ColorsRGB, file = "KMA14ColorsRGB.txt")
+
+setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Mixtures")
+
+
+
+dir.create(path = "BAYES/2014-2015 Mixtures 46loci 14RG")
+sapply(c("Control", "Mixture", "Output"), function(folder) {dir.create(path = paste(getwd(), "BAYES/2014-2015 Mixtures 46loci 14RG", folder, sep = "/"))} )
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Round 1 MSA files for BAYES 2014 Early Strata ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Starting with a Regionally flat prior, then rolling prior afterwards
-KMA473Pops15FlatPrior
+KMA473Pops14FlatPrior
 
 
 KMA2014Strata_1_Early <- grep(pattern = "1_Early", x = KMA2014Strata, value = TRUE)
@@ -1013,20 +1050,20 @@ dput(x = Round1Mixtures_2014, file = "Objects/Round1Mixtures_2014.txt")
 
 ## Dumping Mixture files
 KMA47346MixtureFormat <- CreateMixture.GCL(sillys = KMA2014Strata_1_Early[1], loci = loci46, IDs = NULL, mixname = KMA2014Strata_1_Early[1],
-                                           dir = "BAYES/2014-2015 Mixtures 46loci/Mixture", type = "BAYES", PT = FALSE)
+                                           dir = "BAYES/2014-2015 Mixtures 46loci 14RG/Mixture", type = "BAYES", PT = FALSE)
 dput(KMA47346MixtureFormat, file = "Objects/KMA47346MixtureFormat.txt")
 
-sapply(Round1Mixtures_2014, function(Mix) {CreateMixture.GCL(sillys = Mix, loci = loci46, IDs = NULL, mixname = Mix, dir = "BAYES/2014-2015 Mixtures 46loci/Mixture", type = "BAYES", PT = FALSE)} )
+sapply(Round1Mixtures_2014, function(Mix) {CreateMixture.GCL(sillys = Mix, loci = loci46, IDs = NULL, mixname = Mix, dir = "BAYES/2014-2015 Mixtures 46loci 14RG/Mixture", type = "BAYES", PT = FALSE)} )
 
 ## Dumping Control files
 sapply(Round1Mixtures_2014, function(Mix) {
   CreateControlFile.GCL(sillyvec = KMA473Pops, loci = loci46, mixname = Mix, basename = "KMA473Pops46Markers", suffix = "", nreps = 40000, nchains = 5,
-                        groupvec = KMA473PopsGroupVec15, priorvec = KMA473Pops15FlatPrior, initmat = KMA473PopsInits, dir = "BAYES/2014-2015 Mixtures 46loci/Control",
+                        groupvec = KMA473PopsGroupVec14, priorvec = KMA473Pops14FlatPrior, initmat = KMA473PopsInits, dir = "BAYES/2014-2015 Mixtures 46loci 14RG/Control",
                         seeds = WASSIPSockeyeSeeds, thin = c(1, 1, 100), mixfortran = KMA47346MixtureFormat, basefortran = KMA47346Baseline, switches = "F T F T T T F")
 })
 
 ## Create output directory
-sapply(Round1Mixtures_2014, function(Mix) {dir.create(paste("BAYES/2014-2015 Mixtures 46loci/Output/", Mix, sep = ""))})
+sapply(Round1Mixtures_2014, function(Mix) {dir.create(paste("BAYES/2014-2015 Mixtures 46loci 14RG/Output/", Mix, sep = ""))})
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
