@@ -5947,3 +5947,218 @@ AssignmentTally <- read.table("self-ass-results.txt", header = TRUE) %>%
   arrange(FromPop, desc(n))
 str(AssignmentTally)
 as.data.frame(AssignmentTally)[1:25,]
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Dog Salmon Weir Collections 2011-2012 ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+rm(list = ls(all = TRUE))
+setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Baseline")
+source("H:/R Source Scripts/Functions.GCL_KS.R")
+source("C:/Users/krshedd/Documents/R/Functions.GCL.R")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### 96 Loci
+## Locus Control
+LocusControl <- dget(file = "Objects/OriginalLocusControl.txt")
+loci96 <- dget(file = "Objects/loci96.txt")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Dog Salmon Weir Collections
+DogSalmonCollections5 <- c("SDOGSC11E", "SDOGSC11EJ", "SDOGSC11W", "SDOGSC12E", "SDOGSC12W")
+
+LOKI2R.GCL(sillyvec = DogSalmonCollections5, username = "krshedd", password = password)
+rm(password)
+
+
+## Save unaltered .gcl's as back-up:
+invisible(sapply(DogSalmonCollections5, function(silly) {dput(x = get(paste(silly, ".gcl", sep = '')), file = paste("Raw genotypes/OriginalCollections/" , silly, ".txt", sep = ''))} )); beep(5)
+
+## Original sample sizes by SILLY
+collection.size.original <- sapply(DogSalmonCollections5, function(silly) get(paste(silly, ".gcl", sep = ""))$n)
+collection.size.original
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# QC DogSalmonCollections5
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Check loci
+## Get sample size by locus
+Original_DogSalmonCollections5_SampleSizebyLocus <- SampSizeByLocus.GCL(sillyvec = DogSalmonCollections5, loci = loci96)
+min(Original_DogSalmonCollections5_SampleSizebyLocus)  ## 68
+apply(Original_DogSalmonCollections5_SampleSizebyLocus, 1, min) / apply(Original_DogSalmonCollections5_SampleSizebyLocus, 1, max)  ## Good, 0.91
+
+Original_DogSalmonCollections5_PercentbyLocus <- apply(Original_DogSalmonCollections5_SampleSizebyLocus, 1, function(row) {row / max(row)} )
+which(apply(Original_DogSalmonCollections5_PercentbyLocus, 2, min) < 0.8)  # no re-runs!
+
+require(lattice)
+new.colors <- colorRampPalette(c("black", "white"))
+levelplot(t(Original_DogSalmonCollections5_PercentbyLocus), 
+          col.regions = new.colors, 
+          at = seq(from = 0, to = 1, length.out = 100), 
+          main = "% Genotyped", xlab = "SILLY", ylab = "Locus", 
+          scales = list(x = list(rot = 90)), 
+          aspect = "fill")  # aspect = "iso" will make squares
+
+
+#### Check individuals
+## View Histogram of Failure Rate by Strata
+invisible(sapply(DogSalmonCollections5, function(mix) {
+  my.gcl <- get(paste(mix, ".gcl", sep = ''))
+  failure <- apply(my.gcl$scores[, , 1], 1, function(ind) {sum(ind == "0") / length(ind)} )
+  hist(x = failure, main = mix, xlab = "Failure Rate", col = 8, xlim = c(0, 1), ylim = c(0, 20), breaks = seq(from = 0, to = 1, by = 0.02))
+  abline(v = 0.2, lwd = 3)
+}))
+
+
+
+DogSalmonCollections5_SampleSizes <- matrix(data = NA, nrow = length(DogSalmonCollections5), ncol = 5, 
+                               dimnames = list(DogSalmonCollections5, c("Genotyped", "Alternate", "Missing", "Duplicate", "Final")))
+
+### Initial
+## Get number of individuals per silly before removing missing loci individuals
+Original_DogSalmonCollections5_ColSize <- sapply(paste(DogSalmonCollections5, ".gcl", sep = ''), function(x) get(x)$n)
+DogSalmonCollections5_SampleSizes[, "Genotyped"] <- Original_DogSalmonCollections5_ColSize
+
+
+### Alternate
+## Indentify alternate species individuals
+DogSalmonCollections5_Alternate <- FindAlternateSpecies.GCL(sillyvec = DogSalmonCollections5, species = "sockeye")
+
+## Remove Alternate species individuals
+RemoveAlternateSpecies.GCL(AlternateSpeciesReport = DogSalmonCollections5_Alternate, AlternateCutOff = 0.5, FailedCutOff = 0.5)
+
+## Get number of individuals per silly after removing alternate species individuals
+ColSize_DogSalmonCollections5_PostAlternate <- sapply(paste(DogSalmonCollections5, ".gcl", sep = ''), function(x) get(x)$n)
+DogSalmonCollections5_SampleSizes[, "Alternate"] <- Original_DogSalmonCollections5_ColSize-ColSize_DogSalmonCollections5_PostAlternate
+
+
+### Missing
+## Remove individuals with >20% missing data
+DogSalmonCollections5_MissLoci <- RemoveIndMissLoci.GCL(sillyvec = DogSalmonCollections5, proportion = 0.8)
+
+## Get number of individuals per silly after removing missing loci individuals
+ColSize_DogSalmonCollections5_PostMissLoci <- sapply(paste(DogSalmonCollections5, ".gcl", sep = ''), function(x) get(x)$n)
+DogSalmonCollections5_SampleSizes[, "Missing"] <- ColSize_DogSalmonCollections5_PostAlternate-ColSize_DogSalmonCollections5_PostMissLoci
+
+
+### Duplicate
+## Check within collections for duplicate individuals.
+DogSalmonCollections5_DuplicateCheck95MinProportion <- CheckDupWithinSilly.GCL(sillyvec = DogSalmonCollections5, loci = loci96, quantile = NULL, minproportion = 0.95)
+DogSalmonCollections5_DuplicateCheckReportSummary <- sapply(DogSalmonCollections5, function(x) DogSalmonCollections5_DuplicateCheck95MinProportion[[x]]$report)
+DogSalmonCollections5_DuplicateCheckReportSummary
+
+## Remove duplicate individuals
+DogSalmonCollections5_RemovedDups <- RemoveDups.GCL(DogSalmonCollections5_DuplicateCheck95MinProportion)
+
+## Get number of individuals per silly after removing duplicate individuals
+ColSize_DogSalmonCollections5_PostDuplicate <- sapply(paste(DogSalmonCollections5, ".gcl", sep = ''), function(x) get(x)$n)
+DogSalmonCollections5_SampleSizes[, "Duplicate"] <- ColSize_DogSalmonCollections5_PostMissLoci-ColSize_DogSalmonCollections5_PostDuplicate
+
+
+### Final
+DogSalmonCollections5_SampleSizes[, "Final"] <- ColSize_DogSalmonCollections5_PostDuplicate
+DogSalmonCollections5_SampleSizes
+
+# Lost two fish for missing.
+
+invisible(sapply(DogSalmonCollections5, function(silly) {dput(x = get(paste(silly, ".gcl", sep = '')), file = paste("Raw genotypes/PostQCCollections/" , silly, ".txt", sep = ''))} )); beep(5)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Check HWE in collections (only use diploid loci)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+mito.loci <- dget(file = "Objects/mito.loci.txt")
+
+gcl2Genepop.GCL(sillyvec = DogSalmonCollections5, loci = loci96[-mito.loci], path = "Genepop/DogSalmonCollections5_93nuclearloci.txt", VialNums = TRUE); beep(2)
+
+## Check HWE in Genepop
+# Originally done with Exact test and subsequently re-done with MCMC
+HWE <- ReadGenepopHWE.GCL(file = "Genepop/DogSalmonCollections5_93nuclearloci.txt.P")
+str(HWE)
+
+
+sapply(as.character(unique(HWE$DataByPop$Pop)), function(pop) {
+  x <- subset(x = HWE$DataByPop, subset = Pop == pop)
+  plot(sort(x[, "WC Fis"]), type = "h", lwd = 5, ylab = "WC Fis", xlab = "Loci (sorted)", col = "grey40", main = pop)
+  abline(h = 0, lwd = 5)
+  x[x$PValue[!is.na(x$PValue)] < 0.05, ]
+}, USE.NAMES = TRUE, simplify = FALSE
+)
+
+HWE$SummaryPValues
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Add these weir collections to MDS
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+FrazerKarlukAyakulik41Collections <- dget(file = "Objects/FrazerKarlukAyakulik41Collections.txt")
+FrazerKarlukAyakulik42Collections <- c("SSUMMM09", FrazerKarlukAyakulik41Collections)
+
+invisible(sapply(FrazerKarlukAyakulik42Collections, function(silly) {assign(x = paste(silly, ".gcl", sep = ""), value = dget(file = paste(getwd(), "/Raw genotypes/PostQCCollections/", silly, ".txt", sep = "")), pos = 1)})); beep(2)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Get objects
+KMAobjects <- list.files(path = "Objects", recursive = FALSE)
+KMAobjects <- KMAobjects[!KMAobjects %in% c("OLD", "Likelihood Profiles", "OriginalLocusControl.txt")]
+KMAobjects
+
+invisible(sapply(KMAobjects, function(objct) {assign(x = unlist(strsplit(x = objct, split = ".txt")), value = dget(file = paste(getwd(), "Objects", objct, sep = "/")), pos = 1) })); beep(2)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Combine Loci
+CombineLoci.GCL(sillyvec = c(DogSalmonCollections5, FrazerKarlukAyakulik42Collections), markerset = c("One_CO1", "One_Cytb_17", "One_Cytb_26"), update = TRUE); beep(2)
+CombineLoci.GCL(sillyvec = c(DogSalmonCollections5, FrazerKarlukAyakulik42Collections), markerset = c("One_Tf_ex10-750", "One_Tf_ex3-182"), update = TRUE); beep(2)
+
+loci89
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## MDS 89 loci
+ gcl2Genepop.GCL(sillyvec = c(DogSalmonCollections5, FrazerKarlukAyakulik42Collections), loci = loci89, path = "Genepop/FrazerKarlukAyakulik47Collections_89loci.gen", VialNums = TRUE)
+
+detach("package:adegenet", unload = TRUE)
+require(package = adegenet, lib.loc = "C:/Users/krshedd/Documents/R/win-library/3.1")
+
+genind <- read.genepop(file = "Genepop/FrazerKarlukAyakulik47Collections_89loci.gen")
+
+genpop <- genind2genpop(genind)
+
+# AdegenetNei47Col89loci <- dist.genpop(genpop, method = 1, diag = TRUE, upper = TRUE)
+# dput(x = AdegenetNei47Col89loci, file = "Trees/AdegenetNei47Col89loci.txt")
+AdegenetNei47Col89loci <- dget(file = "Trees/AdegenetNei47Col89loci.txt")
+str(AdegenetNei47Col89loci)
+
+require(ape)
+Nei47NJtree <- nj(AdegenetNei47Col89loci)
+str(Nei47NJtree)
+Nei47NJtree$tip.label <- readClipboard()
+plot.phylo(x = Nei47NJtree, cex = 0.5, no.margin = TRUE)
+
+library('rgl')
+
+MDS <- cmdscale(as.matrix(AdegenetNei47Col89loci), k = 3)
+# MDS <- cmdscale(as.matrix(AdegenetNei47Col89loci), k = 40, eig = TRUE)  # Do with all possible dimensions
+# dput(x = MDS, file = "Objects/MDSAdegenetNei47Col89loci.txt")
+# dput(x = MDS, file = "Objects/MDSAdegenetNei47Col89loci_alldim.txt")
+MDS <- dget(file = "Objects/MDSAdegenetNei47Col89loci.txt")
+
+x <- as.vector(MDS[, 1])   
+y <- as.vector(MDS[, 2])
+z <- as.vector(MDS[, 3])
+
+
+FrazerKarlukAyakulik47Collections <- c(DogSalmonCollections5, FrazerKarlukAyakulik42Collections)
+FrazerKarlukAyakulik42CollectionsGroupVec3 <- c(5, FrazerKarlukAyakulik41CollectionsGroupVec3)
+FrazerKarlukAyakulik47CollectionsGroupVec3 <- c(rep(5, 5), FrazerKarlukAyakulik42CollectionsGroupVec3)
+Colors15 <- dget(file = "Objects/Colors15.txt")
+
+
+open3d()
+par(family = "serif")
+plot3d(x, y, z + abs(range(z)[1]), xlab = '', ylab = '', zlab = '', aspect = FALSE, col = Colors15[FrazerKarlukAyakulik47CollectionsGroupVec3], size = 0.5, type = 's', axes = TRUE, box = TRUE, top = TRUE, cex = 1)
+box3d()
+# plot3d(x, y, z + abs(range(z)[1]), aspect = FALSE, col = "black", size = 0.5, type = 'h', box = TRUE, axes = FALSE, top = FALSE, add = TRUE)  # adds pins to spheres
+# texts3d(x, y, z + abs(range(z)[1]), adj = c(-0.8, 0.8), text = seq(FrazerKarlukAyakulik47Collections), font = 2, cex = 0.8, add = TRUE, top = TRUE, axes = FALSE)  # adds numbers to points(adj moves the numbers around the points)
+texts3d(x, y, z + abs(range(z)[1]), adj = c(-0.2, 0.2), text = FrazerKarlukAyakulik47Collections, font = 2, cex = 0.8, add = TRUE, top = TRUE, axes = FALSE)  # adds numbers to points(adj moves the numbers around the points)
+rgl.snapshot("MDS/MDSAdegenetNei47ColFrazerKarlukAyakulik89loci.png", fmt="png", top=TRUE )
