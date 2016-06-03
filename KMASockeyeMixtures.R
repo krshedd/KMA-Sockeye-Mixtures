@@ -1074,8 +1074,8 @@ sapply(Round1Mixtures_2014, function(Mix) {dir.create(paste("BAYES/2014-2015 Mix
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Summarize Round 1 Output ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Round1Mixtures_2014_Estimates <- CustomCombineBAYESOutput.GCL(groupvec = seq(KMA15GroupsPC), groupnames = KMA15GroupsPC, 
-                                                              maindir = "BAYES/2014-2015 Mixtures 46loci/Output", 
+Round1Mixtures_2014_Estimates <- CustomCombineBAYESOutput.GCL(groupvec = seq(KMA14GroupsPC), groupnames = KMA14GroupsPC, 
+                                                              maindir = "BAYES/2014-2015 Mixtures 46loci 14RG/Output", 
                                                               mixvec = Round1Mixtures_2014, prior = "",  
                                                               ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1, PosteriorOutput = TRUE)
 
@@ -1093,7 +1093,7 @@ sapply(Round1Mixtures_2014_Estimates$Stats, function(Mix) {table(Mix[, "GR"] > 1
 sapply(Round1Mixtures_2014[c(3, 4, 2, 1, 5)], function(Mix) {
   BarPlot <- barplot2(Round1Mixtures_2014_EstimatesStats[[Mix]][, "GR"], col = "blue", ylim = c(1, pmax(1.5, max(Round1Mixtures_2014_EstimatesStats[[Mix]][, "GR"]))), ylab = "Gelman-Rubin", type = "h", xpd = FALSE, main = Mix, names.arg = '')
   abline(h = 1.2, lwd = 3, xpd = FALSE)
-  text(x = BarPlot, y = 1, labels = KMA15GroupsPC2Rows, srt = 0, pos = 1, xpd = TRUE, cex = 0.55)
+  text(x = BarPlot, y = 1, labels = KMA14GroupsPC2Rows, srt = 0, pos = 1, xpd = TRUE, cex = 0.55)
   })
 
 # Quick look at raw posterior output
@@ -1136,7 +1136,7 @@ PlotPosterior <- function(mixvec = NULL, output, header = NULL, groups, colors =
 dput(x = PlotPosterior, file = "Objects/PlotPosterior.txt")
 
 PlotPosterior(mixvec = Round1Mixtures_2014[c(3, 4, 2, 1, 5)], output = Round1Mixtures_2014_Estimates$Output, 
-              groups = KMA15GroupsPC, colors = KMA15Colors, 
+              groups = KMA14GroupsPC, colors = KMA14Colors, 
               header = Round1Mixtures_2014_Header, set.mfrow = c(5, 3), thin = 10)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1167,7 +1167,7 @@ QuickPlot <- function(mixvec, estimatesstats, groups, groups2rows = NULL, colors
 }
 dput(x = QuickPlot, file = "Objects/QuickPlot.txt")
 
-QuickPlot(mixvec = Round1Mixtures_2014, estimatesstats = Round1Mixtures_2014_Estimates, groups = KMA15GroupsPC, groups2rows = KMA15GroupsPC2Rows, colors = KMA15Colors, header = Round1Mixtures_2014_Header)
+QuickPlot(mixvec = Round1Mixtures_2014, estimatesstats = Round1Mixtures_2014_Estimates, groups = KMA14GroupsPC, groups2rows = KMA14GroupsPC2Rows, colors = KMA14Colors, header = Round1Mixtures_2014_Header)
 
 
 ## Barplots
@@ -1201,7 +1201,7 @@ QuickBarplot <- function(mixvec, estimatesstats, groups, groups2rows = NULL, hea
   par(mar = c(5.1, 4.1, 4.1, 2.1))
 }
 dput(x = QuickBarplot, file = "Objects/QuickBarplot.txt")
-QuickBarplot(mixvec = Round1Mixtures_2014, estimatesstats = Round1Mixtures_2014_Estimates, groups = KMA15GroupsPC, groups2rows = KMA15GroupsPC2Rows, header = Round1Mixtures_2014_Header)
+QuickBarplot(mixvec = Round1Mixtures_2014, estimatesstats = Round1Mixtures_2014_Estimates, groups = KMA14GroupsPC, groups2rows = KMA14GroupsPC2Rows, header = Round1Mixtures_2014_Header)
 
 
 ## Make violin plots of posteriors with RGs sorted
@@ -1227,123 +1227,8 @@ ViolinPlot <- function(mixvec = NULL, estimates, groups, colors, header, wex = 1
 dput(x = ViolinPlot, file = "Objects/ViolinPlot.txt")
 
 
-ViolinPlot(estimates = Round1Mixtures_2014_Estimates, groups = KMA15GroupsPC2Rows, colors = KMA15Colors, header = Round1Mixtures_2014_Header)
+ViolinPlot(estimates = Round1Mixtures_2014_Estimates, groups = KMA14GroupsPC2Rows, colors = KMA14Colors, header = Round1Mixtures_2014_Header)
 rm(Round1Mixtures_2014_Estimates)
-
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#### Looking into Alitak Middle Within Chain Convergence Issues ####
-# Clearly, Frazer and Ayakulik reporting groups fail to converge on a stable mode
-# The distribution is bimodal, as the posterior jumps around
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-# Pulling entire posterior with no burn-in
-Round1Alitak_2014_Estimates <- CustomCombineBAYESOutput.GCL(groupvec = seq(KMA15GroupsPC), groupnames = KMA15GroupsPC, 
-                                                              maindir = "BAYES/2014-2015 Mixtures 46loci/Output", 
-                                                              mixvec = "SALITC14_2_Middle", prior = "",  
-                                                              ext = "RGN", nchains = 5, burn = 0, alpha = 0.1, PosteriorOutput = TRUE)
-
-# Plotting entire posterior with no burn-in
-nchains <- 5
-RG <- "Frazer"
-# RG <- "Ayakulik"
-par(mfrow = c(5, 1), mar = c(2.1, 2.1, 1.1, 1.1), oma = c(4.1, 4.1, 3.1, 0))
-sapply(seq(nchains), function(chain) {
-  posterior.length <- dim(Round1Alitak_2014_Estimates$Output$SALITC14_2_Middle)[1] / nchains
-  plot(Round1Alitak_2014_Estimates$Output$SALITC14_2_Middle[seq(from = (chain - 1) * posterior.length + 1, length.out = posterior.length), which(KMA15GroupsPC == RG)], 
-       type = "l", ylim = c(0, 1), xlab = '', ylab = '')
-  abline(v = posterior.length / 2, lwd = 2)
-  text(x = posterior.length / 4, y = 1, labels = "Burn-in", pos = 1)
-  text(x = posterior.length / 4 * 3, y = 1, labels = "Posterior", pos = 1)} )
-mtext(text = paste("Alitak 2014 Middle Strata: ", RG, sep = ''), side = 3, outer = TRUE, cex = 1.5)
-mtext(text = "Iteration (5 chains each)", side = 1, outer = TRUE, cex = 1.5, line = 1.5)
-mtext(text = "Posterior", side = 2, outer = TRUE, cex = 1.5, line = 1.5)
-par(mfrow = c(1, 1), mar = c(5.1, 4.1, 4.1, 2.1), oma = c(0, 0, 0, 0))
-
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Looking at different ways to measure MCMC convergence, both within and between chains
-# Following methods from <http://www.people.fas.harvard.edu/~plam/teaching/methods/convergence/convergence_print.pdf>
-# All done with the "coda" package; code is taken from CustomCombine.
-groupvec = seq(KMA15GroupsPC)
-groupnames = KMA15GroupsPC
-maindir = "BAYES/2014-2015 Mixtures 46loci/Output"
-mixvec = "SALITC14_2_Middle"
-mix = "SALITC14_2_Middle"
-prior = ""
-ext = "RGN"
-nchains = 5
-burn = 0.5
-alpha = 0.1
-PosteriorOutput = TRUE
-
-
-
-require(coda)
-
-G <- max(groupvec)
-
-C <- length(groupvec)
-
-nummix <- length(mixvec)
-
-results <- setNames(vector("list",nummix),mixvec)
-
-Output <- setNames(vector("list",nummix),mixvec)
-
-filenames <- paste(maindir,"\\",mix,"\\",mix,prior,"Chain",1:nchains,ext,".",ext,sep="")
-
-files <- lapply(filenames,function(filename){mcmc(as.matrix(read.table(filename)[,-1]))})
-
-end <- sapply(files,nrow)
-
-if(length(unique(end))>1){stop("Chains must be the same length!!!")}
-
-end <- end[1]
-
-begin <- floor(burn*end)+1
-
-files4GR <- vector("list",nchains)
-
-for(chain in seq(nchains)){
-  
-  files4GR[[chain]] <- as.mcmc(t(rowsum(t(files[[chain]][begin:end,]),group=groupvec)))
-  
-}#chain
-
-files4GR <- as.mcmc.list(files4GR)    
-str(files4GR)
-
-# Gelman-Ruben (between chain)
-GR <- gelman.diag(files4GR,multivariate=FALSE,transform=TRUE)
-GR
-gelman.plot(files4GR, ylim = c(1, 2))
-
-# Raftery-Lewis (within chain)
-RL <- raftery.diag(files4GR, q = 0.025, r = 0.005, s = 0.95, converge.eps = 0.001) 
-RL
-RL.BAYES <- raftery.diag(files4GR, q = 0.975, r = 0.02, s = 0.95, converge.eps = 0.001) 
-RL.BAYES
-
-RL.BAYES.Median <- raftery.diag(files4GR, q = 0.5, r = 0.02, s = 0.95, converge.eps = 0.001) 
-RL.BAYES.Median
-
-summary(files4GR)
-
-# Plot trace and density
-plot(files4GR)
-
-# Plot running mean
-par(mfrow = c(5, 1), mar = c(2.1, 2.1, 1.1, 1.1), oma = c(4.1, 4.1, 3.1, 0))
-lapply(files4GR, function(chain) {
-  plot(sapply(seq(dim(chain)[1]), function(iter) {mean(chain[seq(from = 1, to = iter), 5])}), type = "l", ylim = c(0.45, 0.6))
-} )
-mtext(text = paste("Alitak 2014 Middle Strata: Frazer", sep = ''), side = 3, outer = TRUE, cex = 1.5)
-mtext(text = "Iteration", side = 1, outer = TRUE, cex = 1.5, line = 1.5)
-mtext(text = "Running Mean Posterior", side = 2, outer = TRUE, cex = 1.5, line = 1.5)
-
-# Ultimately, we decided to run this out much farther and see if it stabilizes on one of the modes (200K vs. 40K)
-# Also going to re-do the proof test such that we grab only early-Karluk/early-Ayakulik vs. Frazer and then again with late-Karluk/late-Frazer
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1355,7 +1240,7 @@ KMA31GroupsPC <- readClipboard()
 dput(x = KMA31GroupsPC, file = "Objects/KMA31GroupsPC.txt")
 
 Round1Mixtures_2014_31RG_Estimates <- CustomCombineBAYESOutput.GCL(groupvec = KMA473PopsGroupVec31, groupnames = KMA31GroupsPC, 
-                                                                   maindir = "BAYES/2014-2015 Mixtures 46loci/Output/40K Iterations", 
+                                                                   maindir = "BAYES/2014-2015 Mixtures 46loci 14RG/Output/40K Iterations", 
                                                                    mixvec = Round1Mixtures_2014, prior = "",  
                                                                    ext = "BOT", nchains = 5, burn = 0.5, alpha = 0.1, PosteriorOutput = TRUE)
 str(Round1Mixtures_2014_31RG_Estimates)
