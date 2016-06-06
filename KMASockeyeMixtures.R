@@ -1343,14 +1343,14 @@ rm(Round2Mixtures_2014_Estimates)
 
 ## Dumping a New Control file that goes out further!
 
-sapply(Round2Mixtures_2014, function(Mix) {
+sapply(Round2Mixtures_2014[c(1, 4)], function(Mix) {
   CreateControlFile.GCL(sillyvec = KMA473Pops, loci = loci46, mixname = Mix, basename = "KMA473Pops46Markers", suffix = "", nreps = 80000, nchains = 5,
                         groupvec = KMA473PopsGroupVec14, priorvec = Round2Mixtures_2014_Prior[[Mix]], initmat = KMA473PopsInits, dir = "BAYES/2014-2015 Mixtures 46loci 14RG/Control",
                         seeds = WASSIPSockeyeSeeds, thin = c(1, 1, 100), mixfortran = KMA47346MixtureFormat, basefortran = KMA47346Baseline, switches = "F T F T T T F")
 })
 
 ## Create output directory
-sapply(Round2Mixtures_2014, function(Mix) {dir.create(paste("BAYES/2014-2015 Mixtures 46loci 14RG/Output/", Mix, sep = ""))})
+sapply(Round2Mixtures_2014[c(1, 4)], function(Mix) {dir.create(paste("BAYES/2014-2015 Mixtures 46loci 14RG/Output/", Mix, sep = ""))})
 # Will rename later, but leave as is for now for BayesCopyPaste.GCL
 
 
