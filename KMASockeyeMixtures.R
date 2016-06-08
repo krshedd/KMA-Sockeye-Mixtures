@@ -1359,7 +1359,7 @@ sapply(Round2Mixtures_2014[c(1, 4)], function(Mix) {dir.create(paste("BAYES/2014
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Round2Mixtures80K_2014_Estimates <- CustomCombineBAYESOutput.GCL(groupvec = seq(KMA14GroupsPC), groupnames = KMA14GroupsPC, 
                                                                  maindir = "BAYES/2014-2015 Mixtures 46loci 14RG/Output/80K Iterations", 
-                                                                 mixvec = Round2Mixtures_2014, prior = "",  
+                                                                 mixvec = Round2Mixtures_2014[c(1, 4)], prior = "",  
                                                                  ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1, PosteriorOutput = TRUE)
 
 # Dput 1) estimates stats + posterior output & 2) estimates stats
@@ -1372,8 +1372,8 @@ Round2Mixtures80K_2014_EstimatesStats <- dget(file = "Estimates objects/Round2Mi
 
 # Verify that Gelman-Rubin < 1.2
 sapply(Round2Mixtures80K_2014_Estimates$Stats, function(Mix) {Mix[, "GR"]})
-sapply(Round2Mixtures80K_2014_Estimates$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # Issues with SAYAKC14_2_Middle and SUYAKC14_2_
-sapply(Round2Mixtures_2014[c(3, 4, 2, 1)], function(Mix) {
+sapply(Round2Mixtures80K_2014_Estimates$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # SUYAKC14_2_
+sapply(Round2Mixtures_2014[c(4, 1)], function(Mix) {
   par(mfrow = c(1, 1))
   BarPlot <- barplot2(Round2Mixtures80K_2014_EstimatesStats[[Mix]][, "GR"], col = "blue", ylim = c(1, pmax(1.5, max(Round2Mixtures80K_2014_EstimatesStats[[Mix]][, "GR"]))), ylab = "Gelman-Rubin", xpd = FALSE, main = Mix, names.arg = '')
   abline(h = 1.2, lwd = 3, xpd = FALSE)
@@ -1383,7 +1383,7 @@ sapply(Round2Mixtures_2014[c(3, 4, 2, 1)], function(Mix) {
 # Quick look at raw posterior output
 str(Round2Mixtures80K_2014_Estimates$Output)
 
-PlotPosterior(mixvec = Round2Mixtures_2014[c(3, 4, 2, 1)], output = Round2Mixtures80K_2014_Estimates$Output, 
+PlotPosterior(mixvec = Round2Mixtures_2014[c(4, 1)], output = Round2Mixtures80K_2014_Estimates$Output, 
               groups = KMA14GroupsPC, colors = KMA14Colors, 
               header = Round2Mixtures_2014_Header, set.mfrow = c(5, 3), thin = 10)
 
@@ -1391,13 +1391,13 @@ PlotPosterior(mixvec = Round2Mixtures_2014[c(3, 4, 2, 1)], output = Round2Mixtur
 #### Plot Round 2 Repeated 80K Results ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## Quick and dirty plot
-QuickPlot(mixvec = Round2Mixtures_2014[c(3, 4, 2, 1)], estimatesstats = Round2Mixtures80K_2014_Estimates, groups = KMA14GroupsPC, groups2rows = KMA14GroupsPC2Rows, colors = KMA14Colors, header = Round2Mixtures_2014_Header)
+QuickPlot(mixvec = Round2Mixtures_2014[c(4, 1)], estimatesstats = Round2Mixtures80K_2014_Estimates, groups = KMA14GroupsPC, groups2rows = KMA14GroupsPC2Rows, colors = KMA14Colors, header = Round2Mixtures_2014_Header[c(4, 1)])
 
 ## Quick barplot
-QuickBarplot(mixvec = Round2Mixtures_2014[c(3, 4, 2, 1)], estimatesstats = Round2Mixtures80K_2014_Estimates, groups = KMA14GroupsPC, groups2rows = KMA14GroupsPC2Rows, header = Round2Mixtures_2014_Header)
+QuickBarplot(mixvec = Round2Mixtures_2014[c(4, 1)], estimatesstats = Round2Mixtures80K_2014_Estimates, groups = KMA14GroupsPC, groups2rows = KMA14GroupsPC2Rows, header = Round2Mixtures_2014_Header[c(4, 1)])
 
 ## Make violin plots of posteriors with RGs sorted
-ViolinPlot(mixvec = Round2Mixtures_2014[c(3, 4, 2, 1)], estimates = Round2Mixtures80K_2014_Estimates, groups = KMA14GroupsPC2Rows, colors = KMA14Colors, header = Round2Mixtures_2014_Header)
+ViolinPlot(mixvec = Round2Mixtures_2014[c(4, 1)], estimates = Round2Mixtures80K_2014_Estimates, groups = KMA14GroupsPC2Rows, colors = KMA14Colors, header = Round2Mixtures_2014_Header[c(4, 1)])
 rm(Round2Mixtures80K_2014_Estimates)
 
 
@@ -1405,7 +1405,11 @@ rm(Round2Mixtures80K_2014_Estimates)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## Compare Results from 40K to 80K
-sapply(Round2Mixtures_2014[c(3, 4, 2, 1)], function(Mix) {
+Round2Mixtures_2014_Estimates <- dget(file = "Estimates objects/Round2Mixtures_2014_Estimates.txt")
+Round2Mixtures_2014_EstimatesStats <- dget(file = "Estimates objects/Round2Mixtures_2014_EstimatesStats.txt")
+
+
+sapply(Round2Mixtures_2014[c(4, 1)], function(Mix) {
   par(mar = c(3.1, 5.1, 3.1, 2.1))
   Barplot <- barplot2(height = t(matrix(data = c(Round2Mixtures_2014_EstimatesStats[[Mix]][, "median"],
                                                  Round2Mixtures80K_2014_EstimatesStats[[Mix]][, "median"]) * 100, 
@@ -1427,42 +1431,40 @@ sapply(Round2Mixtures_2014[c(3, 4, 2, 1)], function(Mix) {
 
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Dputting Final Round 2 Estimates ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Keeping 40K iteration results from SKARLC14_2_Middle and SUGANC14_2_Middle as GR was < 1.2 and thats "our business rule"
+# Using 80K iteration results from SAYAKC14_2_Middle and SUYAKC14_2_Middle
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## Compare Results from June 40K to July 80K
-Mixtures_2014_Header <- setNames(object = c("Ayakulik Section 2014",
-                                            "Karluk Section 2014",
-                                            "Uganik Section 2014",
-                                            "Uyak Section 2014"), 
-                                 nm = KMA2014[2:5])
+sapply(Round2Mixtures_2014_Estimates$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # Issues with SAYAKC14_2_Middle and SUYAKC14_2_Middle
+sapply(Round2Mixtures80K_2014_Estimates$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # SUYAKC14_2_Middle still an issue, but going to live with it
 
-sapply(KMA2014[c(4, 5, 3, 2)], function(Mix) {
-  par(mar = c(3.1, 5.1, 3.1, 2.1))
-  Barplot <- barplot2(height = t(matrix(data = c(Round1Mixtures_2014_EstimatesStats[[paste(Mix, "_1_Early", sep = '')]][, "median"],
-                                                 Round2Mixtures80K_2014_EstimatesStats[[paste(Mix, "_2_Middle", sep = '')]][, "median"]) * 100, 
-                                        ncol = 2, dimnames = list(KMA14GroupsPC, c("Early", "Middle")))),
-                      beside = TRUE, plot.ci = TRUE, ci.lwd = 2, 
-                      ci.l = t(matrix(data = c(Round1Mixtures_2014_EstimatesStats[[paste(Mix, "_1_Early", sep = '')]][, "5%"],
-                                               Round2Mixtures80K_2014_EstimatesStats[[paste(Mix, "_2_Middle", sep = '')]][, "5%"]) * 100,
-                                      ncol = 2, dimnames = list(KMA14GroupsPC, c("Early", "Middle")))),
-                      ci.u = t(matrix(data = c(Round1Mixtures_2014_EstimatesStats[[paste(Mix, "_1_Early", sep = '')]][, "95%"],
-                                               Round2Mixtures80K_2014_EstimatesStats[[paste(Mix, "_2_Middle", sep = '')]][, "95%"]) * 100,
-                                      ncol = 2, dimnames = list(KMA14GroupsPC, c("Early", "Middle")))),
-                      ylim = c(0, 100), col = colorpanel(n = 2, low = "blue", high = "white"), yaxt = 'n', xaxt = 'n', 
-                      main = Mixtures_2014_Header[Mix], ylab = "Percent of Mixture", cex.lab = 2, cex.main = 2)
-  axis(side = 2, at = seq(0, 100, 25), labels = formatC(x = seq(0, 100, 25), big.mark = "," , digits = 0, format = "f"), cex.axis = 1.5)
-  abline(h = 0, xpd = FALSE)
-  mtext(text = KMA14GroupsPC2Rows, side = 1, line = 1, at = apply(Barplot, 2, mean), adj = 0.5, cex = 0.6)
-  legend("topleft", legend = c("Early - June 1-27", "Middle - June 28 - July 25"), fill = colorpanel(n = 2, low = "blue", high = "white"), bty = 'n', cex = 1.5)
-})
+round(cbind("40K" = Round2Mixtures_2014_Estimates$Stats$SUYAKC14_2_Middle[, "GR"],
+            "80K" = Round2Mixtures80K_2014_Estimates$Stats$SUYAKC14_2_Middle[, "GR"]), 2)
+
+str(Round2Mixtures_2014_Estimates)
+Round2Mixtures_2014
+
+Round2Mixtures_2014_Estimates_Final <- list(Stats = c(Round2Mixtures80K_2014_Estimates$Stats["SAYAKC14_2_Middle"],
+                                                         Round2Mixtures_2014_Estimates$Stats[c("SKARLC14_2_Middle", "SUGANC14_2_Middle")],
+                                                         Round2Mixtures80K_2014_Estimates$Stats["SUYAKC14_2_Middle"]),
+                                            Output = c(Round2Mixtures80K_2014_Estimates$Output["SAYAKC14_2_Middle"],
+                                                       Round2Mixtures_2014_Estimates$Output[c("SKARLC14_2_Middle", "SUGANC14_2_Middle")],
+                                                       Round2Mixtures80K_2014_Estimates$Output["SUYAKC14_2_Middle"]))
+str(Round2Mixtures_2014_Estimates_Final)
+dput(x = Round2Mixtures_2014_Estimates_Final, file = "Estimates objects/Round2Mixtures_2014_Estimates_Final.txt")
+dput(x = Round2Mixtures_2014_Estimates_Final$Stats, file = "Estimates objects/Round2Mixtures_2014_EstimatesStats_Final.txt")
+
+Round2Mixtures_2014_Estimates_Final <- dget(file = "Estimates objects/Round2Mixtures_2014_Estimates_Final.txt")
+Round2Mixtures_2014_EstimatesStats_Final <- dget(file = "Estimates objects/Round2Mixtures_2014_EstimatesStats_Final.txt")
+
+sapply(Round2Mixtures_2014_Estimates_Final$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # South of Cape Suckling out for SUYAKC14_2_Middle
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Sneak Peak Round 2 Results with Finer Scale Reporting Groups ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-KMA473PopsGroupVec31 <- as.numeric(readClipboard())
-KMA31GroupsPC <- readClipboard()
-
 Round2Mixtures_2014_31RG_Estimates <- CustomCombineBAYESOutput.GCL(groupvec = KMA473PopsGroupVec31, groupnames = KMA31GroupsPC, 
                                                                    maindir = "BAYES/2014-2015 Mixtures 46loci 14RG/Output/80K Iterations", 
                                                                    mixvec = Round2Mixtures_2014, prior = "",  
@@ -1473,42 +1475,18 @@ QuickBarplot(mixvec = Round1Mixtures_2014[5], estimatesstats = Round1Mixtures_20
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#### Dputting Final Round 2 Estimates ####
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Keeping 40K iteration results from SKARLC14_2_Middle and SUGANC14_2_Middle as GR was < 1.2 and thats "our business rule"
-# Using 80K iteration results from SAYAKC14_2_Middle and SUYAKC14_2_Middle
-
-sapply(Round2Mixtures_2014_Estimates$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # Issues with SAYAKC14_2_Middle and SUYAKC14_2_
-sapply(Round2Mixtures80K_2014_Estimates$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # Resolved
-
-str(Round2Mixtures_2014_Estimates)
-
-Round2Mixtures_2014_Estimates_Final <- list(Stats = c(Round2Mixtures80K_2014_Estimates$Stats[1],
-                                                         Round2Mixtures_2014_Estimates$Stats[2:3],
-                                                         Round2Mixtures80K_2014_Estimates$Stats[4]),
-                                            Output = c(Round2Mixtures80K_2014_Estimates$Output[1],
-                                                       Round2Mixtures_2014_Estimates$Output[2:3],
-                                                       Round2Mixtures80K_2014_Estimates$Output[4]))
-str(Round2Mixtures_2014_Estimates_Final)
-dput(x = Round2Mixtures_2014_Estimates_Final, file = "Estimates objects/Round2Mixtures_2014_Estimates_Final.txt")
-dput(x = Round2Mixtures_2014_Estimates_Final$Stats, file = "Estimates objects/Round2Mixtures_2014_EstimatesStats_Final.txt")
-
-Round2Mixtures_2014_Estimates_Final <- dget(file = "Estimates objects/Round2Mixtures_2014_Estimates_Final.txt")
-Round2Mixtures_2014_EstimatesStats_Final <- dget(file = "Estimates objects/Round2Mixtures_2014_EstimatesStats_Final.txt")
-
-sapply(Round2Mixtures_2014_Estimates_Final$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # No issues
-
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Round 3 MSA files for BAYES 2014 Late Strata ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Identify Strata to Run
 KMA2014Strata_3_Late <- grep(pattern = "3_Late", x = KMA2014Strata, value = TRUE)
-Round3Mixtures_2014 <- KMA2014Strata_3_Late[-which(KMA2014Strata_3_Late == "SALITC14_3_Late")]  # Remove SALITC14_3_Late as I want to run that out further
+Round3Mixtures_2014 <- KMA2014Strata_3_Late
 dput(x = Round3Mixtures_2014, file = "Objects/Round3Mixtures_2014.txt")
 
 # Create rolling prior based on Round 2 estimates
-Round3Mixtures_2014_Prior <- sapply(Round2Mixtures_2014_EstimatesStats_Final[1:4], function(Mix) {Prior.GCL(groupvec = KMA473PopsGroupVec14, groupweights = Mix[, "mean"], minval = 0.01)}, simplify = FALSE)
+Round1Mixtures_2014_EstimatesStats <- dget(file = "Estimates objects/Round1Mixtures_2014_EstimatesStats.txt")
+
+Round3Mixtures_2014_Prior <- sapply(c(Round1Mixtures_2014_EstimatesStats["SALITC14_2_Middle"], Round2Mixtures_2014_EstimatesStats_Final[1:4]), function(Mix) {Prior.GCL(groupvec = KMA473PopsGroupVec14, groupweights = Mix[, "mean"], minval = 0.01)}, simplify = FALSE)
+str(Round3Mixtures_2014_Prior)
 names(Round3Mixtures_2014_Prior) <- gsub(pattern = "2_Middle", replacement = "3_Late", x = names(Round3Mixtures_2014_Prior))  # This changes the names
 dput(x = Round3Mixtures_2014_Prior, file = "Objects/Round3Mixtures_2014_Prior.txt")
 str(Round3Mixtures_2014_Prior)
@@ -1527,6 +1505,17 @@ sapply(Round3Mixtures_2014, function(Mix) {
 ## Create output directory
 sapply(Round3Mixtures_2014, function(Mix) {dir.create(paste("BAYES/2014-2015 Mixtures 46loci 14RG/Output/", Mix, sep = ""))})
 
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Create Control file for SUGANC14_3_Late 80K as it is known offender from 15RG
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sapply(Round3Mixtures_2014[4], function(Mix) {
+  CreateControlFile.GCL(sillyvec = KMA473Pops, loci = loci46, mixname = Mix, basename = "KMA473Pops46Markers", suffix = "", nreps = 80000, nchains = 5,
+                        groupvec = KMA473PopsGroupVec14, priorvec = Round3Mixtures_2014_Prior[[Mix]], initmat = KMA473PopsInits, dir = "BAYES/2014-2015 Mixtures 46loci 14RG/Control",
+                        seeds = WASSIPSockeyeSeeds, thin = c(1, 1, 100), mixfortran = KMA47346MixtureFormat, basefortran = KMA47346Baseline, switches = "F T F T T T F")
+})
+
+sapply(Round3Mixtures_2014[4], function(Mix) {dir.create(paste("BAYES/2014-2015 Mixtures 46loci 14RG/Output/80K Iterations/", Mix, sep = ""))})
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Go run BAYES
@@ -4607,6 +4596,7 @@ DogSalmonCollections5_SampleSizes
 invisible(sapply(DogSalmonCollections5, function(silly) {dput(x = get(paste(silly, ".gcl", sep = '')), file = paste("Raw genotypes/PostQCCollections/" , silly, ".txt", sep = ''))} )); beep(5)
 
 
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Check HWE in collections (only use diploid loci)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -4704,3 +4694,184 @@ box3d()
 # texts3d(x, y, z + abs(range(z)[1]), adj = c(-0.8, 0.8), text = seq(FrazerKarlukAyakulik47Collections), font = 2, cex = 0.8, add = TRUE, top = TRUE, axes = FALSE)  # adds numbers to points(adj moves the numbers around the points)
 texts3d(x, y, z + abs(range(z)[1]), adj = c(-0.2, 0.2), text = FrazerKarlukAyakulik47Collections, font = 2, cex = 0.8, add = TRUE, top = TRUE, axes = FALSE)  # adds numbers to points(adj moves the numbers around the points)
 rgl.snapshot("MDS/MDSAdegenetNei47ColFrazerKarlukAyakulik89loci.png", fmt="png", top=TRUE )
+
+
+
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Frazer/Ayakulik Structure ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+rm(list = ls(all = TRUE))
+setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Baseline")
+source("H:/R Source Scripts/Functions.GCL_KS.R")
+source("C:/Users/krshedd/Documents/R/Functions.GCL.R")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### 96 Loci
+## Locus Control
+LocusControl <- dget(file = "Objects/OriginalLocusControl.txt")
+loci96 <- dget(file = "Objects/loci96.txt")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Get genotypes
+
+SWKodiakCollections46 <- c("SPINNM08", "SSTUM08", "SCOUR08", "SMIDWS08", "SHOLFS08", "SMIDWM08", "SSUMMM09", "SLINDM08", "SVALA08", "SOUTS08", "SDOGSC08", "SCAIDA14",
+                           "SDOGSC11E", "SDOGSC11EJ", "SDOGSC11W", "SDOGSC12E", "SDOGSC12W",
+                           "SREDSS11", "SREDSWS11", "SREDWS12", "SREDNWS11", "SREDNES11", "SREDCRY11", "SREDCON11", "SAYAK00", "SAYAK08L",
+                           "SAYAK11", "SAYAK12",
+                           "SFAL99E", "SCAN99E", "SCAS99E", "SUTHU99E", "SUTHU00E", "SSAL99E", "SHAL01E", "SGRA99E", "SCOT99E", "SMOR99E",
+                           "SOMALL99", "SKARLSE11", "SKARLSE99L", "SLTHUM99", "STHUS99L", "SKARLW99L", "SKARLE99L",
+                           "SKARL01L")
+
+LOKI2R.GCL(sillyvec = sillyvec, username = "krshedd", password = password)
+sapply(SWKodiakCollections46, function(silly) {LOKI2R.GCL(sillyvec = silly, username = "krshedd", password = password)} )  # looping through due to heap space error when getting all sillys at once
+
+rm(password)
+
+str(SSUMMM09.gcl)
+
+
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# QC
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Check loci
+## Get sample size by locus
+Original_SWKodiakCollections46_SampleSizebyLocus <- SampSizeByLocus.GCL(sillyvec = SWKodiakCollections46, loci = loci96)
+min(Original_SWKodiakCollections46_SampleSizebyLocus)  ## 52
+apply(Original_SWKodiakCollections46_SampleSizebyLocus, 1, min) / apply(Original_SWKodiakCollections46_SampleSizebyLocus, 1, max)  ## Good, 0.91
+
+Original_SWKodiakCollections46_PercentbyLocus <- apply(Original_SWKodiakCollections46_SampleSizebyLocus, 1, function(row) {row / max(row)} )
+which(apply(Original_SWKodiakCollections46_PercentbyLocus, 2, min) < 0.8)  # no re-runs!
+
+require(lattice)
+new.colors <- colorRampPalette(c("black", "white"))
+levelplot(t(Original_SWKodiakCollections46_PercentbyLocus), 
+          col.regions = new.colors, 
+          at = seq(from = 0, to = 1, length.out = 100), 
+          main = "% Genotyped", xlab = "SILLY", ylab = "Locus", 
+          scales = list(x = list(rot = 90)), 
+          aspect = "fill")  # aspect = "iso" will make squares
+
+
+#### Check individuals
+## View Histogram of Failure Rate by Strata
+invisible(sapply(SWKodiakCollections46, function(mix) {
+  my.gcl <- get(paste(mix, ".gcl", sep = ''))
+  failure <- apply(my.gcl$scores[, , 1], 1, function(ind) {sum(ind == "0") / length(ind)} )
+  hist(x = failure, main = mix, xlab = "Failure Rate", col = 8, xlim = c(0, 1), ylim = c(0, 20), breaks = seq(from = 0, to = 1, by = 0.02))
+  abline(v = 0.2, lwd = 3)
+}))
+
+
+
+SWKodiakCollections46_SampleSizes <- matrix(data = NA, nrow = length(SWKodiakCollections46), ncol = 5, 
+                                            dimnames = list(SWKodiakCollections46, c("Genotyped", "Alternate", "Missing", "Duplicate", "Final")))
+
+### Initial
+## Get number of individuals per silly before removing missing loci individuals
+Original_SWKodiakCollections46_ColSize <- sapply(paste(SWKodiakCollections46, ".gcl", sep = ''), function(x) get(x)$n)
+SWKodiakCollections46_SampleSizes[, "Genotyped"] <- Original_SWKodiakCollections46_ColSize
+
+
+### Alternate
+## Indentify alternate species individuals
+SWKodiakCollections46_Alternate <- FindAlternateSpecies.GCL(sillyvec = SWKodiakCollections46, species = "sockeye")
+
+## Remove Alternate species individuals
+RemoveAlternateSpecies.GCL(AlternateSpeciesReport = SWKodiakCollections46_Alternate, AlternateCutOff = 0.5, FailedCutOff = 0.5)
+
+## Get number of individuals per silly after removing alternate species individuals
+ColSize_SWKodiakCollections46_PostAlternate <- sapply(paste(SWKodiakCollections46, ".gcl", sep = ''), function(x) get(x)$n)
+SWKodiakCollections46_SampleSizes[, "Alternate"] <- Original_SWKodiakCollections46_ColSize-ColSize_SWKodiakCollections46_PostAlternate
+
+
+### Missing
+## Remove individuals with >20% missing data
+SWKodiakCollections46_MissLoci <- RemoveIndMissLoci.GCL(sillyvec = SWKodiakCollections46, proportion = 0.8)
+
+## Get number of individuals per silly after removing missing loci individuals
+ColSize_SWKodiakCollections46_PostMissLoci <- sapply(paste(SWKodiakCollections46, ".gcl", sep = ''), function(x) get(x)$n)
+SWKodiakCollections46_SampleSizes[, "Missing"] <- ColSize_SWKodiakCollections46_PostAlternate-ColSize_SWKodiakCollections46_PostMissLoci
+
+
+### Duplicate
+## Check within collections for duplicate individuals.
+SWKodiakCollections46_DuplicateCheck95MinProportion <- CheckDupWithinSilly.GCL(sillyvec = SWKodiakCollections46, loci = loci96, quantile = NULL, minproportion = 0.95)
+SWKodiakCollections46_DuplicateCheckReportSummary <- sapply(SWKodiakCollections46, function(x) SWKodiakCollections46_DuplicateCheck95MinProportion[[x]]$report)
+SWKodiakCollections46_DuplicateCheckReportSummary
+
+## Remove duplicate individuals
+SWKodiakCollections46_RemovedDups <- RemoveDups.GCL(SWKodiakCollections46_DuplicateCheck95MinProportion)
+
+## Get number of individuals per silly after removing duplicate individuals
+ColSize_SWKodiakCollections46_PostDuplicate <- sapply(paste(SWKodiakCollections46, ".gcl", sep = ''), function(x) get(x)$n)
+SWKodiakCollections46_SampleSizes[, "Duplicate"] <- ColSize_SWKodiakCollections46_PostMissLoci-ColSize_SWKodiakCollections46_PostDuplicate
+
+
+### Final
+SWKodiakCollections46_SampleSizes[, "Final"] <- ColSize_SWKodiakCollections46_PostDuplicate
+SWKodiakCollections46_SampleSizes
+
+
+### Dput post-QC fish
+dir.create(path = "Raw genotypes/PostQCCollectionsSWKodiak46")
+invisible(sapply(SWKodiakCollections46, function(silly) {dput(x = get(paste(silly, ".gcl", sep = '')), file = paste("Raw genotypes/PostQCCollectionsSWKodiak46/" , silly, ".txt", sep = ''))} )); beep(8)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Check HWE in collections (only use diploid loci)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+mito.loci <- dget(file = "Objects/mito.loci.txt")
+
+gcl2Genepop.GCL(sillyvec = SWKodiakCollections46, loci = loci96[-mito.loci], path = "Genepop/SWKodiakCollections46_93nuclearloci.txt", VialNums = TRUE); beep(2)
+
+## Check HWE in Genepop
+# Originally done with Exact test and subsequently re-done with MCMC
+HWE <- ReadGenepopHWE.GCL(file = "Genepop/SWKodiakCollections46_93nuclearloci.txt.P")
+str(HWE)
+
+
+sapply(as.character(unique(HWE$DataByPop$Pop)), function(pop) {
+  x <- subset(x = HWE$DataByPop, subset = Pop == pop)
+  plot(sort(x[, "WC Fis"]), type = "h", lwd = 5, ylab = "WC Fis", xlab = "Loci (sorted)", col = "grey40", main = pop)
+  abline(h = 0, lwd = 5)
+  x[x$PValue[!is.na(x$PValue)] < 0.05, ]
+}, USE.NAMES = TRUE, simplify = FALSE
+)
+
+str(HWE$SummaryPValues)
+HWE$SummaryPValues["Overall Loci", ]
+
+sapply(SWKodiakCollections46, function(silly) {
+  hist(HWE$SummaryPValues[1:93, grep(pattern = silly, colnames(HWE$SummaryPValues))], breaks = seq(from = 0, to = 1, by = 0.05), col = 8, main = silly, ylim = c(0, 50), xlab = "HWE P-values")
+  abline(h = 5, lwd = 3, col = "red")
+  })
+
+apply(HWE$SummaryPValues[1:93, seq(SWKodiakCollections46)], 2, function(silly) {sum(silly < 0.05, na.rm = TRUE)})
+hist(apply(HWE$SummaryPValues[1:93, seq(SWKodiakCollections46)], 2, function(silly) {sum(silly < 0.05, na.rm = TRUE)}), main = "# loci out of HWE per collection", xlab = "# loci with HWE P-value < 0.05", breaks = 0:14, col = 8)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Create Genepop for Convert for Structure
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+loci89 <- dget(file = "Objects/loci89.txt")
+
+loci96[!loci96 %in% loci89]
+loci2remove <- c("One_ACBP-79", "One_c3-98", "One_GPDH2", "One_MHC2_251", "One_Tf_ex10-750")
+loci91 <- loci96[!loci96 %in% loci2remove]
+gcl2Genepop.GCL(sillyvec = SWKodiakCollections46, loci = loci91, path = "Genepop/SWKodiakCollections46_loci91.txt", VialNums = TRUE); beep(2)
+
+
+loci2remove <- c("One_ACBP-79", "One_c3-98", "One_CO1", "One_Cytb_17", "One_Cytb_26", "One_GPDH2", "One_MHC2_251", "One_Tf_ex10-750")
+loci88 <- loci96[!loci96 %in% loci2remove]
+gcl2Genepop.GCL(sillyvec = SWKodiakCollections46, loci = loci88, path = "Genepop/SWKodiakCollections46_loci88.txt", VialNums = TRUE); beep(2)
+
+
+
+
+sum(sapply(SWKodiakCollections46, function(silly) {get(paste(silly, ".gcl", sep = ''))$n}))
