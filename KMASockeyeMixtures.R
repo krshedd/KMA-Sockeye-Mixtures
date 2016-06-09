@@ -4784,12 +4784,329 @@ sapply(SWKodiakCollections46, function(silly) {get(paste(silly, ".gcl", sep = ''
 # Stratify SAYAK12, Ayakulik Weir 2012
 table(SAYAK12.gcl$attributes$CAPTURE_DATE)
 
+sort(unique(SAYAK12.gcl$attributes$CAPTURE_DATE))
+
+
+# June 5-11
+AyakulikWeir_June5_11_IDs <- AttributesToIDs.GCL(silly = "SAYAK12", attribute = "CAPTURE_DATE", matching = sort(unique(SAYAK12.gcl$attributes$CAPTURE_DATE))[1:2])
+AyakulikWeir_June5_11_IDs <- list(na.omit(AyakulikWeir_June5_11_IDs))
+names(AyakulikWeir_June5_11_IDs) <- "SAYAK12"
+
+PoolCollections.GCL("SAYAK12", loci = loci96, IDs = AyakulikWeir_June5_11_IDs, newname = "AyakulikWeir_June5_11")
+AyakulikWeir_June5_11.gcl$n
+
+
+# June 17-25
+AyakulikWeir_June17_25_IDs <- AttributesToIDs.GCL(silly = "SAYAK12", attribute = "CAPTURE_DATE", matching = sort(unique(SAYAK12.gcl$attributes$CAPTURE_DATE))[3:4])
+AyakulikWeir_June17_25_IDs <- list(na.omit(AyakulikWeir_June17_25_IDs))
+names(AyakulikWeir_June17_25_IDs) <- "SAYAK12"
+
+PoolCollections.GCL("SAYAK12", loci = loci96, IDs = AyakulikWeir_June17_25_IDs, newname = "AyakulikWeir_June17_25")
+AyakulikWeir_June17_25.gcl$n
+
+
+# July 2-8
+AyakulikWeir_July2_8_IDs <- AttributesToIDs.GCL(silly = "SAYAK12", attribute = "CAPTURE_DATE", matching = sort(unique(SAYAK12.gcl$attributes$CAPTURE_DATE))[5:6])
+AyakulikWeir_July2_8_IDs <- list(na.omit(AyakulikWeir_July2_8_IDs))
+names(AyakulikWeir_July2_8_IDs) <- "SAYAK12"
+
+PoolCollections.GCL("SAYAK12", loci = loci96, IDs = AyakulikWeir_July2_8_IDs, newname = "AyakulikWeir_July2_8")
+AyakulikWeir_July2_8.gcl$n
+
+
+# July 16-19
+AyakulikWeir_July16_19_IDs <- AttributesToIDs.GCL(silly = "SAYAK12", attribute = "CAPTURE_DATE", matching = sort(unique(SAYAK12.gcl$attributes$CAPTURE_DATE))[7:8])
+AyakulikWeir_July16_19_IDs <- list(na.omit(AyakulikWeir_July16_19_IDs))
+names(AyakulikWeir_July16_19_IDs) <- "SAYAK12"
+
+PoolCollections.GCL("SAYAK12", loci = loci96, IDs = AyakulikWeir_July16_19_IDs, newname = "AyakulikWeir_July16_19")
+AyakulikWeir_July16_19.gcl$n
+
+
+# July 26-August 2
+AyakulikWeir_July26_August2_IDs <- AttributesToIDs.GCL(silly = "SAYAK12", attribute = "CAPTURE_DATE", matching = sort(unique(SAYAK12.gcl$attributes$CAPTURE_DATE))[9:10])
+AyakulikWeir_July26_August2_IDs <- list(na.omit(AyakulikWeir_July26_August2_IDs))
+names(AyakulikWeir_July26_August2_IDs) <- "SAYAK12"
+
+PoolCollections.GCL("SAYAK12", loci = loci96, IDs = AyakulikWeir_July26_August2_IDs, newname = "AyakulikWeir_July26_August2")
+AyakulikWeir_July26_August2.gcl$n
+
+
+# August 9-19
+AyakulikWeir_August9_19_IDs <- AttributesToIDs.GCL(silly = "SAYAK12", attribute = "CAPTURE_DATE", matching = sort(unique(SAYAK12.gcl$attributes$CAPTURE_DATE))[11:12])
+AyakulikWeir_August9_19_IDs <- list(na.omit(AyakulikWeir_August9_19_IDs))
+names(AyakulikWeir_August9_19_IDs) <- "SAYAK12"
+
+PoolCollections.GCL("SAYAK12", loci = loci96, IDs = AyakulikWeir_August9_19_IDs, newname = "AyakulikWeir_August9_19")
+AyakulikWeir_August9_19.gcl$n
+
+
+# August 23
+AyakulikWeir_August23_IDs <- AttributesToIDs.GCL(silly = "SAYAK12", attribute = "CAPTURE_DATE", matching = sort(unique(SAYAK12.gcl$attributes$CAPTURE_DATE))[13])
+AyakulikWeir_August23_IDs <- list(na.omit(AyakulikWeir_August23_IDs))
+names(AyakulikWeir_August23_IDs) <- "SAYAK12"
+
+PoolCollections.GCL("SAYAK12", loci = loci96, IDs = AyakulikWeir_August23_IDs, newname = "AyakulikWeir_August23")
+AyakulikWeir_August23.gcl$n
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Stratify SAYAK12, Ayakulik Weir 2012
+# FreqPlot
+
+
+#### All Ayakulik
+
+Ayakulik14Collections <- c(SWKodiakCollections46[23:24], 
+                         "AyakulikWeir_June5_11",
+                         "AyakulikWeir_June17_25",
+                         "AyakulikWeir_July2_8",
+                         "AyakulikWeir_July16_19",
+                         "AyakulikWeir_July26_August2",
+                         "AyakulikWeir_August9_19",
+                         "AyakulikWeir_August23",
+                         SWKodiakCollections46[18:22])
+
+
+sampsizes <- sapply(Ayakulik14Collections, function(silly) {get(paste(silly, ".gcl", sep = ''))$n})
+
+
+# Counts
+Ayakulik14CollectionsPostRemovalsAlleleCounts <- FreqPop.GCL(sillyvec = Ayakulik14Collections, loci = loci96)
+str(Ayakulik14CollectionsPostRemovalsAlleleCounts)
+
+# Frequencies
+Ayakulik14CollectionsPostRemovalsFreqs <- Ayakulik14CollectionsPostRemovalsAlleleCounts[,,"Allele 1"] / (Ayakulik14CollectionsPostRemovalsAlleleCounts[,,"Allele 2"] + Ayakulik14CollectionsPostRemovalsAlleleCounts[,,"Allele 1"])
+str(Ayakulik14CollectionsPostRemovalsFreqs)
+
+# 95% CI
+Ayakulik14CollectionsPostRemovalsFreqs95CI
+sampsizebylocus <- apply(Ayakulik14CollectionsPostRemovalsAlleleCounts, c(1, 2), sum)
+
+Ayakulik14CollectionsPostRemovalsFreqs5CI <- qbinom(p = 0.05, size = sampsizebylocus, prob = Ayakulik14CollectionsPostRemovalsFreqs) / sampsizebylocus
+Ayakulik14CollectionsPostRemovalsFreqs95CI <- qbinom(p = 0.95, size = sampsizebylocus, prob = Ayakulik14CollectionsPostRemovalsFreqs) / sampsizebylocus
+
+
+
+#### Create plots
+## Create groupvec
+Ayakulik14CollectionsGroupVec3 <- c(rep(1, 2), rep(2, 7), rep(3, 5))
+
+
+## Plot points and smoothing line
+getwd()
+pdf(file = "FreqPlots/Ayakulik14Collections_96SNPs_GroupVec2_FreqPlots.pdf",width=11, height=8.5, family="Times",pointsize=20)   
+par(mar = c(2.1, 4.1, 4.1, 4.6))
+for(locus in loci96){
+  plot(Ayakulik14CollectionsPostRemovalsFreqs[, locus], main = locus, col = c("blue", "skyblue", "blue4")[Ayakulik14CollectionsGroupVec3], pch = 19, ylim = c(0, 1), ylab = "Frequency", xlab = "Collections", xaxt = 'n', cex = 1)
+  arrows(x0 = seq(Ayakulik14Collections), x1 = seq(Ayakulik14Collections), y0 = Ayakulik14CollectionsPostRemovalsFreqs5CI[, locus], y1 = Ayakulik14CollectionsPostRemovalsFreqs95CI[, locus], angle = 90, code = 3, lwd = 1.5, length = 0.1)
+  lines(supsmu(seq(length(Ayakulik14Collections)), Ayakulik14CollectionsPostRemovalsFreqs[, locus]), lwd = 2)
+  points(Ayakulik14CollectionsPostRemovalsFreqs[, locus], col = c("blue", "skyblue", "blue4")[Ayakulik14CollectionsGroupVec3], pch = 19, cex = 1)
+  mtext(text = "Collections", side = 1, line = 0.7)
+  text(x = seq(Ayakulik14Collections), y = Ayakulik14CollectionsPostRemovalsFreqs[, locus], labels = seq(Ayakulik14Collections), cex = 0.4, col = "white")
+  text(x = seq(Ayakulik14Collections), y = -0.07, labels = sampsizes, cex = 0.6, xpd = TRUE)
+  legend(x = length(Ayakulik14CollectionsGroupVec3) + length(Ayakulik14CollectionsGroupVec3)/40, y = 0.9, legend = c("Early Baseline", "2012 Weir", "Late Baseline"), fill = c("blue", "skyblue", "blue4"), xpd = TRUE, bty = "n", cex = 0.7)
+}; rm(locus)
+dev.off()
+
+t(t(Ayakulik14Collections))
+
+
+
+
+
+
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Stratify SDOGSC12, Dog Salmon Weir 2012
 table(SDOGSC12E.gcl$attributes$CAPTURE_DATE)
 table(SDOGSC12W.gcl$attributes$CAPTURE_DATE)
 
 PoolCollections.GCL(collections = c("SDOGSC12E", "SDOGSC12W"), loci = loci96, newname = "SDOGSC12")
 str(SDOGSC12.gcl)
 table(SDOGSC12.gcl$attributes$CAPTURE_DATE)
+
+
+# June 25-26
+DogSalmonWeir_June25_26_IDs <- AttributesToIDs.GCL(silly = "SDOGSC12", attribute = "CAPTURE_DATE", matching = sort(unique(SDOGSC12.gcl$attributes$CAPTURE_DATE))[1:2])
+DogSalmonWeir_June25_26_IDs <- list(na.omit(DogSalmonWeir_June25_26_IDs))
+names(DogSalmonWeir_June25_26_IDs) <- "SDOGSC12"
+
+PoolCollections.GCL("SDOGSC12", loci = loci96, IDs = DogSalmonWeir_June25_26_IDs, newname = "DogSalmonWeir_June25_26")
+DogSalmonWeir_June25_26.gcl$n
+
+
+# July 5
+DogSalmonWeir_July5_IDs <- AttributesToIDs.GCL(silly = "SDOGSC12", attribute = "CAPTURE_DATE", matching = sort(unique(SDOGSC12.gcl$attributes$CAPTURE_DATE))[3])
+DogSalmonWeir_July5_IDs <- list(na.omit(DogSalmonWeir_July5_IDs))
+names(DogSalmonWeir_July5_IDs) <- "SDOGSC12"
+
+PoolCollections.GCL("SDOGSC12", loci = loci96, IDs = DogSalmonWeir_July5_IDs, newname = "DogSalmonWeir_July5")
+DogSalmonWeir_July5.gcl$n
+
+
+# July 10-11
+DogSalmonWeir_July10_11_IDs <- AttributesToIDs.GCL(silly = "SDOGSC12", attribute = "CAPTURE_DATE", matching = sort(unique(SDOGSC12.gcl$attributes$CAPTURE_DATE))[4:5])
+DogSalmonWeir_July10_11_IDs <- list(na.omit(DogSalmonWeir_July10_11_IDs))
+names(DogSalmonWeir_July10_11_IDs) <- "SDOGSC12"
+
+PoolCollections.GCL("SDOGSC12", loci = loci96, IDs = DogSalmonWeir_July10_11_IDs, newname = "DogSalmonWeir_July10_11")
+DogSalmonWeir_July10_11.gcl$n
+
+
+# July 16-17
+DogSalmonWeir_July16_17_IDs <- AttributesToIDs.GCL(silly = "SDOGSC12", attribute = "CAPTURE_DATE", matching = sort(unique(SDOGSC12.gcl$attributes$CAPTURE_DATE))[6:7])
+DogSalmonWeir_July16_17_IDs <- list(na.omit(DogSalmonWeir_July16_17_IDs))
+names(DogSalmonWeir_July16_17_IDs) <- "SDOGSC12"
+
+PoolCollections.GCL("SDOGSC12", loci = loci96, IDs = DogSalmonWeir_July16_17_IDs, newname = "DogSalmonWeir_July16_17")
+DogSalmonWeir_July16_17.gcl$n
+
+
+# July 23-24
+DogSalmonWeir_July23_24_IDs <- AttributesToIDs.GCL(silly = "SDOGSC12", attribute = "CAPTURE_DATE", matching = sort(unique(SDOGSC12.gcl$attributes$CAPTURE_DATE))[8:9])
+DogSalmonWeir_July23_24_IDs <- list(na.omit(DogSalmonWeir_July23_24_IDs))
+names(DogSalmonWeir_July23_24_IDs) <- "SDOGSC12"
+
+PoolCollections.GCL("SDOGSC12", loci = loci96, IDs = DogSalmonWeir_July23_24_IDs, newname = "DogSalmonWeir_July23_24")
+DogSalmonWeir_July23_24.gcl$n
+
+
+# July 30-August 7
+DogSalmonWeir_July30_August7_IDs <- AttributesToIDs.GCL(silly = "SDOGSC12", attribute = "CAPTURE_DATE", matching = sort(unique(SDOGSC12.gcl$attributes$CAPTURE_DATE))[10:11])
+DogSalmonWeir_July30_August7_IDs <- list(na.omit(DogSalmonWeir_July30_August7_IDs))
+names(DogSalmonWeir_July30_August7_IDs) <- "SDOGSC12"
+
+PoolCollections.GCL("SDOGSC12", loci = loci96, IDs = DogSalmonWeir_July30_August7_IDs, newname = "DogSalmonWeir_July30_August7")
+DogSalmonWeir_July30_August7.gcl$n
+
+
+# August 13-17
+DogSalmonWeir_August13_17_IDs <- AttributesToIDs.GCL(silly = "SDOGSC12", attribute = "CAPTURE_DATE", matching = sort(unique(SDOGSC12.gcl$attributes$CAPTURE_DATE))[12])
+DogSalmonWeir_August13_17_IDs <- list(na.omit(DogSalmonWeir_August13_17_IDs))
+names(DogSalmonWeir_August13_17_IDs) <- "SDOGSC12"
+
+PoolCollections.GCL("SDOGSC12", loci = loci96, IDs = DogSalmonWeir_August13_17_IDs, newname = "DogSalmonWeir_August13_17")
+DogSalmonWeir_August13_17.gcl$n
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# FreqPlot
+
+
+#### All Frazer
+
+Frazer19Collections <- c(SWKodiakCollections46[1:12], 
+                         "DogSalmonWeir_June25_26",
+                         "DogSalmonWeir_July5",
+                         "DogSalmonWeir_July10_11",
+                         "DogSalmonWeir_July16_17",
+                         "DogSalmonWeir_July23_24",
+                         "DogSalmonWeir_July30_August7",
+                         "DogSalmonWeir_August13_17")
+                         
+
+sampsizes <- sapply(Frazer19Collections, function(silly) {get(paste(silly, ".gcl", sep = ''))$n})
+
+
+# Counts
+Frazer19CollectionsPostRemovalsAlleleCounts <- FreqPop.GCL(sillyvec = Frazer19Collections, loci = loci96)
+str(Frazer19CollectionsPostRemovalsAlleleCounts)
+
+# Frequencies
+Frazer19CollectionsPostRemovalsFreqs <- Frazer19CollectionsPostRemovalsAlleleCounts[,,"Allele 1"] / (Frazer19CollectionsPostRemovalsAlleleCounts[,,"Allele 2"] + Frazer19CollectionsPostRemovalsAlleleCounts[,,"Allele 1"])
+str(Frazer19CollectionsPostRemovalsFreqs)
+
+# 95% CI
+Frazer19CollectionsPostRemovalsFreqs95CI
+sampsizebylocus <- apply(Frazer19CollectionsPostRemovalsAlleleCounts, c(1, 2), sum)
+
+Frazer19CollectionsPostRemovalsFreqs5CI <- qbinom(p = 0.05, size = sampsizebylocus, prob = Frazer19CollectionsPostRemovalsFreqs) / sampsizebylocus
+Frazer19CollectionsPostRemovalsFreqs95CI <- qbinom(p = 0.95, size = sampsizebylocus, prob = Frazer19CollectionsPostRemovalsFreqs) / sampsizebylocus
+
+
+
+#### Create plots
+## Create groupvec
+Frazer19CollectionsGroupVec2 <- c(rep(1, 12), rep(2, 7))
+
+
+## Plot points and smoothing line
+getwd()
+pdf(file = "FreqPlots/Frazer19Collections_96SNPs_GroupVec2_FreqPlots.pdf",width=11, height=8.5, family="Times",pointsize=20)   
+par(mar = c(2.1, 4.1, 4.1, 4.6))
+for(locus in loci96){
+  plot(Frazer19CollectionsPostRemovalsFreqs[, locus], main = locus, col = c("cyan", "skyblue")[Frazer19CollectionsGroupVec2], pch = 19, ylim = c(0, 1), ylab = "Frequency", xlab = "Collections", xaxt = 'n', cex = 1)
+  arrows(x0 = seq(Frazer19Collections), x1 = seq(Frazer19Collections), y0 = Frazer19CollectionsPostRemovalsFreqs5CI[, locus], y1 = Frazer19CollectionsPostRemovalsFreqs95CI[, locus], angle = 90, code = 3, lwd = 1.5, length = 0.1)
+  lines(supsmu(seq(length(Frazer19Collections)), Frazer19CollectionsPostRemovalsFreqs[, locus]), lwd = 2)
+  points(Frazer19CollectionsPostRemovalsFreqs[, locus], col = c("cyan", "skyblue")[Frazer19CollectionsGroupVec2], pch = 19, cex = 1)
+  mtext(text = "Collections", side = 1, line = 0.7)
+  text(x = seq(Frazer19Collections), y = Frazer19CollectionsPostRemovalsFreqs[, locus], labels = seq(Frazer19Collections), cex = 0.4)
+  text(x = seq(Frazer19Collections), y = -0.07, labels = sampsizes, cex = 0.6, xpd = TRUE)
+  legend(x = length(Frazer19CollectionsGroupVec2) + length(Frazer19CollectionsGroupVec2)/20, y = 0.9, legend = c("Baseline", "2012 Weir"), fill = c("cyan", "skyblue"), xpd = TRUE, bty = "n", cex = 0.7)
+}; rm(locus)
+dev.off()
+
+t(t(Frazer19Collections))
+
+
+
+
+
+
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# FreqPlot
+
+
+#### All Frazer and Ayakulik
+
+FrazerAyakulik33Collections <- c(Frazer19Collections, Ayakulik14Collections)
+
+
+sampsizes <- sapply(FrazerAyakulik33Collections, function(silly) {get(paste(silly, ".gcl", sep = ''))$n})
+
+
+# Counts
+FrazerAyakulik33CollectionsPostRemovalsAlleleCounts <- FreqPop.GCL(sillyvec = FrazerAyakulik33Collections, loci = loci96)
+str(FrazerAyakulik33CollectionsPostRemovalsAlleleCounts)
+
+# Frequencies
+FrazerAyakulik33CollectionsPostRemovalsFreqs <- FrazerAyakulik33CollectionsPostRemovalsAlleleCounts[,,"Allele 1"] / (FrazerAyakulik33CollectionsPostRemovalsAlleleCounts[,,"Allele 2"] + FrazerAyakulik33CollectionsPostRemovalsAlleleCounts[,,"Allele 1"])
+str(FrazerAyakulik33CollectionsPostRemovalsFreqs)
+
+# 95% CI
+FrazerAyakulik33CollectionsPostRemovalsFreqs95CI
+sampsizebylocus <- apply(FrazerAyakulik33CollectionsPostRemovalsAlleleCounts, c(1, 2), sum)
+
+FrazerAyakulik33CollectionsPostRemovalsFreqs5CI <- qbinom(p = 0.05, size = sampsizebylocus, prob = FrazerAyakulik33CollectionsPostRemovalsFreqs) / sampsizebylocus
+FrazerAyakulik33CollectionsPostRemovalsFreqs95CI <- qbinom(p = 0.95, size = sampsizebylocus, prob = FrazerAyakulik33CollectionsPostRemovalsFreqs) / sampsizebylocus
+
+
+
+#### Create plots
+## Create groupvec
+FrazerAyakulik33CollectionsGroupVec3 <- c(Frazer19CollectionsGroupVec2, Ayakulik14CollectionsGroupVec3 + 2)
+colors5 <- c("cyan", "skyblue3", "blue", "skyblue", "blue4")
+
+## Plot points and smoothing line
+getwd()
+pdf(file = "FreqPlots/FrazerAyakulik33Collections_96SNPs_GroupVec2_FreqPlots.pdf",width=11, height=8.5, family="Times",pointsize=20)   
+par(mar = c(2.1, 4.1, 4.1, 4.6))
+for(locus in loci96){
+  plot(FrazerAyakulik33CollectionsPostRemovalsFreqs[, locus], main = locus, col = colors5[FrazerAyakulik33CollectionsGroupVec3], pch = 19, ylim = c(0, 1), ylab = "Frequency", xlab = "Collections", xaxt = 'n', cex = 1)
+  arrows(x0 = seq(FrazerAyakulik33Collections), x1 = seq(FrazerAyakulik33Collections), y0 = FrazerAyakulik33CollectionsPostRemovalsFreqs5CI[, locus], y1 = FrazerAyakulik33CollectionsPostRemovalsFreqs95CI[, locus], angle = 90, code = 3, lwd = 1.5, length = 0.1)
+  lines(supsmu(seq(length(FrazerAyakulik33Collections)), FrazerAyakulik33CollectionsPostRemovalsFreqs[, locus]), lwd = 2)
+  points(FrazerAyakulik33CollectionsPostRemovalsFreqs[, locus], col = colors5[FrazerAyakulik33CollectionsGroupVec3], pch = 19, cex = 1)
+  mtext(text = "Collections", side = 1, line = 0.7)
+  text(x = seq(FrazerAyakulik33Collections), y = FrazerAyakulik33CollectionsPostRemovalsFreqs[, locus], labels = seq(FrazerAyakulik33Collections), cex = 0.4, col = "white")
+  text(x = seq(FrazerAyakulik33Collections), y = -0.07, labels = sampsizes, cex = 0.5, xpd = TRUE)
+  legend(x = length(FrazerAyakulik33CollectionsGroupVec3) + length(FrazerAyakulik33CollectionsGroupVec3)/40, y = 0.9, legend = c("Frazer Baseline", "Frazer Weir", "Ayakulik Early", "Ayakulik Weir", "Ayakulik Late"), fill = colors5, xpd = TRUE, bty = "n", cex = 0.6)
+}; rm(locus)
+dev.off()
+
+t(t(FrazerAyakulik33Collections))
