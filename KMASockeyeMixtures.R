@@ -1650,7 +1650,7 @@ Round4Mixtures_2014_EstimatesStats <- dget(file = "Estimates objects/Round4Mixtu
 # Verify that Gelman-Rubin < 1.2
 sapply(Round4Mixtures_2014_Estimates$Stats, function(Mix) {Mix[, "GR"]})
 sapply(Round4Mixtures_2014_Estimates$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # No issues
-sapply(Round4Mixtures_2014[c(3, 4, 2, 1)], function(Mix) {
+sapply(Round4Mixtures_2014[c(2, 3, 1)], function(Mix) {
   par(mfrow = c(1, 1))
   BarPlot <- barplot2(Round4Mixtures_2014_EstimatesStats[[Mix]][, "GR"], col = "blue", ylim = c(1, pmax(1.5, max(Round4Mixtures_2014_EstimatesStats[[Mix]][, "GR"]))), ylab = "Gelman-Rubin", xpd = FALSE, main = Mix, names.arg = '')
   abline(h = 1.2, lwd = 3, xpd = FALSE)
@@ -1659,8 +1659,7 @@ sapply(Round4Mixtures_2014[c(3, 4, 2, 1)], function(Mix) {
 
 # Quick look at raw posterior output
 str(Round4Mixtures_2014_Estimates$Output)
-Round4Mixtures_2014_Header <- setNames(object = c("Alitak Section Late July 26-August 29, 2014",
-                                                  "Karluk Section LateLate August 25-29, 2014",
+Round4Mixtures_2014_Header <- setNames(object = c("Karluk Section LateLate August 25-29, 2014",
                                                   "Uganik Section LateLate August 25-29, 2014",
                                                   "Uyak Section LateLate August 25-29, 2014"), 
                                        nm = Round4Mixtures_2014)
@@ -1676,13 +1675,13 @@ PlotPosterior(mixvec = Round4Mixtures_2014, output = Round4Mixtures_2014_Estimat
 #### Plot Round 4 Results ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## Quick and dirty plot
-QuickPlot(mixvec = Round4Mixtures_2014[c(3, 4, 2, 1)], estimatesstats = Round4Mixtures_2014_Estimates, groups = KMA14GroupsPC, groups2rows = KMA14GroupsPC2Rows, colors = KMA14Colors, header = Round4Mixtures_2014_Header)
+QuickPlot(mixvec = Round4Mixtures_2014[c(2, 3, 1)], estimatesstats = Round4Mixtures_2014_Estimates, groups = KMA14GroupsPC, groups2rows = KMA14GroupsPC2Rows, colors = KMA14Colors, header = Round4Mixtures_2014_Header)
 
 ## Quick barplot
-QuickBarplot(mixvec = Round4Mixtures_2014[c(3, 4, 2, 1)], estimatesstats = Round4Mixtures_2014_Estimates, groups = KMA14GroupsPC, groups2rows = KMA14GroupsPC2Rows, header = Round4Mixtures_2014_Header)
+QuickBarplot(mixvec = Round4Mixtures_2014[c(2, 3, 1)], estimatesstats = Round4Mixtures_2014_Estimates, groups = KMA14GroupsPC, groups2rows = KMA14GroupsPC2Rows, header = Round4Mixtures_2014_Header)
 
 ## Make violin plots of posteriors with RGs sorted
-ViolinPlot(mixvec = Round4Mixtures_2014[c(3, 4, 2, 1)], estimates = Round4Mixtures_2014_Estimates, groups = KMA14GroupsPC2Rows, colors = KMA14Colors, header = Round4Mixtures_2014_Header)
+ViolinPlot(mixvec = Round4Mixtures_2014[c(2, 3, 1)], estimates = Round4Mixtures_2014_Estimates, groups = KMA14GroupsPC2Rows, colors = KMA14Colors, header = Round4Mixtures_2014_Header)
 rm(Round4Mixtures_2014_Estimates)
 
 
@@ -1695,7 +1694,7 @@ Round4Mixtures_2014_31RG_Estimates <- CustomCombineBAYESOutput.GCL(
   mixvec = Round4Mixtures_2014, prior = "",  
   ext = "BOT", nchains = 5, burn = 0.5, alpha = 0.1, PosteriorOutput = TRUE)
 str(Round4Mixtures_2014_31RG_Estimates)
-QuickBarplot(mixvec = Round4Mixtures_2014[c(3, 4, 2, 1)], estimatesstats = Round4Mixtures_2014_31RG_Estimates$Stats, groups = KMA31GroupsPC, header = Round4Mixtures_2014_Header[c(3, 4, 2, 1)])
+QuickBarplot(mixvec = Round4Mixtures_2014[c(2, 3, 1)], estimatesstats = Round4Mixtures_2014_31RG_Estimates$Stats, groups = KMA31GroupsPC, header = Round4Mixtures_2014_Header[c(2, 3, 1)])
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -5110,3 +5109,163 @@ for(locus in loci96){
 dev.off()
 
 t(t(FrazerAyakulik33Collections))
+
+
+
+
+
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## Combine Loci
+CombineLoci.GCL(sillyvec = FrazerAyakulik33Collections, markerset = c("One_CO1", "One_Cytb_17", "One_Cytb_26"), update = TRUE); beep(2)
+CombineLoci.GCL(sillyvec = FrazerAyakulik33Collections, markerset = c("One_Tf_ex10-750", "One_Tf_ex3-182"), update = TRUE); beep(2)
+
+loci89 <- dget(file = "Objects/loci89.txt")
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# MDS
+
+gcl2Genepop.GCL(sillyvec = FrazerAyakulik33Collections, loci = loci89, path = "Genepop/FrazerAyakulik33Collections_89loci.gen", VialNums = TRUE)
+
+detach("package:adegenet", unload = TRUE)
+require(package = adegenet, lib.loc = "C:/Users/krshedd/Documents/R/win-library/3.1")
+
+genind <- read.genepop(file = "Genepop/FrazerAyakulik33Collections_89loci.gen")
+
+genpop <- genind2genpop(genind)
+
+# AdegenetNei33Col89loci <- dist.genpop(genpop, method = 1, diag = TRUE, upper = TRUE)
+# dput(x = AdegenetNei33Col89loci, file = "Trees/AdegenetNei33Col89loci.txt")
+AdegenetNei33Col89loci <- dget(file = "Trees/AdegenetNei33Col89loci.txt")
+str(AdegenetNei33Col89loci)
+
+require(ape)
+Nei33NJtree <- nj(AdegenetNei33Col89loci)
+str(Nei33NJtree)
+Nei33NJtree$tip.label <- readClipboard()
+plot.phylo(x = Nei33NJtree, cex = 0.5, no.margin = TRUE)
+
+library('rgl')
+
+MDS <- cmdscale(as.matrix(AdegenetNei33Col89loci), k = 3)
+# MDS <- cmdscale(as.matrix(AdegenetNei33Col89loci), k = 40, eig = TRUE)  # Do with all possible dimensions
+# dput(x = MDS, file = "Objects/MDSAdegenetNei33Col89loci.txt")
+# dput(x = MDS, file = "Objects/MDSAdegenetNei33Col89loci_alldim.txt")
+MDS <- dget(file = "Objects/MDSAdegenetNei33Col89loci.txt")
+
+x <- as.vector(MDS[, 1])   
+y <- as.vector(MDS[, 2])
+z <- as.vector(MDS[, 3])
+
+FrazerAyakulik33CollectionsGroupVec5 <- c(Frazer19CollectionsGroupVec2, Ayakulik14CollectionsGroupVec3 + 2)
+colors5 <- c("cyan", "red", "blue", "green", "blue4")
+
+
+open3d()
+par(family = "serif")
+plot3d(x, y, z + abs(range(z)[1]), xlab = '', ylab = '', zlab = '', aspect = FALSE, col = colors5[FrazerAyakulik33CollectionsGroupVec5], size = 0.5, type = 's', axes = TRUE, box = TRUE, top = TRUE, cex = 1)
+box3d()
+# plot3d(x, y, z + abs(range(z)[1]), aspect = FALSE, col = "black", size = 0.5, type = 'h', box = TRUE, axes = FALSE, top = FALSE, add = TRUE)  # adds pins to spheres
+# texts3d(x, y, z + abs(range(z)[1]), adj = c(-0.8, 0.8), text = seq(FrazerAyakulik33Collections), font = 2, cex = 0.8, add = TRUE, top = TRUE, axes = FALSE)  # adds numbers to points(adj moves the numbers around the points)
+texts3d(x, y, z + abs(range(z)[1]), adj = c(-0.2, 0.2), text = FrazerAyakulik33Collections, font = 2, cex = 0.8, add = TRUE, top = TRUE, axes = FALSE)  # adds numbers to points(adj moves the numbers around the points)
+
+rgl.snapshot("MDS/MDSAdegenetNei33ColFrazerKarlukAyakulik89loci2.png", fmt="png", top=TRUE )
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Likelihood profile
+
+FrazerAyakulik33CollectionsGroupVec5 <- c(Frazer19CollectionsGroupVec2, Ayakulik14CollectionsGroupVec3 + 2)
+FrazerAyakulik33CollectionsGroupVec2 <- c(rep(1, length(Frazer19CollectionsGroupVec2)), rep(2, length(Ayakulik14CollectionsGroupVec3)))
+
+FrazerAyakulik33CollectionsLeaveOneOutLikeProfile <- LeaveOneOutLikeProfile.GCL(popvec = FrazerAyakulik33Collections, loci = loci89, groupvec = FrazerAyakulik33CollectionsGroupVec2, groupnames = c("Frazer", "Ayakulik"), groupcomps = NULL, ncores = 5)
+str(FrazerAyakulik33CollectionsLeaveOneOutLikeProfile)
+
+PlotLikeProfile.GCL(likeprof = FrazerAyakulik33CollectionsLeaveOneOutLikeProfile, popvec = FrazerAyakulik33Collections, loci = loci89, groupvec = FrazerAyakulik33CollectionsGroupVec2, groupnames = c("Frazer", "Ayakulik"), dir = "Likelihood Profiles", filename = "FrazerAyakulik33CollectionsLeaveOneOutLikeProfile.pdf", col = c("cyan", "blue"))
+
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Escapement test for Frazer ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+rm(list = ls(all = TRUE))
+setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Baseline")
+source("H:/R Source Scripts/Functions.GCL_KS.R")
+source("C:/Users/krshedd/Documents/R/Functions.GCL.R")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### 96 Loci
+## Locus Control
+LocusControl <- dget(file = "Objects/OriginalLocusControl.txt")
+loci96 <- dget(file = "Objects/loci96.txt")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Get genotypes
+
+SWKodiakCollections46 <- c("SPINNM08", "SSTUM08", "SCOUR08", "SMIDWS08", "SHOLFS08", "SMIDWM08", "SSUMMM09", "SLINDM08", "SVALA08", "SOUTS08", "SDOGSC08", "SCAIDA14",
+                           "SDOGSC11E", "SDOGSC11EJ", "SDOGSC11W", "SDOGSC12E", "SDOGSC12W",
+                           "SREDSS11", "SREDSWS11", "SREDWS12", "SREDNWS11", "SREDNES11", "SREDCRY11", "SREDCON11", "SAYAK00", "SAYAK08L",
+                           "SAYAK11", "SAYAK12",
+                           "SFAL99E", "SCAN99E", "SCAS99E", "SUTHU99E", "SUTHU00E", "SSAL99E", "SHAL01E", "SGRA99E", "SCOT99E", "SMOR99E",
+                           "SOMALL99", "SKARLSE11", "SKARLSE99L", "SLTHUM99", "STHUS99L", "SKARLW99L", "SKARLE99L",
+                           "SKARL01L")
+
+invisible(sapply(SWKodiakCollections46, function(silly) {assign(x = paste(silly, ".gcl", sep = ""), value = dget(file = paste(getwd(), "/Raw genotypes/PostQCCollectionsSWKodiak46/", silly, ".txt", sep = "")), pos = 1)} )); beep(4)
+
+
+## FreqFis Plots
+SWKodiakCollections46GroupVec8 <- c(rep(1, 12), rep(2, 5), rep(3, 5), rep(4, 2), rep(5, 4), rep(6, 10), rep(7, 7), 8)
+FreqFisPlot_SWKodiakCollections46GroupVec8 <- FreqFisPlot4SNPs.GCL(sillyvec = SWKodiakCollections46, loci = loci96, groupvec = SWKodiakCollections46GroupVec8, alpha = 0.05, groupcol = c("cyan", "red", "blue", "blue4", "green", "purple", "grey", "orange"), file = "HWE/FreqFisPlot_SWKodiakCollections46GroupVec8.pdf")
+# sillyvec = SWKodiakCollections46; loci = loci96; groupvec = SWKodiakCollections46GroupVec8; alpha = 0.05; groupcol = c("cyan", "red", "blue", "blue4", "green", "purple", "grey", "orange"); file = "HWE/FreqFisPlot_SWKodiakCollections46GroupVec8.pdf"
+str(FreqFisPlot_SWKodiakCollections46GroupVec8)
+
+## Pool
+PoolCollections.GCL(collections = c("SDOGSC12E", "SDOGSC12W"), loci = loci96, newname = "SDOGSC12")
+str(SDOGSC12.gcl)
+
+
+## Combine Loci
+CombineLoci.GCL(sillyvec = "SDOGSC12", markerset = c("One_CO1", "One_Cytb_17", "One_Cytb_26"), update = TRUE); beep(2)
+CombineLoci.GCL(sillyvec = "SDOGSC12", markerset = c("One_CO1", "One_Cytb_26"), update = TRUE); beep(2)
+CombineLoci.GCL(sillyvec = "SDOGSC12", markerset = c("One_Tf_ex10-750", "One_Tf_ex3-182"), update = TRUE); beep(2)
+
+loci89 <- dget(file = "Objects/loci89.txt")
+loci46 <- dget(file = "Objects/loci46.txt")
+
+
+
+
+# Starting with a Regionally flat prior, then rolling prior afterwards
+KMA473Pops15FlatPrior <- dget(file = "Objects/KMA473Pops15FlatPrior.txt")
+KMA473Pops <- dget(file = "Objects/KMA473Pops.txt")
+KMA473PopsGroupVec15 <- dget(file = "Objects/KMA473PopsGroupVec15.txt")
+KMA473PopsInits <- dget(file = "Objects/KMA473PopsInits.txt")
+KMA47346Baseline <- dget(file = "Objects/KMA47346Baseline.txt")
+WASSIPSockeyeSeeds <- dget(file = "v:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Mixtures/Objects/WASSIPSockeyeSeeds.txt")
+
+
+## Dumping Mixture files
+dir.create(path = "BAYES/Escapement Tests")
+dir.create(path = "BAYES/Escapement Tests/Control")
+dir.create(path = "BAYES/Escapement Tests/Mixture")
+dir.create(path = "BAYES/Escapement Tests/Output")
+
+
+KMA47346MixtureFormat <- CreateMixture.GCL(sillys = "SDOGSC12", loci = loci46, IDs = NULL, mixname = "SDOGSC12",
+                                           dir = "BAYES/Escapement Tests/Mixture", type = "BAYES", PT = FALSE)
+
+## Dumping Control files
+CreateControlFile.GCL(sillyvec = KMA473Pops, loci = loci46, mixname = "SDOGSC12", basename = "KMA473Pops46Markers", suffix = "", nreps = 40000, nchains = 5,
+                      groupvec = KMA473PopsGroupVec15, priorvec = KMA473Pops15FlatPrior, initmat = KMA473PopsInits, dir = "BAYES/Escapement Tests/Control",
+                      seeds = WASSIPSockeyeSeeds, thin = c(1, 1, 100), mixfortran = KMA47346MixtureFormat, basefortran = KMA47346Baseline, switches = "F T F T T T F")
+
+## Create output directory
+dir.create(path = "BAYES/Escapement Tests/Output/SDOGSC12")
