@@ -1726,24 +1726,26 @@ sapply(rownames(HarvestByStrata2014)[!is.na(HarvestByStrata2014[, 4])], function
          value = StratifiedEstimator.GCL(
            groupvec = seq(KMA14GroupsPC), groupnames = KMA14GroupsPC, maindir = "BAYES/2014-2015 Mixtures 46loci 14RG/Output", 
            mixvec = c(paste(geomix, "_3_Late", sep = ''), paste(geomix, "_4_LateLate", sep = '')), 
-           catchvec = HarvestByStrata2014[geomix, 3:4], newname = paste(geomix, "_3_Late_Stratified", sep = ''), priorname = '',
+           catchvec = HarvestByStrata2014[geomix, c("3_Late", "4_LateLate")], newname = paste(geomix, "_3_Late_Stratified", sep = ''), priorname = '',
            ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1), 
          pos = 1)
   dput(x = get(paste(geomix, "_3_Late_Stratified", sep = '')), file = paste("Estimates objects/", geomix, "_3_Late_Stratified.txt", sep = ''))
 } ); beep(5)
 
-dimnames(SKARLC14_3_Late_Stratified$Summary)
+str(SKARLC14_3_Late_Stratified)
+
+dimnames(SKARLC14_3_Late_Stratified$Stats)
 dimnames(Round4Mixtures_2014_Estimates$Stats$SKARLC14_4_LateLate)
 
 # Look at Late and LateLate separately and then compare to stratified estimate
 Round1Mixtures_2014_EstimatesStats <- dget("Estimates objects/Round1Mixtures_2014_EstimatesStats.txt")
 Round2Mixtures_2014_EstimatesStats_Final <- dget("Estimates objects/Round2Mixtures_2014_EstimatesStats_Final.txt")
-Round3Mixtures_2014_EstimatesStats_Final <- dget("Estimates objects/Round3Mixtures_2014_EstimatesStats_Final.txt")
+Round3Mixtures_2014_EstimatesStats <- dget("Estimates objects/Round3Mixtures_2014_EstimatesStats.txt")
 Round4Mixtures_2014_EstimatesStats <- dget("Estimates objects/Round4Mixtures_2014_EstimatesStats.txt")
 
 KMA2014Strata_EstimatesStats <- c(Round1Mixtures_2014_EstimatesStats, 
                                   Round2Mixtures_2014_EstimatesStats_Final, 
-                                  Round3Mixtures_2014_EstimatesStats_Final, 
+                                  Round3Mixtures_2014_EstimatesStats, 
                                   Round4Mixtures_2014_EstimatesStats)
 
 TempMix <- c("_1_Early", "_2_Middle", "_3_Late", "_4_LateLate")
@@ -1783,7 +1785,7 @@ sapply(GeoMix, function(geomix) {
 round(HarvestByStrata2014[3:5, 3:4] / apply(HarvestByStrata2014[3:5, 3:4], 1, sum) * 100, 1)
 
 sapply(GeoMix, function(geomix) {
-  round(get(paste(geomix, "14_3_Late_Stratified", sep = ''))$Summary[, "MEDIAN"] * 100, 1)
+  round(get(paste(geomix, "14_3_Late_Stratified", sep = ''))$Stats[, "median"] * 100, 1)
 })
 
 
@@ -1793,7 +1795,7 @@ sapply(GeoMix, function(geomix) {
 
 Round1Mixtures_2014_EstimatesStats <- dget("Estimates objects/Round1Mixtures_2014_EstimatesStats.txt")
 Round2Mixtures_2014_EstimatesStats_Final <- dget("Estimates objects/Round2Mixtures_2014_EstimatesStats_Final.txt")
-Round3Mixtures_2014_EstimatesStats_Final <- dget("Estimates objects/Round3Mixtures_2014_EstimatesStats_Final.txt")
+Round3Mixtures_2014_EstimatesStats <- dget("Estimates objects/Round3Mixtures_2014_EstimatesStats.txt")
 Round4Mixtures_2014_EstimatesStats <- dget("Estimates objects/Round4Mixtures_2014_EstimatesStats.txt")
 SKARLC14_3_Late_Stratified <- dget("Estimates objects/SKARLC14_3_Late_Stratified.txt")
 SUGANC14_3_Late_Stratified <- dget("Estimates objects/SUGANC14_3_Late_Stratified.txt")
@@ -1821,24 +1823,28 @@ KMA2014Strata_2_Middle_EstimatesStats <- c(Round1Mixtures_2014_EstimatesStats[5]
                                            Round2Mixtures_2014_EstimatesStats_Final)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 3_Late
-str(Round3Mixtures_2014_EstimatesStats_Final)
+str(Round3Mixtures_2014_EstimatesStats)
 str(Round4Mixtures_2014_EstimatesStats)
-str(SKARLC14_3_Late_Stratified$Summary)
+str(SKARLC14_3_Late_Stratified$Stats)
 
 # dealing with different output from CustomCombineBAYESOutput and StratifiedEstimator
-colnames(SKARLC14_3_Late_Stratified$Summary) <- c("mean", "sd", "5%", "median", "95%", "P=0", "GR")
-colnames(SUGANC14_3_Late_Stratified$Summary) <- c("mean", "sd", "5%", "median", "95%", "P=0", "GR")
-colnames(SUYAKC14_3_Late_Stratified$Summary) <- c("mean", "sd", "5%", "median", "95%", "P=0", "GR")
+# colnames(SKARLC14_3_Late_Stratified$Summary) <- c("mean", "sd", "5%", "median", "95%", "P=0", "GR")
+# colnames(SUGANC14_3_Late_Stratified$Summary) <- c("mean", "sd", "5%", "median", "95%", "P=0", "GR")
+# colnames(SUYAKC14_3_Late_Stratified$Summary) <- c("mean", "sd", "5%", "median", "95%", "P=0", "GR")
+# 
+# SKARLC14_3_Late_Stratified$Summary <- SKARLC14_3_Late_Stratified$Summary[, c("mean", "sd", "median", "5%", "95%", "P=0", "GR")]
+# SUGANC14_3_Late_Stratified$Summary <- SUGANC14_3_Late_Stratified$Summary[, c("mean", "sd", "median", "5%", "95%", "P=0", "GR")]
+# SUYAKC14_3_Late_Stratified$Summary <- SUYAKC14_3_Late_Stratified$Summary[, c("mean", "sd", "median", "5%", "95%", "P=0", "GR")]
 
-SKARLC14_3_Late_Stratified$Summary <- SKARLC14_3_Late_Stratified$Summary[, c("mean", "sd", "median", "5%", "95%", "P=0", "GR")]
-SUGANC14_3_Late_Stratified$Summary <- SUGANC14_3_Late_Stratified$Summary[, c("mean", "sd", "median", "5%", "95%", "P=0", "GR")]
-SUYAKC14_3_Late_Stratified$Summary <- SUYAKC14_3_Late_Stratified$Summary[, c("mean", "sd", "median", "5%", "95%", "P=0", "GR")]
+KMA2014Strata_3_Late_EstimatesStats <- c(Round3Mixtures_2014_EstimatesStats[1:2],
+                                         list("SKARLC14_3_Late" = SKARLC14_3_Late_Stratified$Stats),
+                                         list("SUGANC14_3_Late" = SUGANC14_3_Late_Stratified$Stats),
+                                         list("SUYAKC14_3_Late" = SUYAKC14_3_Late_Stratified$Stats))
 
-KMA2014Strata_3_Late_EstimatesStats <- c(Round4Mixtures_2014_EstimatesStats[1],
-                                         Round3Mixtures_2014_EstimatesStats_Final[1],
-                                         list("SKARLC14_3_Late" = SKARLC14_3_Late_Stratified$Summary),
-                                         list("SUGANC14_3_Late" = SUGANC14_3_Late_Stratified$Summary),
-                                         list("SUYAKC14_3_Late" = SUYAKC14_3_Late_Stratified$Summary))
+str(KMA2014Strata_1_Early_EstimatesStats)
+str(KMA2014Strata_2_Middle_EstimatesStats)
+str(KMA2014Strata_3_Late_EstimatesStats)
+
 
 dir.create("Estimates objects/Final")
 dput(x = KMA2014Strata_1_Early_EstimatesStats, file = "Estimates objects/Final/KMA2014Strata_1_Early_EstimatesStats.txt")
@@ -2023,8 +2029,7 @@ str(SALITC14_Annual_Stratified)
 
 # Create a list object with all Stratified Annual Rollups for the "Estimates objects/Final" folder
 KMA2014_Annual_EstimatesStats <- sapply(KMA2014, function(geomix) {
-  Stats <- get(paste(geomix, "_Annual_Stratified", sep = ''))$Summary[, c("MEAN", "SD", "MEDIAN", "5%", "95%", "P0", "GR")]
-  colnames(Stats) <- c("mean", "sd", "median", "5%", "95%", "P=0", "GR")
+  Stats <- get(paste(geomix, "_Annual_Stratified", sep = ''))$Stats
   Stats
 }, simplify = FALSE)
 str(KMA2014_Annual_EstimatesStats)
@@ -2127,6 +2132,8 @@ Round1Mixtures_2015 %in% names(Round1Mixtures_2015_Prior)
 dput(x = Round1Mixtures_2015_Prior, file = "Objects/Round1Mixtures_2015_Prior.txt")
 str(Round1Mixtures_2015_Prior)
 
+# Verify
+sapply(Round1Mixtures_2015, function(geomix) {plot(as.vector(Round1Mixtures_2015_Prior[[geomix]]), type = "h", main = geomix)})
 
 ## Dumping Mixture files
 sapply(Round1Mixtures_2015, function(Mix) {CreateMixture.GCL(sillys = Mix, loci = loci46, IDs = NULL, mixname = Mix, dir = "BAYES/2014-2015 Mixtures 46loci 14RG/Mixture", type = "BAYES", PT = FALSE)} )
@@ -2141,6 +2148,13 @@ sapply(Round1Mixtures_2015, function(Mix) {
 ## Create output directory
 sapply(Round1Mixtures_2015, function(Mix) {dir.create(paste("BAYES/2014-2015 Mixtures 46loci 14RG/Output/", Mix, sep = ""))})
 
+
+## Dumping Control files for 80K suspects
+sapply(Round1Mixtures_2015[4:5], function(Mix) {
+  CreateControlFile.GCL(sillyvec = KMA473Pops, loci = loci46, mixname = Mix, basename = "KMA473Pops46Markers", suffix = "", nreps = 80000, nchains = 5,
+                        groupvec = KMA473PopsGroupVec14, priorvec = Round1Mixtures_2015_Prior[[Mix]], initmat = KMA473PopsInits, dir = "BAYES/2014-2015 Mixtures 46loci 14RG/Control",
+                        seeds = WASSIPSockeyeSeeds, thin = c(1, 1, 100), mixfortran = KMA47346MixtureFormat, basefortran = KMA47346Baseline, switches = "F T F T T T F")
+})
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Go run BAYES
