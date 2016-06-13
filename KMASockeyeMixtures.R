@@ -5269,3 +5269,21 @@ CreateControlFile.GCL(sillyvec = KMA473Pops, loci = loci46, mixname = "SDOGSC12"
 
 ## Create output directory
 dir.create(path = "BAYES/Escapement Tests/Output/SDOGSC12")
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Read in output
+KMA15GroupsPC <- dget(file = "Objects/PCGroups15.txt")
+KMA15GroupsPC2Rows <- dget(file = "V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Mixtures/Objects/KMA15GroupsPC2Rows.txt")
+
+
+SDOGSC12_Estimates <- CustomCombineBAYESOutput.GCL(
+  groupvec = seq(KMA15GroupsPC), groupnames = KMA15GroupsPC ,
+  maindir = "BAYES/Escapement Tests/Output/", 
+  mixvec = "SDOGSC12", prior = "",  
+  ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1, PosteriorOutput = TRUE)
+str(SDOGSC12_Estimates)
+
+QuickBarplot <- dget(file = "V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Mixtures/Objects/QuickBarplot.txt")
+QuickBarplot(mixvec = "SDOGSC12", estimatesstats = SDOGSC12_Estimates, groups = KMA15GroupsPC, groups2rows = KMA15GroupsPC2Rows, header = setNames(object = "Dog Salmon Weir 2012", nm = "SDOGSC12"))
+# Escapement test works well, but this is likely due to the "bayesian" pull effect...
