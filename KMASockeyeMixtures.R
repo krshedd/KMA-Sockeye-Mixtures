@@ -979,7 +979,7 @@ objects(pattern = "\\.gcl")
 # KMA15GroupsPC <- dget(file = "PCGroups15.txt")
 # KMA47346Baseline <- dget(file = "KMA47346Baseline.txt")
 # KMA47389Baseline <- dget(file = "KMA47389Baseline.txt")
-# WASSIPSockeyeSeeds <- dget("V:/Analysis/5_Coastwide/Sockeye/WASSIP/Mixture/Objects/WASSIPSockeyeSeeds.txt")
+# WASSIPSockeyeSeeds <- dget(file = "V:/Analysis/5_Coastwide/Sockeye/WASSIP/Mixture/Objects/WASSIPSockeyeSeeds.txt")
 # KMA473CommonNames <- dget(file = "CommonNames473.txt")
 # KMA15Colors <- dget(file = "Colors15.txt")
 # setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Mixtures")
@@ -2393,6 +2393,14 @@ sapply(Round2Mixtures_2015[5], function(Mix) {
                         seeds = WASSIPSockeyeSeeds, thin = c(1, 1, 100), mixfortran = KMA47346MixtureFormat, basefortran = KMA47346Baseline, switches = "F T F T T T F")
 })
 
+
+## Dumping Control files for 80K suspects, repeat
+sapply(Round2Mixtures_2015[4], function(Mix) {
+  CreateControlFile.GCL(sillyvec = KMA473Pops, loci = loci46, mixname = Mix, basename = "KMA473Pops46Markers", suffix = "", nreps = 80000, nchains = 5,
+                        groupvec = KMA473PopsGroupVec14, priorvec = Round2Mixtures_2015_Prior[[Mix]], initmat = KMA473PopsInits, dir = "BAYES/2014-2015 Mixtures 46loci 14RG/Control",
+                        seeds = WASSIPSockeyeSeeds, thin = c(1, 1, 100), mixfortran = KMA47346MixtureFormat, basefortran = KMA47346Baseline, switches = "F T F T T T F")
+})
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Go run BAYES
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2403,7 +2411,7 @@ sapply(Round2Mixtures_2015[5], function(Mix) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Round2Mixtures_2015_Estimates <- CustomCombineBAYESOutput.GCL(
   groupvec = seq(KMA14GroupsPC), groupnames = KMA14GroupsPC ,
-  maindir = "BAYES/2014-2015 Mixtures 46loci 14RG/Output", 
+  maindir = "BAYES/2014-2015 Mixtures 46loci 14RG/Output/40K Iterations", 
   mixvec = Round2Mixtures_2015, prior = "",  
   ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1, PosteriorOutput = TRUE)
 
@@ -2417,7 +2425,7 @@ Round2Mixtures_2015_EstimatesStats <- dget(file = "Estimates objects/Round2Mixtu
 
 # Verify that Gelman-Rubin < 1.2
 sapply(Round2Mixtures_2015_Estimates$Stats, function(Mix) {Mix[, "GR"]})
-sapply(Round2Mixtures_2015_Estimates$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # Issues with SUGANC14_3_Late
+sapply(Round2Mixtures_2015_Estimates$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # Issues with SUGANC15_2_Middle
 require(gplots)
 par(mfrow = c(1, 1), mar = c(3.1, 4.6, 3.1, 1.1), oma = rep(0, 4))
 sapply(Round2Mixtures_2015[c(4, 5, 3, 2, 1)], function(Mix) {
