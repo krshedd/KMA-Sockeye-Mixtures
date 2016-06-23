@@ -1898,8 +1898,11 @@ cex.main <- 1.7
 cex.leg <- 1.3
 ci.lwd <- 2.5
 
+# dir.create("Figures/2014")
+require(devEMF)
+
 sapply(names(TempMix14[c(4, 5, 3, 2, 1)]), function(geomix) {
-  # emf(file = paste("Figures/2014/", geomix, ".emf", sep = ''), width = 8.5, height = 6.5, family = "sans", bg = "white")
+  emf(file = paste("Figures/2014/", geomix, ".emf", sep = ''), width = 8.5, height = 6.5, family = "sans", bg = "white")
   par(mar = c(2.1, 4.1, 2.6, 0.6))
 
   Barplot1 <- barplot2(height = t(sapply(TempMix14[[geomix]], function(tempmix) {Estimates[[tempmix]][, "median"]})) * 100, 
@@ -1914,7 +1917,7 @@ sapply(names(TempMix14[c(4, 5, 3, 2, 1)]), function(geomix) {
   mtext(text = "Percentage of Catch", side = 2, cex = cex.yaxis, line = 3)
   mtext(text = Groups2Rows, side = 1, line = 1, at = apply(Barplot1, 2, mean), adj = 0.5, cex = cex.xaxis)
   mtext(text = GeoHeader[unlist(strsplit(geomix, split = "14"))], side = 3, cex = cex.main, line = 1)
-  # dev.off()
+  dev.off()
 })
 
 
@@ -1943,6 +1946,7 @@ KMA2014Strata_HarvestEstimatesStats <- sapply(names(KMA2014Strata_EstimatesStats
 }, simplify = FALSE )
 
 dput(x = KMA2014Strata_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2014Strata_HarvestEstimatesStats.txt")
+KMA2014Strata_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2014Strata_HarvestEstimatesStats.txt")
 str(KMA2014Strata_HarvestEstimatesStats)
 
 # What should ymax be?
@@ -1981,7 +1985,7 @@ ci.lwd <- 2.5
 ymax <- 140000
 
 sapply(names(TempMix14[c(4, 5, 3, 2, 1)]), function(geomix) {
-  # emf(file = paste("Figures/2014/", geomix, "Harvest.emf", sep = ''), width = 8.5, height = 6.5, family = "sans", bg = "white")
+  emf(file = paste("Figures/2014/", geomix, "Harvest.emf", sep = ''), width = 8.5, height = 6.5, family = "sans", bg = "white")
   par(mar = c(2.1, 4.1, 2.6, 0.6))
   
   Barplot1 <- barplot2(height = t(sapply(TempMix14[[geomix]], function(tempmix) {Estimates[[tempmix]][, "median"]})), 
@@ -1996,7 +2000,7 @@ sapply(names(TempMix14[c(4, 5, 3, 2, 1)]), function(geomix) {
   mtext(text = "Number of Fish Harvested (Thousands)", side = 2, cex = cex.yaxis, line = 3)
   mtext(text = Groups2Rows, side = 1, line = 1, at = apply(Barplot1, 2, mean), adj = 0.5, cex = cex.xaxis)
   mtext(text = GeoHeader[unlist(strsplit(geomix, split = "14"))], side = 3, cex = cex.main, line = 1)
-  # dev.off()
+  dev.off()
 })
 
 
@@ -2641,6 +2645,10 @@ sapply(Round3Mixtures_2015[c(1, 4, 5)], function(Mix) {
                         seeds = WASSIPSockeyeSeeds, thin = c(1, 1, 100), mixfortran = KMA47346MixtureFormat, basefortran = KMA47346Baseline, switches = "F T F T T T F")
 })
 
+## Create output directory for 80K suspects
+sapply(Round3Mixtures_2015[c(1, 4, 5)], function(Mix) {dir.create(paste("BAYES/Output/", Mix, sep = ""))})
+
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Go run BAYES
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2716,33 +2724,12 @@ QuickBarplot(mixvec = Round3Mixtures_2015[c(4, 5, 3, 2, 1)], estimatesstats = Ro
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#### Round 3 2015 Repeated MSA files for BAYES 80K Iterations ####
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## Dumping out a new control file to re-analyze SUGANC15_2_Late Round 3 mixtures with a 80K posterior as opposed to our standard 40K
-## Perhaps it will converge on one of the modes for South of Cape Suckling?
-
-# Just use original mixture, no need to create a new one!
-
-## Dumping a New Control file that goes out further!
-
-sapply(Round3Mixtures_2015[c(1, 4)], function(Mix) {
-  CreateControlFile.GCL(sillyvec = KMA473Pops, loci = loci46, mixname = Mix, basename = "KMA473Pops46Markers", suffix = "", nreps = 80000, nchains = 5,
-                        groupvec = KMA473PopsGroupVec14, priorvec = Round3Mixtures_2015_Prior[[Mix]], initmat = KMA473PopsInits, dir = "BAYES/2014-2015 Mixtures 46loci 14RG/Control",
-                        seeds = WASSIPSockeyeSeeds, thin = c(1, 1, 100), mixfortran = KMA47346MixtureFormat, basefortran = KMA47346Baseline, switches = "F T F T T T F")
-})
-
-## Create output directory
-sapply(Round3Mixtures_2015[c(1, 4)], function(Mix) {dir.create(paste("BAYES/2014-2015 Mixtures 46loci 14RG/Output/", Mix, sep = ""))})
-# Will rename later, but leave as is for now for BayesCopyPaste.GCL
-
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Summarize Round 3 Repeated 80K Output ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Round3Mixtures80K_2015_Estimates <- CustomCombineBAYESOutput.GCL(
   groupvec = seq(KMA14GroupsPC), groupnames = KMA14GroupsPC, 
-  maindir = "BAYES/2014-2015 Mixtures 46loci 14RG/Output", 
-  mixvec = Round3Mixtures_2015[c(1, 4)], prior = "",  
+  maindir = "BAYES/2014-2015 Mixtures 46loci 14RG/Output/80K Iterations", 
+  mixvec = Round3Mixtures_2015[4], prior = "",  
   ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1, PosteriorOutput = TRUE)
 
 # Dput 1) estimates stats + posterior output & 2) estimates stats
@@ -2757,7 +2744,7 @@ Round3Mixtures80K_2015_EstimatesStats <- dget(file = "Estimates objects/Round3Mi
 sapply(Round3Mixtures80K_2015_EstimatesStats, function(Mix) {Mix[, "GR"]})
 sapply(Round3Mixtures80K_2015_EstimatesStats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # SUYAKC15_3_Late resolved
 require(gplots)
-sapply(Round3Mixtures_2015[c(1, 4)], function(Mix) {
+sapply(Round3Mixtures_2015[4], function(Mix) {
   par(mfrow = c(1, 1))
   BarPlot <- barplot2(Round3Mixtures80K_2015_EstimatesStats[[Mix]][, "GR"], col = "blue", ylim = c(1, pmax(1.5, max(Round3Mixtures80K_2015_EstimatesStats[[Mix]][, "GR"]))), ylab = "Gelman-Rubin", xpd = FALSE, main = Mix, names.arg = '')
   abline(h = 1.2, lwd = 3, xpd = FALSE)
@@ -2767,9 +2754,9 @@ sapply(Round3Mixtures_2015[c(1, 4)], function(Mix) {
 # Quick look at raw posterior output
 str(Round3Mixtures80K_2015_Estimates$Output)
 
-PlotPosterior(mixvec = Round3Mixtures_2015[c(1, 4)], output = Round3Mixtures80K_2015_Estimates$Output, 
+PlotPosterior(mixvec = Round3Mixtures_2015[4], output = Round3Mixtures80K_2015_Estimates$Output, 
               groups = KMA14GroupsPC, colors = KMA14Colors, 
-              header = Round3Mixtures_2015_Header[c(1, 4)], set.mfrow = c(5, 3), thin = 10)
+              header = Round3Mixtures_2015_Header[4], set.mfrow = c(5, 3), thin = 10)
 
 
 
@@ -2777,13 +2764,13 @@ PlotPosterior(mixvec = Round3Mixtures_2015[c(1, 4)], output = Round3Mixtures80K_
 #### Plot Round 3 Repeated 80K Results ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## Quick and dirty plot
-QuickPlot(mixvec = Round3Mixtures_2015[c(1, 4)], estimatesstats = Round3Mixtures80K_2015_Estimates, groups = KMA14GroupsPC, groups2rows = KMA14GroupsPC2Rows, colors = KMA14Colors, header = Round3Mixtures_2015_Header[3])
+QuickPlot(mixvec = Round3Mixtures_2015[4], estimatesstats = Round3Mixtures80K_2015_Estimates, groups = KMA14GroupsPC, groups2rows = KMA14GroupsPC2Rows, colors = KMA14Colors, header = Round3Mixtures_2015_Header[3])
 
 ## Quick barplot
-QuickBarplot(mixvec = Round3Mixtures_2015[c(1, 4)], estimatesstats = Round3Mixtures80K_2015_Estimates, groups = KMA14GroupsPC, groups2rows = KMA14GroupsPC2Rows, header = Round3Mixtures_2015_Header[c(1, 4)])
+QuickBarplot(mixvec = Round3Mixtures_2015[4], estimatesstats = Round3Mixtures80K_2015_Estimates, groups = KMA14GroupsPC, groups2rows = KMA14GroupsPC2Rows, header = Round3Mixtures_2015_Header[4])
 
 ## Make violin plots of posteriors with RGs sorted
-ViolinPlot(mixvec = Round3Mixtures_2015[c(1, 4)], estimates = Round3Mixtures80K_2015_Estimates, groups = KMA14GroupsPC2Rows, colors = KMA14Colors, header = Round3Mixtures_2015_Header)
+ViolinPlot(mixvec = Round3Mixtures_2015[4], estimates = Round3Mixtures80K_2015_Estimates, groups = KMA14GroupsPC2Rows, colors = KMA14Colors, header = Round3Mixtures_2015_Header)
 rm(Round3Mixtures80K_2015_Estimates)
 
 
@@ -2791,7 +2778,7 @@ rm(Round3Mixtures80K_2015_Estimates)
 ## Compare Results from 40K to 80K
 Round3Mixtures_2015_EstimatesStats <- dget(file = "Estimates objects/Round3Mixtures_2015_EstimatesStats.txt")
 
-sapply(Round3Mixtures_2015[c(1, 4)], function(Mix) {
+sapply(Round3Mixtures_2015[4], function(Mix) {
   par(mar = c(3.1, 5.1, 3.1, 2.1))
   Barplot <- barplot2(height = t(matrix(data = c(Round3Mixtures_2015_EstimatesStats[[Mix]][, "median"],
                                                  Round3Mixtures80K_2015_EstimatesStats[[Mix]][, "median"]) * 100, 
@@ -2815,20 +2802,22 @@ sapply(Round3Mixtures_2015[c(1, 4)], function(Mix) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Dputting Final Round 3 2015 Estimates ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Keeping 40K iteration results from SAYAKC15_3_Late, SKARLC15_3_Late, and SUYAKC15_3_Late as GR was < 1.2 and thats "our business rule"
-# Using 80K iteration results from  and SALITC15_3_Late and SUGANC15_3_Late
+# Keeping 40K iteration results from SALITC15_3_Late, SAYAKC15_3_Late, SKARLC15_3_Late, and SUYAKC15_3_Late as GR was < 1.2 and thats "our business rule"
+# Using 80K iteration results from SUGANC15_3_Late
 Round3Mixtures_2015_Estimates <- dget(file = "Estimates objects/Round3Mixtures_2015_Estimates.txt")
 
-sapply(Round3Mixtures_2015_EstimatesStats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # Issues with SALITC15_3_Late & SUGANC15_3_Late
-sapply(Round3Mixtures80K_2015_EstimatesStats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # Both resolved
+sapply(Round3Mixtures_2015_EstimatesStats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # Issues with SUGANC15_3_Late
+sapply(Round3Mixtures80K_2015_EstimatesStats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # Issues with SUGANC15_3_Late remain...
 
 str(Round3Mixtures_2015_Estimates)
 str(Round3Mixtures80K_2015_Estimates)
 
-Round3Mixtures_2015_Estimates_Final <- list(Stats = c(Round3Mixtures_2015_Estimates$Stats[Round3Mixtures_2015[c(2:3, 5)]],
-                                                      Round3Mixtures80K_2015_Estimates$Stats[Round3Mixtures_2015[c(1, 4)]]),
-                                            Output = c(Round3Mixtures_2015_Estimates$Output[Round3Mixtures_2015[c(2:3, 5)]],
-                                                       Round3Mixtures80K_2015_Estimates$Output[Round3Mixtures_2015[c(1, 4)]]))
+Round3Mixtures_2015_Estimates_Final <- list(Stats = c(Round3Mixtures_2015_Estimates$Stats[Round3Mixtures_2015[1:3]],
+                                                      Round3Mixtures80K_2015_Estimates$Stats[Round3Mixtures_2015[4]],
+                                                      Round3Mixtures_2015_Estimates$Stats[Round3Mixtures_2015[5]]),
+                                            Output = c(Round3Mixtures_2015_Estimates$Output[Round3Mixtures_2015[1:3]],
+                                                       Round3Mixtures80K_2015_Estimates$Output[Round3Mixtures_2015[4]],
+                                                       Round3Mixtures_2015_Estimates$Output[Round3Mixtures_2015[5]]))
 str(Round3Mixtures_2015_Estimates_Final)
 dput(x = Round3Mixtures_2015_Estimates_Final, file = "Estimates objects/Round3Mixtures_2015_Estimates_Final.txt")
 dput(x = Round3Mixtures_2015_Estimates_Final$Stats, file = "Estimates objects/Round3Mixtures_2015_EstimatesStats_Final.txt")
@@ -2836,7 +2825,7 @@ dput(x = Round3Mixtures_2015_Estimates_Final$Stats, file = "Estimates objects/Ro
 Round3Mixtures_2015_Estimates_Final <- dget(file = "Estimates objects/Round3Mixtures_2015_Estimates_Final.txt")
 Round3Mixtures_2015_EstimatesStats_Final <- dget(file = "Estimates objects/Round3Mixtures_2015_EstimatesStats_Final.txt")
 
-sapply(Round3Mixtures_2015_Estimates_Final$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})
+sapply(Round3Mixtures_2015_Estimates_Final$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # Issues with SUGANC15_3_Late remain...
 
 # Dput final Middle Strata Estimates from 2015
 dput(x = Round3Mixtures_2015_EstimatesStats_Final, file = "Estimates objects/Final/KMA2015Strata_3_Late_EstimatesStats.txt")
@@ -2961,7 +2950,9 @@ KMA2015Strata_HarvestEstimatesStats <- sapply(names(KMA2015Strata_EstimatesStats
 }, simplify = FALSE )
 
 dput(x = KMA2015Strata_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2015Strata_HarvestEstimatesStats.txt")
+KMA2015Strata_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2015Strata_HarvestEstimatesStats.txt")
 str(KMA2015Strata_HarvestEstimatesStats)
+
 
 TempMix15 <- sapply(KMA2015, function(geo) {grep(pattern = geo, x = names(KMA2015Strata_EstimatesStats), value = TRUE)}, simplify = FALSE)
 
@@ -3030,6 +3021,17 @@ paste(geomix, colnames(HarvestByStrata2015)[!is.na(HarvestByStrata2015[geomix,])
 
 HarvestByStrata2015[geomix, !is.na(HarvestByStrata2015[geomix,])]
 
+# Which mixtures were 80K as opposed to 40K?
+Round1Mixtures_2015_Estimates_Final <- dget(file = "Estimates objects/Round1Mixtures_2015_Estimates_Final.txt")
+Round2Mixtures_2015_Estimates_Final <- dget(file = "Estimates objects/Round2Mixtures_2015_Estimates_Final.txt")
+Round3Mixtures_2015_Estimates_Final <- dget(file = "Estimates objects/Round3Mixtures_2015_Estimates_Final.txt")
+
+sort(sapply(c(Round1Mixtures_2015_Estimates_Final$Output,
+              Round2Mixtures_2015_Estimates_Final$Output,
+              Round3Mixtures_2015_Estimates_Final$Output),
+            function(mixture) {dim(mixture)[1] == 200000} ), decreasing = TRUE)
+
+
 # For this to work properly, the output mixture directories all need to be in the same place (can be moved back afterwards)
 sapply(KMA2015, function(geomix) {
   assign(x = paste(geomix, "_Annual_Stratified", sep = ''), 
@@ -3048,9 +3050,7 @@ str(SALITC15_Annual_Stratified)
 
 # Create a list object with all Stratified Annual Rollups for the "Estimates objects/Final" folder
 KMA2015_Annual_EstimatesStats <- sapply(KMA2015, function(geomix) {
-  Stats <- get(paste(geomix, "_Annual_Stratified", sep = ''))$Summary[, c("MEAN", "SD", "MEDIAN", "5%", "95%", "P0", "GR")]
-  colnames(Stats) <- c("mean", "sd", "median", "5%", "95%", "P=0", "GR")
-  Stats
+  get(paste(geomix, "_Annual_Stratified", sep = ''))$Stats
 }, simplify = FALSE)
 str(KMA2015_Annual_EstimatesStats)
 dput(x = KMA2015_Annual_EstimatesStats, file = "Estimates objects/Final/KMA2015_Annual_EstimatesStats.txt")
@@ -3064,8 +3064,8 @@ KMA2015_Annual_HarvestEstimatesStats <- sapply(KMA2015, function(strata) {
         KMA2015_Annual_EstimatesStats[[strata]][, c("P=0", "GR")])
 }, simplify = FALSE )
 
-dput(x = KMA2015_Annual_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2015_Annual_HarvestEstimatesStats.txt")
 str(KMA2015_Annual_HarvestEstimatesStats)
+dput(x = KMA2015_Annual_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2015_Annual_HarvestEstimatesStats.txt")
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -3087,15 +3087,23 @@ Annual2014_Stratified_HarvestEstimates <- sapply(KMA2014, function(geomix) {
 
 #~~~~~~~~~~~~~~~~~~
 # 2015
-
+KMA2015_Annual_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2015_Annual_EstimatesStats.txt")
 Annual2015_Stratified_Estimates <- sapply(KMA2015, function(geomix) {
   KMA2015_Annual_EstimatesStats[[geomix]][, "mean"]
 })
 
 
+KMA2015_Annual_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2015_Annual_HarvestEstimatesStats.txt")
+Annual2015_Stratified_HarvestEstimates <- sapply(KMA2015, function(geomix) {
+  round(KMA2015_Annual_HarvestEstimatesStats[[geomix]][, "mean"])
+})
+
+
+
+
 require(lattice)
 new.colors <- colorRampPalette(c("white", "black"))
-levelplot(t(Annual2015_Stratified_Estimates[15:1, c(4,5,3,2,1)]), col.regions = new.colors, xlab = "Reporting Group", 
+levelplot(t(Annual2015_Stratified_Estimates[14:1, c(4,5,3,2,1)]), col.regions = new.colors, xlab = "Reporting Group", 
           ylab = "Fishery", main = "2015 Proportion", at = seq(0, 1, length.out = 100), aspect = "fill", 
           scales = list(x = list(rot = 45)),
           panel = function(...) {
@@ -3104,7 +3112,7 @@ levelplot(t(Annual2015_Stratified_Estimates[15:1, c(4,5,3,2,1)]), col.regions = 
 
 require(lattice)
 new.colors <- colorRampPalette(c("white", "black"))
-levelplot(t(Annual2014_Stratified_Estimates[15:1, c(4,5,3,2,1)]), col.regions = new.colors, xlab = "Reporting Group", 
+levelplot(t(Annual2014_Stratified_Estimates[14:1, c(4,5,3,2,1)]), col.regions = new.colors, xlab = "Reporting Group", 
           ylab = "Fishery", main = "2014 Proportion", at = seq(0, 1, length.out = 100), aspect = "fill", 
           scales = list(x = list(rot = 45)),
           panel = function(...) {
@@ -3130,7 +3138,7 @@ require(lattice)
 max(Annual2015_Stratified_HarvestEstimates)
 
 new.colors <- colorRampPalette(c("white", "black"))
-levelplot(t(Annual2015_Stratified_HarvestEstimates[15:1, c(4,5,3,2,1)]), col.regions = new.colors, xlab = "Reporting Group", 
+levelplot(t(Annual2015_Stratified_HarvestEstimates[14:1, c(4,5,3,2,1)]), col.regions = new.colors, xlab = "Reporting Group", 
           ylab = "Fishery", main = "2015 Harvest", at = seq(0, 250000, length.out = 100), aspect = "fill", 
           scales = list(x = list(rot = 45)),
           panel = function(...) {
@@ -3138,7 +3146,7 @@ levelplot(t(Annual2015_Stratified_HarvestEstimates[15:1, c(4,5,3,2,1)]), col.reg
           })
 
 new.colors <- colorRampPalette(c("white", "black"))
-levelplot(t(Annual2014_Stratified_HarvestEstimates[15:1, c(4,5,3,2,1)]), col.regions = new.colors, xlab = "Reporting Group", 
+levelplot(t(Annual2014_Stratified_HarvestEstimates[14:1, c(4,5,3,2,1)]), col.regions = new.colors, xlab = "Reporting Group", 
           ylab = "Fishery", main = "2014 Harvest", at = seq(0, 250000, length.out = 100), aspect = "fill", 
           scales = list(x = list(rot = 45)),
           panel = function(...) {
@@ -3196,6 +3204,13 @@ EarlyStrata2015_Estimates <- sapply(KMA2015Strata_1_Early_EstimatesStats, functi
 })
 colnames(EarlyStrata2015_Estimates) <- KMA2015
 
+
+# KMA2014Strata_1_Early_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2014Strata_1_Early_EstimatesStats.txt")
+# EarlyStrata2014_Estimates <- sapply(KMA2014Strata_1_Early_EstimatesStats, function(geomix) {
+#   geomix[, "mean"]
+# })
+# colnames(EarlyStrata2014_Estimates) <- KMA2014
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Plot Annual vs. Early Means
 par(mar = c(4.1, 5.1, 3.1, 1.1))
@@ -3210,6 +3225,17 @@ sapply(KMA2015, function(geomix) {
 })
 
 
+
+# par(mar = c(4.1, 5.1, 3.1, 1.1))
+# sapply(KMA2014, function(geomix) {
+#   Barplot <- barplot2(height = rbind(Annual2014_Stratified_Estimates[, geomix], EarlyStrata2014_Estimates[, geomix]) * 100, 
+#                       beside = TRUE, col = c("blue", "white"), yaxt = 'n', xaxt = 'n', main = geomix, ylab = "Precent of Mixture",
+#                       cex.lab = 2, cex.main = 2, ylim = c(0, 100))
+#   axis(side = 2, at = seq(0, 100, 25), labels = formatC(x = seq(0, 100, 25), big.mark = ",", digits = 0, format = "f"), cex.axis = 1.5)
+#   abline(h = 0, xpd = FALSE)
+#   text(x = colMeans(Barplot), y = -1, labels = KMA14GroupsPC2Rows, srt = 90, adj = 1, xpd = TRUE, cex = 0.6)
+#   legend("topleft", legend = c("Annual Means", "Early Strata Means"), fill = c("blue", "white"), bty = 'n', cex = 1.5)
+# })
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
