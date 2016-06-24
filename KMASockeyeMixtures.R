@@ -2887,6 +2887,7 @@ GeoHeader <- setNames(object = c(paste("Cape Alitak/Humpy Deadman 257-10,20,50,6
                                  paste("Uganik/Kupreanof 253", sep = ''),
                                  paste("Uyak Bay 254", sep = '')),
                       nm = unlist(strsplit(x = KMA2015, split = "15")))
+dput(x = GeoHeader, file = "Objects/GeoHeader.txt")
 
 ProportionColors <- colorpanel(n = 3, low = "blue", high = "white")
 TempProportionColors15 <- sapply(KMA2015, function(geo) {
@@ -3624,9 +3625,32 @@ dimnames(DatesStrata2014.mat) <- list(DatesStrata2014$location, c("1_Early", "2_
 dput(x = DatesStrata2014.mat, file = "Objects/DatesStrata2014_Final.txt"); rm(DatesStrata2014.mat)
 DatesStrata2014_Final <- dget(file = "Objects/DatesStrata2014_Final.txt")
 
+
+DatesStrata2015 <- read.table(file = "Harvest/2015DatesByStrata.txt", header = TRUE, sep = "\t", as.is = TRUE)
+DatesStrata2015.mat <- as.matrix(DatesStrata2015[-1])
+dimnames(DatesStrata2015.mat) <- list(DatesStrata2015$location, c("1_Early", "2_Middle", "3_Late"))
+dput(x = DatesStrata2015.mat, file = "Objects/DatesStrata2015_Final.txt"); rm(DatesStrata2015.mat)
+DatesStrata2015_Final <- dget(file = "Objects/DatesStrata2015_Final.txt")
+
+
 # Sample sizes
 KMA2014_2015Strata_SampleSizes_Final <- KMA2014_2015Strata_SampleSizes[, "Final"]
+LateLateStrata <- grep(pattern = "LateLate", x = names(KMA2014_2015Strata_SampleSizes_Final))
+KMA2014_2015Strata_SampleSizes_Final[LateLateStrata-1] <- KMA2014_2015Strata_SampleSizes_Final[LateLateStrata-1] + KMA2014_2015Strata_SampleSizes_Final[LateLateStrata]
+KMA2014_2015Strata_SampleSizes_Final_Condense <- KMA2014_2015Strata_SampleSizes_Final[-LateLateStrata]
+dput(x = KMA2014_2015Strata_SampleSizes_Final_Condense, file = "Objects/KMA2014_2015Strata_SampleSizes_Final_Condense.txt")
+KMA2014_2015Strata_SampleSizes_Final_Condense <- dget(file = "Objects/KMA2014_2015Strata_SampleSizes_Final_Condense.txt")
 
+
+# Geographic headers
+GeoHeader <- setNames(object = c(paste("Cape Alitak/Humpy Deadman Section (257-10,20,50,60,70)", sep = ''),
+                                 paste("Ayakulik/Halibut Bay Section (256-10", "\u2013", "256-30)", sep = ''),
+                                 paste("Karluk/Sturgeon Section (255-10", "\u2013", "255-20; 256-40)", sep = ''),
+                                 paste("Uganik/Kupreanof Section (253)", sep = ''),
+                                 paste("Uyak Bay Section (254)", sep = '')),
+                      nm = unlist(strsplit(x = KMA2015, split = "15")))
+dput(x = GeoHeader, file = "Objects/GeoHeader.txt")
+GeoHeader <- dget(file = "Objects/GeoHeader.txt")
 
 
 # Get Final Estimates Objects
@@ -3647,25 +3671,35 @@ mixvec <- SheetNames
 mix <- SheetNames[2]
 harvest <- HarvestByStrata2014_Final
 dates <- DatesStrata2014_Final
-sampsize <- KMA2014_2015Strata_SampleSizes[, "Final"]
+sampsize <- KMA2014_2015Strata_SampleSizes_Final
 
 
 
 # String split by "_
 SheetNames.split <- unlist(strsplit(x = mix, split = "_"))
 
+
 # The first element is the geographic area + year
 geomix <- SheetNames.split[1]
+yr <- unlist(strsplit(x = geomix, split = "C"))[2]
+geo <- unlist(strsplit(x = geomix, split = "1"))[1]
+
 
 # If it is not an annual roll-up, then get the strata number + strata name
 if(length(SheetNames.split) > 1) {
   tempmix <- paste(c(SheetNames.split[2], SheetNames.split[3]), collapse = "_")
   
-  Stratum <- paste("stratum ", SheetNames.split[2], " (", dates[geomix, tempmix], "; Harvest=", formatC(x = harvest[geomix, tempmix], format = "f", digits = 0, big.mark = ","), "; n=", sampsize[mix], ")", sep = '')
+  Caption <- paste("Table X.-Estimates of stock composition (%) and stock-specific harvest for temporal stratum ",
+                   SheetNames.split[2], " (", dates[geomix, tempmix],
+                   "; Harvest=", formatC(x = harvest[geomix, tempmix], format = "f", digits = 0, big.mark = ","),
+                   "; n=", sampsize[mix], ")", " of the ", GeoHeader[geo], ", 20", yr,
+                   ".  Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and SD.",
+                   sep = '')
 } else {
-    Stratum <-
-  }
-
+  Caption <- paste("Table X.- Annual estimates of stock composition (%) and stock-specific harvest for the ", GeoHeader[geo], ", 20", yr,
+                  ".  Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and SD.",
+                  sep = '')
+}
 
 
 
