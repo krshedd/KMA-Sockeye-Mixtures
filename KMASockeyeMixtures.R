@@ -3618,38 +3618,38 @@ sapply(GeoMix, function(geomix) {
 #### Table results ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# Dates
-DatesStrata2014 <- read.table(file = "Harvest/2014DatesByStrata.txt", header = TRUE, sep = "\t", as.is = TRUE)
-DatesStrata2014.mat <- as.matrix(DatesStrata2014[-1])
-dimnames(DatesStrata2014.mat) <- list(DatesStrata2014$location, c("1_Early", "2_Middle", "3_Late"))
-dput(x = DatesStrata2014.mat, file = "Objects/DatesStrata2014_Final.txt"); rm(DatesStrata2014.mat)
+## Dates
+# DatesStrata2014 <- read.table(file = "Harvest/2014DatesByStrata.txt", header = TRUE, sep = "\t", as.is = TRUE)
+# DatesStrata2014.mat <- as.matrix(DatesStrata2014[-1])
+# dimnames(DatesStrata2014.mat) <- list(DatesStrata2014$location, c("1_Early", "2_Middle", "3_Late"))
+# dput(x = DatesStrata2014.mat, file = "Objects/DatesStrata2014_Final.txt"); rm(DatesStrata2014.mat)
 DatesStrata2014_Final <- dget(file = "Objects/DatesStrata2014_Final.txt")
 
 
-DatesStrata2015 <- read.table(file = "Harvest/2015DatesByStrata.txt", header = TRUE, sep = "\t", as.is = TRUE)
-DatesStrata2015.mat <- as.matrix(DatesStrata2015[-1])
-dimnames(DatesStrata2015.mat) <- list(DatesStrata2015$location, c("1_Early", "2_Middle", "3_Late"))
-dput(x = DatesStrata2015.mat, file = "Objects/DatesStrata2015_Final.txt"); rm(DatesStrata2015.mat)
+# DatesStrata2015 <- read.table(file = "Harvest/2015DatesByStrata.txt", header = TRUE, sep = "\t", as.is = TRUE)
+# DatesStrata2015.mat <- as.matrix(DatesStrata2015[-1])
+# dimnames(DatesStrata2015.mat) <- list(DatesStrata2015$location, c("1_Early", "2_Middle", "3_Late"))
+# dput(x = DatesStrata2015.mat, file = "Objects/DatesStrata2015_Final.txt"); rm(DatesStrata2015.mat)
 DatesStrata2015_Final <- dget(file = "Objects/DatesStrata2015_Final.txt")
 
 
-# Sample sizes
-KMA2014_2015Strata_SampleSizes_Final <- KMA2014_2015Strata_SampleSizes[, "Final"]
-LateLateStrata <- grep(pattern = "LateLate", x = names(KMA2014_2015Strata_SampleSizes_Final))
-KMA2014_2015Strata_SampleSizes_Final[LateLateStrata-1] <- KMA2014_2015Strata_SampleSizes_Final[LateLateStrata-1] + KMA2014_2015Strata_SampleSizes_Final[LateLateStrata]
-KMA2014_2015Strata_SampleSizes_Final_Condense <- KMA2014_2015Strata_SampleSizes_Final[-LateLateStrata]
-dput(x = KMA2014_2015Strata_SampleSizes_Final_Condense, file = "Objects/KMA2014_2015Strata_SampleSizes_Final_Condense.txt")
+## Sample sizes
+# KMA2014_2015Strata_SampleSizes_Final <- KMA2014_2015Strata_SampleSizes[, "Final"]
+# LateLateStrata <- grep(pattern = "LateLate", x = names(KMA2014_2015Strata_SampleSizes_Final))
+# KMA2014_2015Strata_SampleSizes_Final[LateLateStrata-1] <- KMA2014_2015Strata_SampleSizes_Final[LateLateStrata-1] + KMA2014_2015Strata_SampleSizes_Final[LateLateStrata]
+# KMA2014_2015Strata_SampleSizes_Final_Condense <- KMA2014_2015Strata_SampleSizes_Final[-LateLateStrata]
+# dput(x = KMA2014_2015Strata_SampleSizes_Final_Condense, file = "Objects/KMA2014_2015Strata_SampleSizes_Final_Condense.txt")
 KMA2014_2015Strata_SampleSizes_Final_Condense <- dget(file = "Objects/KMA2014_2015Strata_SampleSizes_Final_Condense.txt")
 
 
-# Geographic headers
-GeoHeader <- setNames(object = c(paste("Cape Alitak/Humpy Deadman Section (257-10,20,50,60,70)", sep = ''),
-                                 paste("Ayakulik/Halibut Bay Section (256-10", "\u2013", "256-30)", sep = ''),
-                                 paste("Karluk/Sturgeon Section (255-10", "\u2013", "255-20; 256-40)", sep = ''),
-                                 paste("Uganik/Kupreanof Section (253)", sep = ''),
-                                 paste("Uyak Bay Section (254)", sep = '')),
-                      nm = unlist(strsplit(x = KMA2015, split = "15")))
-dput(x = GeoHeader, file = "Objects/GeoHeader.txt")
+## Geographic headers
+# GeoHeader <- setNames(object = c(paste("Cape Alitak/Humpy Deadman Section (257-10,20,50,60,70)", sep = ''),
+#                                  paste("Ayakulik/Halibut Bay Section (256-10", "\u2013", "256-30)", sep = ''),
+#                                  paste("Karluk/Sturgeon Section (255-10", "\u2013", "255-20; 256-40)", sep = ''),
+#                                  paste("Uganik/Kupreanof Section (253)", sep = ''),
+#                                  paste("Uyak Bay Section (254)", sep = '')),
+#                       nm = unlist(strsplit(x = KMA2015, split = "15")))
+# dput(x = GeoHeader, file = "Objects/GeoHeader.txt")
 GeoHeader <- dget(file = "Objects/GeoHeader.txt")
 
 
@@ -3658,201 +3658,82 @@ KMAfinalestimatesobjects <- list.files(path = "Estimates objects/Final", recursi
 invisible(sapply(KMAfinalestimatesobjects, function(objct) {assign(x = unlist(strsplit(x = objct, split = ".txt")), value = dget(file = paste("Estimates objects/Final", objct, sep = "/")), pos = 1) })); beep(2)
 KMAfinalestimatesobjects; rm(KMAfinalestimatesobjects)
 
-SheetNames <- sort(c(names(KMA2014Strata_EstimatesStats), names(KMA2014_Annual_EstimatesStats)))
-names(SheetNames) <- SheetNames
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## Defining caption variables
 
+EstimatesStats <- c(KMA2014Strata_EstimatesStats, KMA2014_Annual_EstimatesStats,
+                    KMA2015Strata_EstimatesStats, KMA2015_Annual_EstimatesStats)
+
+HarvestEstimatesStats <- c(KMA2014Strata_HarvestEstimatesStats, KMA2014_Annual_HarvestEstimatesStats,
+                           KMA2015Strata_HarvestEstimatesStats, KMA2015_Annual_HarvestEstimatesStats)
+
+SheetNames <- sort(names(EstimatesStats))
+names(SheetNames) <- SheetNames
 mixvec <- SheetNames
 
 
-
-mix <- SheetNames[2]
-harvest <- HarvestByStrata2014_Final
-dates <- DatesStrata2014_Final
-sampsize <- KMA2014_2015Strata_SampleSizes_Final
-
-
-
-# String split by "_
-SheetNames.split <- unlist(strsplit(x = mix, split = "_"))
-
-
-# The first element is the geographic area + year
-geomix <- SheetNames.split[1]
-yr <- unlist(strsplit(x = geomix, split = "C"))[2]
-geo <- unlist(strsplit(x = geomix, split = "1"))[1]
-
-
-# If it is not an annual roll-up, then get the strata number + strata name
-if(length(SheetNames.split) > 1) {
-  tempmix <- paste(c(SheetNames.split[2], SheetNames.split[3]), collapse = "_")
-  
-  Caption <- paste("Table X.-Estimates of stock composition (%) and stock-specific harvest for temporal stratum ",
-                   SheetNames.split[2], " (", dates[geomix, tempmix],
-                   "; Harvest=", formatC(x = harvest[geomix, tempmix], format = "f", digits = 0, big.mark = ","),
-                   "; n=", sampsize[mix], ")", " of the ", GeoHeader[geo], ", 20", yr,
-                   ".  Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and SD.",
-                   sep = '')
-} else {
-  Caption <- paste("Table X.- Annual estimates of stock composition (%) and stock-specific harvest for the ", GeoHeader[geo], ", 20", yr,
-                  ".  Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and SD.",
-                  sep = '')
-}
+# mix <- SheetNames[2]
+harvest <- rbind(HarvestByStrata2014_Final, HarvestByStrata2015_Final)
+dates <- rbind(DatesStrata2014_Final, DatesStrata2015_Final)
+sampsize <- KMA2014_2015Strata_SampleSizes_Final_Condense
 
 
 
-
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 require(xlsx)
 
-SheetNames <- c("Karluk", "Uganik", "Uyak")
-names(SheetNames) <- LateAugustMixtures2014Strata
-
-# Karluk
-Stratum <- "stratum 4 (August 25-29; Harvest=55,637; n=284)"
-Area <- "Karluk Section, "
-Year <- "2014"
-
-# Uyak
-Stratum <- "stratum 4 (August 25-29; Harvest=70,084; n=280)"
-Area <- "Uyak Section, "
-Year <- "2014"
-
-# Uganik
-Stratum <- "stratum 4 (August 25-29; Harvest=126,310; n=282)"
-Area <- "Uganik Section, "
-Year <- "2014"
-
-
-
-
-Mix <- LateAugustMixtures2014Strata[2]
-
-KarlukCaption1 <- paste("Table X.-Estimates of stock composition (%) and stock-specific harvest for temporal ",Stratum," of the ",Area,Year,".  Estimates include median, 90% credibility interval, the probability that the group estimate is equal to zero (P=0), mean and SD.",sep='')
-Disclaimer <- cbind("Note: Stock composition estimates may not sum to 100% and stock-specific harvest estimates may not sum to the total harvest due to rounding error.",'','','','','','','','','','','','')
-
-KarlukTable1=cbind(KarlukCaption1,'','','','','','','','','','','','')
-KarlukTable1=rbind(KarlukTable1,cbind("","Stock Composition",'','','','','','',"Stock-specific Harvest",'','','',''))
-KarlukTable1=rbind(KarlukTable1,cbind('','',"90% CI",'','','','','','',"90% CI",'','',''))
-KarlukTable1=rbind(KarlukTable1,cbind("Reporting Group","Median","5%","95%","P=0","Mean","SD",'',"Median","5%","95%","Mean","SD"))
-## West of Chignik
-KarlukTable1=rbind(KarlukTable1,cbind(KMAsockeyeNames[1],
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[1],3]*100,format="f",digits=1),formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[1],4]*100,format="f",digits=1),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[1],5]*100,format="f",digits=1),formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[1],6],format="f",digits=2),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[1],1]*100,format="f",digits=1),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[1],2]*100,format="f",digits=1),'',formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[1],3],format="f",digits=0,big.mark=","),
-                                      formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[1],4],format="f",digits=0,big.mark=","),formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[1],5],format="f",digits=0,big.mark=","),
-                                      formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[1],1],format="f",digits=0,big.mark=","),formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[1],2],format="f",digits=0,big.mark=",")))
-## Black Lake
-KarlukTable1=rbind(KarlukTable1,cbind(KMAsockeyeNames[2],
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[2],3]*100,format="f",digits=1),formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[2],4]*100,format="f",digits=1),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[2],5]*100,format="f",digits=1),formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[2],6],format="f",digits=2),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[2],1]*100,format="f",digits=1),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[2],2]*100,format="f",digits=1),'',formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[2],3],format="f",digits=0,big.mark=","),
-                                      formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[2],4],format="f",digits=0,big.mark=","),formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[2],5],format="f",digits=0,big.mark=","),
-                                      formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[2],1],format="f",digits=0,big.mark=","),formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[2],2],format="f",digits=0,big.mark=",")))
-## Chignik Lake
-KarlukTable1=rbind(KarlukTable1,cbind(KMAsockeyeNames[3],
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[3],3]*100,format="f",digits=1),formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[3],4]*100,format="f",digits=1),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[3],5]*100,format="f",digits=1),formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[3],6],format="f",digits=2),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[3],1]*100,format="f",digits=1),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[3],2]*100,format="f",digits=1),'',formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[3],3],format="f",digits=0,big.mark=","),
-                                      formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[3],4],format="f",digits=0,big.mark=","),formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[3],5],format="f",digits=0,big.mark=","),
-                                      formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[3],1],format="f",digits=0,big.mark=","),formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[3],2],format="f",digits=0,big.mark=",")))
-## Upper Station / Akalura
-KarlukTable1=rbind(KarlukTable1,cbind(KMAsockeyeNames[4],
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[4],3]*100,format="f",digits=1),formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[4],4]*100,format="f",digits=1),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[4],5]*100,format="f",digits=1),formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[4],6],format="f",digits=2),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[4],1]*100,format="f",digits=1),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[4],2]*100,format="f",digits=1),'',formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[4],3],format="f",digits=0,big.mark=","),
-                                      formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[4],4],format="f",digits=0,big.mark=","),formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[4],5],format="f",digits=0,big.mark=","),
-                                      formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[4],1],format="f",digits=0,big.mark=","),formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[4],2],format="f",digits=0,big.mark=",")))
-## Frazer
-KarlukTable1=rbind(KarlukTable1,cbind(KMAsockeyeNames[5],
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[5],3]*100,format="f",digits=1),formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[5],4]*100,format="f",digits=1),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[5],5]*100,format="f",digits=1),formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[5],6],format="f",digits=2),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[5],1]*100,format="f",digits=1),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[5],2]*100,format="f",digits=1),'',formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[5],3],format="f",digits=0,big.mark=","),
-                                      formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[5],4],format="f",digits=0,big.mark=","),formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[5],5],format="f",digits=0,big.mark=","),
-                                      formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[5],1],format="f",digits=0,big.mark=","),formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[5],2],format="f",digits=0,big.mark=",")))
-## Ayakulik
-KarlukTable1=rbind(KarlukTable1,cbind(KMAsockeyeNames[6],
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[6],3]*100,format="f",digits=1),formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[6],4]*100,format="f",digits=1),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[6],5]*100,format="f",digits=1),formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[6],6],format="f",digits=2),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[6],1]*100,format="f",digits=1),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[6],2]*100,format="f",digits=1),'',formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[6],3],format="f",digits=0,big.mark=","),
-                                      formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[6],4],format="f",digits=0,big.mark=","),formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[6],5],format="f",digits=0,big.mark=","),
-                                      formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[6],1],format="f",digits=0,big.mark=","),formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[6],2],format="f",digits=0,big.mark=",")))
-## Karluk
-KarlukTable1=rbind(KarlukTable1,cbind(KMAsockeyeNames[7],
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[7],3]*100,format="f",digits=1),formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[7],4]*100,format="f",digits=1),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[7],5]*100,format="f",digits=1),formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[7],6],format="f",digits=2),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[7],1]*100,format="f",digits=1),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[7],2]*100,format="f",digits=1),'',formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[7],3],format="f",digits=0,big.mark=","),
-                                      formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[7],4],format="f",digits=0,big.mark=","),formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[7],5],format="f",digits=0,big.mark=","),
-                                      formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[7],1],format="f",digits=0,big.mark=","),formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[7],2],format="f",digits=0,big.mark=",")))
-## Uganik
-KarlukTable1=rbind(KarlukTable1,cbind(KMAsockeyeNames[8],
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[8],3]*100,format="f",digits=1),formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[8],4]*100,format="f",digits=1),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[8],5]*100,format="f",digits=1),formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[8],6],format="f",digits=2),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[8],1]*100,format="f",digits=1),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[8],2]*100,format="f",digits=1),'',formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[8],3],format="f",digits=0,big.mark=","),
-                                      formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[8],4],format="f",digits=0,big.mark=","),formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[8],5],format="f",digits=0,big.mark=","),
-                                      formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[8],1],format="f",digits=0,big.mark=","),formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[8],2],format="f",digits=0,big.mark=",")))
-## Northwest Minor
-KarlukTable1=rbind(KarlukTable1,cbind(KMAsockeyeNames[9],
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[9],3]*100,format="f",digits=1),formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[9],4]*100,format="f",digits=1),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[9],5]*100,format="f",digits=1),formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[9],6],format="f",digits=2),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[9],1]*100,format="f",digits=1),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[9],2]*100,format="f",digits=1),'',formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[9],3],format="f",digits=0,big.mark=","),
-                                      formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[9],4],format="f",digits=0,big.mark=","),formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[9],5],format="f",digits=0,big.mark=","),
-                                      formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[9],1],format="f",digits=0,big.mark=","),formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[9],2],format="f",digits=0,big.mark=",")))
-## Afognak
-KarlukTable1=rbind(KarlukTable1,cbind(KMAsockeyeNames[10],
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[10],3]*100,format="f",digits=1),formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[10],4]*100,format="f",digits=1),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[10],5]*100,format="f",digits=1),formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[10],6],format="f",digits=2),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[10],1]*100,format="f",digits=1),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[10],2]*100,format="f",digits=1),'',formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[10],3],format="f",digits=0,big.mark=","),
-                                      formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[10],4],format="f",digits=0,big.mark=","),formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[10],5],format="f",digits=0,big.mark=","),
-                                      formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[10],1],format="f",digits=0,big.mark=","),formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[10],2],format="f",digits=0,big.mark=",")))
-## Eastside Minor
-KarlukTable1=rbind(KarlukTable1,cbind(KMAsockeyeNames[11],
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[11],3]*100,format="f",digits=1),formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[11],4]*100,format="f",digits=1),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[11],5]*100,format="f",digits=1),formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[11],6],format="f",digits=2),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[11],1]*100,format="f",digits=1),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[11],2]*100,format="f",digits=1),'',formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[11],3],format="f",digits=0,big.mark=","),
-                                      formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[11],4],format="f",digits=0,big.mark=","),formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[11],5],format="f",digits=0,big.mark=","),
-                                      formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[11],1],format="f",digits=0,big.mark=","),formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[11],2],format="f",digits=0,big.mark=",")))
-## Saltery
-KarlukTable1=rbind(KarlukTable1,cbind(KMAsockeyeNames[12],
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[12],3]*100,format="f",digits=1),formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[12],4]*100,format="f",digits=1),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[12],5]*100,format="f",digits=1),formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[12],6],format="f",digits=2),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[12],1]*100,format="f",digits=1),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[12],2]*100,format="f",digits=1),'',formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[12],3],format="f",digits=0,big.mark=","),
-                                      formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[12],4],format="f",digits=0,big.mark=","),formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[12],5],format="f",digits=0,big.mark=","),
-                                      formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[12],1],format="f",digits=0,big.mark=","),formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[12],2],format="f",digits=0,big.mark=",")))
-## Cook Inlet
-KarlukTable1=rbind(KarlukTable1,cbind(KMAsockeyeNames[13],
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[13],3]*100,format="f",digits=1),formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[13],4]*100,format="f",digits=1),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[13],5]*100,format="f",digits=1),formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[13],6],format="f",digits=2),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[13],1]*100,format="f",digits=1),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[13],2]*100,format="f",digits=1),'',formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[13],3],format="f",digits=0,big.mark=","),
-                                      formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[13],4],format="f",digits=0,big.mark=","),formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[13],5],format="f",digits=0,big.mark=","),
-                                      formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[13],1],format="f",digits=0,big.mark=","),formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[13],2],format="f",digits=0,big.mark=",")))
-## PWS / Copper River
-KarlukTable1=rbind(KarlukTable1,cbind(KMAsockeyeNames[14],
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[14],3]*100,format="f",digits=1),formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[14],4]*100,format="f",digits=1),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[14],5]*100,format="f",digits=1),formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[14],6],format="f",digits=2),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[14],1]*100,format="f",digits=1),
-                                      formatC(x=LateAugust_Estimates$Stats[[Mix]][GroupOrder[14],2]*100,format="f",digits=1),'',formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[14],3],format="f",digits=0,big.mark=","),
-                                      formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[14],4],format="f",digits=0,big.mark=","),formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[14],5],format="f",digits=0,big.mark=","),
-                                      formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[14],1],format="f",digits=0,big.mark=","),formatC(x=LateAugust_Estimates_Harvest[[Mix]][GroupOrder[14],2],format="f",digits=0,big.mark=",")))
-## Harvest[[Mix]] sum row
-KarlukTable1=rbind(KarlukTable1,cbind('','','','','','','','','','','Total',formatC(x=LateAugustHarvests[[Mix]],format="f",digits=0,big.mark=","),''),Disclaimer)
-write.xlsx(x=as.data.frame(KarlukTable1),file="Estimates tables/LateAugust2014Tables.xlsx",col.names=F,row.names=F,append=T,sheetName=SheetNames[[Mix]])
+for(mix in SheetNames) {
+  
+  # String split by "_
+  SheetNames.split <- unlist(strsplit(x = mix, split = "_"))
+  
+  
+  # The first element is the geographic area + year
+  geomix <- SheetNames.split[1]
+  yr <- unlist(strsplit(x = geomix, split = "C"))[2]
+  geo <- unlist(strsplit(x = geomix, split = "1"))[1]
+  
+  
+  # If it is not an annual roll-up, then get the strata number + strata name
+  if(length(SheetNames.split) > 1) {
+    tempmix <- paste(c(SheetNames.split[2], SheetNames.split[3]), collapse = "_")
+    
+    Caption <- paste("Table X.-Estimates of stock composition (%) and stock-specific harvest for temporal stratum ",
+                     SheetNames.split[2], " (", dates[geomix, tempmix],
+                     "; Harvest=", formatC(x = harvest[geomix, tempmix], format = "f", digits = 0, big.mark = ","),
+                     "; n=", sampsize[mix], ")", " of the ", GeoHeader[geo], ", 20", yr,
+                     ". Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and SD.",
+                     sep = '')
+  } else {
+    Caption <- paste("Table X.-Annual estimates of stock composition (%) and stock-specific harvest for the ", GeoHeader[geo], ", 20", yr,
+                     ". Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and SD.",
+                     sep = '')
+  }
+  
+  Disclaimer <- "Note: Stock composition estimates may not sum to 100% and stock-specific harvest estimates may not sum to the total harvest due to rounding error."
+  
+  
+  TableX <- matrix(data = "", nrow = 20, ncol = 13)
+  
+  TableX[1, 1] <- Caption
+  TableX[2, c(2, 9)] <- c("Stock Composition", "Stock-specific Harvest")
+  TableX[3, c(3, 10)] <- rep("90% CI", 2)
+  TableX[4, c(1, 2:4, 6:7, 9:13, 5)] <- c("Reporting Group", rep(c("Median", "5%", "95%", "Mean", "SD"), 2), "P=0")
+  TableX[5:18, 1] <- KMA14GroupsPC
+  TableX[5:18, c(2:4, 6:7)] <- formatC(x = EstimatesStats[[mix]][, c("median", "5%", "95%", "mean", "sd")] * 100, digits = 1, format = "f")
+  TableX[5:18, 5] <- formatC(x = EstimatesStats[[mix]][, "P=0"], digits = 2, format = "f")
+  TableX[5:18, 9:13] <- formatC(x = HarvestEstimatesStats[[mix]][, c("median", "5%", "95%", "mean", "sd")], digits = 0, format = "f", big.mark = ",")
+  TableX[19, 11:12] <- c("Total", formatC(x = sum(HarvestEstimatesStats[[mix]][, "mean"]), digits = 0, format = "f", big.mark = ","))
+  TableX[20, 1] <- Disclaimer
+  
+  
+  write.xlsx(x = as.data.frame(TableX), 
+             file = "Estimates tables/KMA Sockeye Estimates Tables.xlsx",
+             col.names = FALSE, row.names = FALSE, append = TRUE, sheetName = mix)
+}; beep(5)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
