@@ -661,7 +661,7 @@ source("H:/R Source Scripts/Functions.GCL_KS.R")
 LocusControl <- dget(file = "Objects/OriginalLocusControl48.txt")
 
 KMAobjects <- list.files(path = "Objects", recursive = FALSE)
-KMAobjects <- KMAobjects[!KMAobjects %in% c("EASSIP-LateAugust2014", "OriginalLocusControl96.txt", "OriginalLocusControl48.txt")]
+KMAobjects <- KMAobjects[!KMAobjects %in% c("EASSIP-LateAugust2014", "OLD 15RG", "OriginalLocusControl96.txt", "OriginalLocusControl48.txt")]
 KMAobjects
 
 invisible(sapply(KMAobjects, function(objct) {assign(x = unlist(strsplit(x = objct, split = ".txt")), value = dget(file = paste(getwd(), "Objects", objct, sep = "/")), pos = 1) })); beep(2)
