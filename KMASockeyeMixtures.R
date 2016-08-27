@@ -3328,7 +3328,8 @@ Groups <- KMA14GroupsPC
 Groups2Rows <- KMA14GroupsPC2Rows
 cex.lab <- 1.5
 cex.xaxis <- 0.5
-cex.leg <- 1.3
+cex.yaxis <- 1.3
+cex.leg <- 1.1
 ci.lwd <- 2.5
 
 
@@ -3341,7 +3342,7 @@ require(gplots)
 
 sapply(GeoMix, function(geomix) {
   
-  emf(file = paste("Figures/All Years/", filenames[geomix], ".emf", sep = ''), width = 7, height = 7, family = "sans", bg = "white")
+  emf(file = paste("Figures/All Years/", filenames[geomix], ".emf", sep = ''), width = 6, height = 5.75, family = "sans", bg = "white")
   
   
   layout(mat = layoutmat, widths = c(0.075, 1, 1), heights = c(0.9, 0.9, 1, 0.1))
@@ -3514,7 +3515,8 @@ Groups <- KMA14GroupsPC
 Groups2Rows <- KMA14GroupsPC2Rows
 cex.lab <- 1.5
 cex.xaxis <- 0.5
-cex.leg <- 1.3
+cex.yaxis <- 1.3
+cex.leg <- 1.1
 ci.lwd <- 2.5
 ymax <- max(sapply(c(HarvestEstimates14, HarvestEstimates15), function(strata) {strata[, "95%"]}))
 
@@ -3527,7 +3529,7 @@ require(gplots)
 
 sapply(GeoMix, function(geomix) {
   
-  emf(file = paste("Figures/All Years/", filenames[geomix], ".emf", sep = ''), width = 7, height = 7, family = "sans", bg = "white")
+  emf(file = paste("Figures/All Years/", filenames[geomix], ".emf", sep = ''), width = 6, height = 5.75, family = "sans", bg = "white")
   
   
   layout(mat = layoutmat, widths = c(0.075, 1, 1), heights = c(0.9, 0.9, 1, 0.1))
@@ -3548,11 +3550,9 @@ sapply(GeoMix, function(geomix) {
                         ci.l = t(sapply(TempMix14[[geomix14]], function(tempmix) {HarvestEstimates14[[tempmix]][, "5%"]})), 
                         ci.u = t(sapply(TempMix14[[geomix14]], function(tempmix) {HarvestEstimates14[[tempmix]][, "95%"]})), 
                         ylim = c(0, ymax), col = TempHarvestColors14[[geomix14]], yaxt = "n", xaxt = 'n')
-  axis(side = 2, at = seq(0, ymax, 40000), labels = formatC(x = seq(0, ymax, 40000) / 1000, big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+  axis(side = 2, at = seq(0, ymax, 50000), labels = formatC(x = seq(0, ymax, 50000) / 1000, big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
   legend(legend = TempLegend14[[geomix14]], x = "topleft", fill = TempHarvestColors14[[geomix14]], border = "black", bty = "n", cex = cex.leg, title="2014")
   abline(h = 0, xpd = FALSE)
-  
-  mtext(text = Groups2Rows, side = 1, line = 1, at = apply(Barplot14, 2, mean), adj = 0.5, cex = cex.xaxis)
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   ## 2015 Barplot
@@ -3563,11 +3563,9 @@ sapply(GeoMix, function(geomix) {
                         ci.l = t(sapply(TempMix15[[geomix15]], function(tempmix) {HarvestEstimates15[[tempmix]][, "5%"]})), 
                         ci.u = t(sapply(TempMix15[[geomix15]], function(tempmix) {HarvestEstimates15[[tempmix]][, "95%"]})), 
                         ylim = c(0, ymax), col = TempHarvestColors15[[geomix15]], yaxt = "n", xaxt = 'n')
-  axis(side = 2, at = seq(0, ymax, 40000), labels = formatC(x = seq(0, ymax, 40000) / 1000, big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+  axis(side = 2, at = seq(0, ymax, 50000), labels = formatC(x = seq(0, ymax, 50000) / 1000, big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
   legend(legend = TempLegend15[[geomix15]], x = "topleft", fill = TempHarvestColors15[[geomix15]], border = "black", bty = "n", cex = cex.leg, title="2015")
   abline(h = 0, xpd = FALSE)
-  
-  mtext(text = Groups2Rows, side = 1, line = 1, at = apply(Barplot15, 2, mean), adj = 0.5, cex = cex.xaxis)
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   ## 2016 Barplot
@@ -3578,9 +3576,10 @@ sapply(GeoMix, function(geomix) {
                         ci.l = matrix(data = rep(0, 45), nrow = 3, ncol = length(KMA14GroupsPC)),
                         ci.u = matrix(data = rep(0, 45), nrow = 3, ncol = length(KMA14GroupsPC)),
                         ylim = c(0, ymax), col = "black", yaxt = "n", xaxt = 'n')
-  axis(side = 2, at = seq(0, ymax, 40000), labels = formatC(x = seq(0, ymax, 40000) / 1000, big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+  axis(side = 2, at = seq(0, ymax, 50000), labels = formatC(x = seq(0, ymax, 50000) / 1000, big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
   legend(legend = TempLegend14[[geomix14]], x = "topleft", fill = TempHarvestColors14[[geomix14]], border = "black", bty = "n", cex = cex.leg, title="2016")
-
+  abline(h = 0, xpd = FALSE)
+  
   
   # geomix16 <- grep(pattern = geomix, x = names(TempMix16), value = TRUE)
   # par(mar = c(2, 1, 1, 1))
@@ -3589,7 +3588,7 @@ sapply(GeoMix, function(geomix) {
   #                       ci.l = t(sapply(TempMix16[[geomix16]], function(tempmix) {HarvestEstimates16[[tempmix]][, "5%"]})), 
   #                       ci.u = t(sapply(TempMix16[[geomix16]], function(tempmix) {HarvestEstimates16[[tempmix]][, "95%"]})), 
   #                       ylim = c(0, ymax), col = TempHarvestColors16[[geomix16]], yaxt = "n", xaxt = 'n')
-  # axis(side = 2, at = seq(0, ymax, 40000), labels = formatC(x = seq(0, ymax, 40000) / 1000, big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+  # axis(side = 2, at = seq(0, ymax, 50000), labels = formatC(x = seq(0, ymax, 50000) / 1000, big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
   # legend(legend = TempLegend16[[geomix16]], x = "topleft", fill = TempHarvestColors16[[geomix16]], border = "black", bty = "n", cex = cex.leg, title="2016")
   # abline(h = 0, xpd = FALSE)
   # 
