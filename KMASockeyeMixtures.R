@@ -5223,3 +5223,60 @@ str(SDOGSC12_Estimates)
 QuickBarplot <- dget(file = "V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Mixtures/Objects/QuickBarplot.txt")
 QuickBarplot(mixvec = "SDOGSC12", estimatesstats = SDOGSC12_Estimates, groups = KMA15GroupsPC, groups2rows = KMA15GroupsPC2Rows, header = setNames(object = "Dog Salmon Weir 2012", nm = "SDOGSC12"))
 # Escapement test works well, but this is likely due to the "bayesian" pull effect...
+
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### 2016 Harvest Data ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+harvest16 <- read.csv(file = "Harvest/Kodiak Salmon Catch by Day and Stat Area 2016.csv", as.is = TRUE)
+str(harvest16)
+
+# Convert Date
+harvest16$Date.Landed <- as.Date(harvest16$Date.Landed, format = "%m/%d/%Y")
+range(harvest16$Date.Landed)
+
+# Create Temporal Strata
+harvest16$Strata <- ifelse(harvest16$Date.Landed >= as.Date("2016-06-01") & harvest16$Date.Landed <= as.Date("2016-06-27"),
+                           "Early",
+                           ifelse(harvest16$Date.Landed >= as.Date("2016-06-28") & harvest16$Date.Landed <= as.Date("2016-07-25"),
+                                  "Middle",
+                                  ifelse(harvest16$Date.Landed >= as.Date("2016-07-26") & harvest16$Date.Landed <= as.Date("2016-08-28"),
+                                         "Late",
+                                         NA)))
+
+# Create Geographic Strata
+unique(harvest16$Stat.Area)
+
+Stat.Area.Eastside <- unique(harvest16$Stat.Area)[c(
+  which(unique(harvest16$Stat.Area) >= 25810 & unique(harvest16$Stat.Area) <=25946),
+  which(unique(harvest16$Stat.Area) >= 25181 & unique(harvest16$Stat.Area) <=25235))]
+
+Stat.Area.Westside <- unique(harvest16$Stat.Area)[c(
+  which(unique(harvest16$Stat.Area) >= 25110 & unique(harvest16$Stat.Area) <=25170),
+  which(unique(harvest16$Stat.Area) >= 25311 & unique(harvest16$Stat.Area) <=25450))]
+
+Stat.Area.SWAlitak <- unique(harvest16$Stat.Area)[c(
+  which(unique(harvest16$Stat.Area) >= 25510 & unique(harvest16$Stat.Area) <=25770))]
+
+Stat.Area.Mainland <- unique(harvest16$Stat.Area)[c(
+  which(unique(harvest16$Stat.Area) >= 26210))]
+
+
+length(c(Stat.Area.Eastside, Stat.Area.Westside, Stat.Area.SWAlitak, Stat.Area.Mainland)); length(unique(harvest16$Stat.Area))
+unique(harvest16$Stat.Area)[!unique(harvest16$Stat.Area) %in% c(Stat.Area.Eastside, Stat.Area.Westside, Stat.Area.SWAlitak, Stat.Area.Mainland)]
+
+
+harvest16$Geo <- ifelse(harvest16$Stat.Area %in% Stat.Area.Mainland, "Mainland",
+                        ifelse(harvest16$Stat.Area %in% Stat.Area.SWAlitak, "SWAlitak",
+                               ifelse(harvest16$Stat.Area %in% Stat.Area.Eastside, "Eastside",
+                                      ifelse(harvest16$Stat.Area %in% Stat.Area.Westside, "Westside", NA
+                                      ))))
+
+table(harvest16$Strata, harvest16$Geo)
+
+require(plyr)
+ddply(.data = harvest16, ~Geo+Strata, summarise, harvest = sum(Number))
+
+aggregate(harvest16$Number, by = list(harvest16$Strata, harvest16$Geo), FUN = sum)
