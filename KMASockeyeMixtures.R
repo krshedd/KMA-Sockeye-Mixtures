@@ -5226,11 +5226,164 @@ QuickBarplot(mixvec = "SDOGSC12", estimatesstats = SDOGSC12_Estimates, groups = 
 
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### 2014 Harvest Data ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+harvest14 <- read.csv(file = "Harvest/Kodiak Sockeye Salmon Catch by Day and Stat Area 2014.csv", as.is = TRUE)
+str(harvest14)
+
+# Convert Date
+harvest14$Date.Landed <- as.Date(harvest14$Date.Landed, format = "%Y-%m-%d")
+harvest14$Date.Fishing.Began <- as.Date(harvest14$Date.Fishing.Began, format = "%Y-%m-%d")
+harvest14$Date.Fishing.Ended <- as.Date(harvest14$Date.Fishing.Ended, format = "%Y-%m-%d")
+range(harvest14$Date.Landed)
+
+# Create Temporal Strata
+harvest14$Strata <- ifelse(harvest14$Date.Landed >= as.Date("2014-06-01") & harvest14$Date.Landed <= as.Date("2014-06-27"),
+                           "Early",
+                           ifelse(harvest14$Date.Landed >= as.Date("2014-06-28") & harvest14$Date.Landed <= as.Date("2014-07-25"),
+                                  "Middle",
+                                  ifelse(harvest14$Date.Landed >= as.Date("2014-07-26") & harvest14$Date.Landed <= as.Date("2014-08-28"),
+                                         "Late",
+                                         NA)))
+
+harvest14$Strata <- factor(harvest14$Strata, levels = c("Early", "Middle", "Late"))
+
+# Create Geographic Strata
+stat.areas <- unique(harvest14$Stat.Area)
+
+Stat.Area.Uganik <- stat.areas[which(stat.areas >= 25300 & stat.areas <= 25399)]
+Stat.Area.Uyak <- stat.areas[which(stat.areas >= 25400 & stat.areas <= 25499)]
+Stat.Area.NorthCape <- stat.areas[which(stat.areas >= 25930 & stat.areas <= 25939)]
+Stat.Area.SWNWAfognak <- stat.areas[which(stat.areas >= 25110 & stat.areas <= 25190)]
+Stat.Area.NESEAfognak <- stat.areas[which(stat.areas >= 25210 & stat.areas <= 25239)]
+Stat.Area.Sitkalidak <- stat.areas[which(stat.areas >= 25800 & stat.areas <= 25899)]
+Stat.Area.NEKodiak <- stat.areas[c(which(stat.areas >= 25910 & stat.areas <= 25927), which(stat.areas >= 25940 & stat.areas <= 25946))]
+Stat.Area.Alitak <- stat.areas[c(which(stat.areas >= 25710 & stat.areas <= 25720), which(stat.areas >= 25750 & stat.areas <= 25770))]
+Stat.Area.MoserOlga <- stat.areas[which(stat.areas >= 25740 & stat.areas <= 25743)]
+Stat.Area.Karluk <- stat.areas[c(which(stat.areas >= 25510 & stat.areas <= 25520), which(stat.areas ==25640))]
+Stat.Area.Ayakulik <- stat.areas[which(stat.areas >= 25610 & stat.areas <= 25630)]
+Stat.Area.NorthShelikof <- stat.areas[which(stat.areas >= 26210 & stat.areas <= 26255)]
+Stat.Area.Katmai <- stat.areas[which(stat.areas >= 26260 & stat.areas <= 26270)]
+Stat.Area.CapeIgvak <- stat.areas[which(stat.areas >= 26275 & stat.areas <= 26295)]
+
+length(unlist(sapply(objects(pattern = "Stat.Area"), function(x) {get(x)})))
+length(stat.areas)
+
+unique(harvest14$Stat.Area)[!stat.areas %in% unlist(sapply(objects(pattern = "Stat.Area"), function(x) {get(x)}))]
+
+
+harvest14$Geo <- ifelse(harvest14$Stat.Area %in% Stat.Area.Uganik, "Uganik",
+                        ifelse(harvest14$Stat.Area %in% Stat.Area.Uyak, "Uyak",
+                               ifelse(harvest14$Stat.Area %in% Stat.Area.NorthCape, "NorthCape",
+                                      ifelse(harvest14$Stat.Area %in% Stat.Area.SWNWAfognak, "SWNWAfognak",
+                                             ifelse(harvest14$Stat.Area %in% Stat.Area.NESEAfognak, "NESEAfognak",
+                                                    ifelse(harvest14$Stat.Area %in% Stat.Area.Sitkalidak, "Sitkalidak",
+                                                           ifelse(harvest14$Stat.Area %in% Stat.Area.NEKodiak, "NEKodiak",
+                                                                  ifelse(harvest14$Stat.Area %in% Stat.Area.Alitak, "Alitak",
+                                                                         ifelse(harvest14$Stat.Area %in% Stat.Area.MoserOlga, "MoserOlga",
+                                                                                ifelse(harvest14$Stat.Area %in% Stat.Area.Karluk, "Karluk",
+                                                                                       ifelse(harvest14$Stat.Area %in% Stat.Area.Ayakulik, "Ayakulik",
+                                                                                              ifelse(harvest14$Stat.Area %in% Stat.Area.NorthShelikof, "NorthShelikof",
+                                                                                                     ifelse(harvest14$Stat.Area %in% Stat.Area.Katmai, "Katmai",
+                                                                                                            ifelse(harvest14$Stat.Area %in% Stat.Area.CapeIgvak, "CapeIgvak", NA
+                                                                                                            ))))))))))))))
+
+harvest14$Geo <- factor(harvest14$Geo, levels = c("Uganik", "Uyak", "NorthCape", "SWNWAfognak", "NESEAfognak", "Sitkalidak", "NEKodiak", "Alitak", "MoserOlga", "Karluk", "Ayakulik", "NorthShelikof", "Katmai", "CapeIgvak"))
+
+table(harvest14$Strata, harvest14$Geo)
+
+require(plyr)
+require(reshape)
+daply(.data = harvest14, ~Geo+Strata, summarise, harvest = sum(Number))
+
+cast(aggregate(Number ~ Geo + Strata, data = harvest14, sum), Geo ~ Strata, value = "Number")
+
+md <- melt(data = harvest14, id.vars = c("Strata", "Geo"), measure.vars = "Number", na.rm = TRUE)
+cast(md, Geo~Strata, sum)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### 2015 Harvest Data ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+harvest15 <- read.csv(file = "Harvest/Kodiak Sockeye Salmon Catch by Day and Stat Area 2015.csv", as.is = TRUE)
+str(harvest15)
+
+# Convert Date
+harvest15$Date.Landed <- as.Date(harvest15$Date.Landed, format = "%Y-%m-%d")
+harvest15$Date.Fishing.Began <- as.Date(harvest15$Date.Fishing.Began, format = "%Y-%m-%d")
+harvest15$Date.Fishing.Ended <- as.Date(harvest15$Date.Fishing.Ended, format = "%Y-%m-%d")
+range(harvest15$Date.Landed)
+
+# Create Temporal Strata
+harvest15$Strata <- ifelse(harvest15$Date.Landed >= as.Date("2015-06-01") & harvest15$Date.Landed <= as.Date("2015-07-03"),
+                           "Early",
+                           ifelse(harvest15$Date.Landed >= as.Date("2015-07-04") & harvest15$Date.Landed <= as.Date("2015-08-01"),
+                                  "Middle",
+                                  ifelse(harvest15$Date.Landed >= as.Date("2015-08-02") & harvest15$Date.Landed <= as.Date("2015-08-29"),
+                                         "Late",
+                                         NA)))
+
+harvest15$Strata <- factor(harvest15$Strata, levels = c("Early", "Middle", "Late"))
+
+# Create Geographic Strata
+stat.areas <- unique(harvest15$Stat.Area)
+
+Stat.Area.Uganik <- stat.areas[which(stat.areas >= 25300 & stat.areas <= 25399)]
+Stat.Area.Uyak <- stat.areas[which(stat.areas >= 25400 & stat.areas <= 25499)]
+Stat.Area.NorthCape <- stat.areas[which(stat.areas >= 25930 & stat.areas <= 25939)]
+Stat.Area.SWNWAfognak <- stat.areas[which(stat.areas >= 25110 & stat.areas <= 25190)]
+Stat.Area.NESEAfognak <- stat.areas[which(stat.areas >= 25210 & stat.areas <= 25239)]
+Stat.Area.Sitkalidak <- stat.areas[which(stat.areas >= 25800 & stat.areas <= 25899)]
+Stat.Area.NEKodiak <- stat.areas[c(which(stat.areas >= 25910 & stat.areas <= 25927), which(stat.areas >= 25940 & stat.areas <= 25946))]
+Stat.Area.Alitak <- stat.areas[c(which(stat.areas >= 25710 & stat.areas <= 25720), which(stat.areas >= 25750 & stat.areas <= 25770))]
+Stat.Area.MoserOlga <- stat.areas[which(stat.areas >= 25740 & stat.areas <= 25743)]
+Stat.Area.Karluk <- stat.areas[c(which(stat.areas >= 25510 & stat.areas <= 25520), which(stat.areas ==25640))]
+Stat.Area.Ayakulik <- stat.areas[which(stat.areas >= 25610 & stat.areas <= 25630)]
+Stat.Area.NorthShelikof <- stat.areas[which(stat.areas >= 26210 & stat.areas <= 26255)]
+Stat.Area.Katmai <- stat.areas[which(stat.areas >= 26260 & stat.areas <= 26270)]
+Stat.Area.CapeIgvak <- stat.areas[which(stat.areas >= 26275 & stat.areas <= 26295)]
+
+length(unlist(sapply(objects(pattern = "Stat.Area"), function(x) {get(x)})))
+length(stat.areas)
+
+unique(harvest15$Stat.Area)[!stat.areas %in% unlist(sapply(objects(pattern = "Stat.Area"), function(x) {get(x)}))]
+
+
+harvest15$Geo <- ifelse(harvest15$Stat.Area %in% Stat.Area.Uganik, "Uganik",
+                        ifelse(harvest15$Stat.Area %in% Stat.Area.Uyak, "Uyak",
+                               ifelse(harvest15$Stat.Area %in% Stat.Area.NorthCape, "NorthCape",
+                                      ifelse(harvest15$Stat.Area %in% Stat.Area.SWNWAfognak, "SWNWAfognak",
+                                             ifelse(harvest15$Stat.Area %in% Stat.Area.NESEAfognak, "NESEAfognak",
+                                                    ifelse(harvest15$Stat.Area %in% Stat.Area.Sitkalidak, "Sitkalidak",
+                                                           ifelse(harvest15$Stat.Area %in% Stat.Area.NEKodiak, "NEKodiak",
+                                                                  ifelse(harvest15$Stat.Area %in% Stat.Area.Alitak, "Alitak",
+                                                                         ifelse(harvest15$Stat.Area %in% Stat.Area.MoserOlga, "MoserOlga",
+                                                                                ifelse(harvest15$Stat.Area %in% Stat.Area.Karluk, "Karluk",
+                                                                                       ifelse(harvest15$Stat.Area %in% Stat.Area.Ayakulik, "Ayakulik",
+                                                                                              ifelse(harvest15$Stat.Area %in% Stat.Area.NorthShelikof, "NorthShelikof",
+                                                                                                     ifelse(harvest15$Stat.Area %in% Stat.Area.Katmai, "Katmai",
+                                                                                                            ifelse(harvest15$Stat.Area %in% Stat.Area.CapeIgvak, "CapeIgvak", NA
+                                                                                                            ))))))))))))))
+
+harvest15$Geo <- factor(harvest15$Geo, levels = c("Uganik", "Uyak", "NorthCape", "SWNWAfognak", "NESEAfognak", "Sitkalidak", "NEKodiak", "Alitak", "MoserOlga", "Karluk", "Ayakulik", "NorthShelikof", "Katmai", "CapeIgvak"))
+
+table(harvest15$Strata, harvest15$Geo)
+
+require(plyr)
+require(reshape)
+daply(.data = harvest15, ~Geo+Strata, summarise, harvest = sum(Number))
+
+cast(aggregate(Number ~ Geo + Strata, data = harvest15, sum), Geo ~ Strata, value = "Number")
+
+md <- melt(data = harvest15, id.vars = c("Strata", "Geo"), measure.vars = "Number", na.rm = TRUE)
+cast(md, Geo~Strata, sum)
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### 2016 Harvest Data ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-harvest16 <- read.csv(file = "Harvest/Kodiak Salmon Catch by Day and Stat Area 2016.csv", as.is = TRUE)
+harvest16 <- read.csv(file = "Harvest/Kodiak Sockeye Salmon Catch by Day and Stat Area 2016.csv", as.is = TRUE)
 str(harvest16)
 
 # Convert Date
