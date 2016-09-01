@@ -5234,7 +5234,9 @@ harvest16 <- read.csv(file = "Harvest/Kodiak Salmon Catch by Day and Stat Area 2
 str(harvest16)
 
 # Convert Date
-harvest16$Date.Landed <- as.Date(harvest16$Date.Landed, format = "%m/%d/%Y")
+harvest16$Date.Landed <- as.Date(harvest16$Date.Landed, format = "%Y-%m-%d")
+harvest16$Date.Fishing.Began <- as.Date(harvest16$Date.Fishing.Began, format = "%Y-%m-%d")
+harvest16$Date.Fishing.Ended <- as.Date(harvest16$Date.Fishing.Ended, format = "%Y-%m-%d")
 range(harvest16$Date.Landed)
 
 # Create Temporal Strata
@@ -5246,37 +5248,57 @@ harvest16$Strata <- ifelse(harvest16$Date.Landed >= as.Date("2016-06-01") & harv
                                          "Late",
                                          NA)))
 
+harvest16$Strata <- factor(harvest16$Strata, levels = c("Early", "Middle", "Late"))
+
 # Create Geographic Strata
-unique(harvest16$Stat.Area)
+stat.areas <- unique(harvest16$Stat.Area)
 
-Stat.Area.Eastside <- unique(harvest16$Stat.Area)[c(
-  which(unique(harvest16$Stat.Area) >= 25810 & unique(harvest16$Stat.Area) <=25946),
-  which(unique(harvest16$Stat.Area) >= 25181 & unique(harvest16$Stat.Area) <=25235))]
+Stat.Area.Uganik <- stat.areas[which(stat.areas >= 25300 & stat.areas <= 25399)]
+Stat.Area.Uyak <- stat.areas[which(stat.areas >= 25400 & stat.areas <= 25499)]
+Stat.Area.NorthCape <- stat.areas[which(stat.areas >= 25930 & stat.areas <= 25939)]
+Stat.Area.SWNWAfognak <- stat.areas[which(stat.areas >= 25110 & stat.areas <= 25190)]
+Stat.Area.NESEAfognak <- stat.areas[which(stat.areas >= 25210 & stat.areas <= 25239)]
+Stat.Area.Sitkalidak <- stat.areas[which(stat.areas >= 25800 & stat.areas <= 25899)]
+Stat.Area.NEKodiak <- stat.areas[c(which(stat.areas >= 25910 & stat.areas <= 25927), which(stat.areas >= 25940 & stat.areas <= 25946))]
+Stat.Area.Alitak <- stat.areas[c(which(stat.areas >= 25710 & stat.areas <= 25720), which(stat.areas >= 25750 & stat.areas <= 25770))]
+Stat.Area.MoserOlga <- stat.areas[which(stat.areas >= 25740 & stat.areas <= 25743)]
+Stat.Area.Karluk <- stat.areas[c(which(stat.areas >= 25510 & stat.areas <= 25520), which(stat.areas ==25640))]
+Stat.Area.Ayakulik <- stat.areas[which(stat.areas >= 25610 & stat.areas <= 25630)]
+Stat.Area.NorthShelikof <- stat.areas[which(stat.areas >= 26210 & stat.areas <= 26255)]
+Stat.Area.Katmai <- stat.areas[which(stat.areas >= 26260 & stat.areas <= 26270)]
+Stat.Area.CapeIgvak <- stat.areas[which(stat.areas >= 26275 & stat.areas <= 26295)]
 
-Stat.Area.Westside <- unique(harvest16$Stat.Area)[c(
-  which(unique(harvest16$Stat.Area) >= 25110 & unique(harvest16$Stat.Area) <=25170),
-  which(unique(harvest16$Stat.Area) >= 25311 & unique(harvest16$Stat.Area) <=25450))]
+length(unlist(sapply(objects(pattern = "Stat.Area"), function(x) {get(x)})))
+length(stat.areas)
 
-Stat.Area.SWAlitak <- unique(harvest16$Stat.Area)[c(
-  which(unique(harvest16$Stat.Area) >= 25510 & unique(harvest16$Stat.Area) <=25770))]
-
-Stat.Area.Mainland <- unique(harvest16$Stat.Area)[c(
-  which(unique(harvest16$Stat.Area) >= 26210))]
+unique(harvest16$Stat.Area)[!stat.areas %in% unlist(sapply(objects(pattern = "Stat.Area"), function(x) {get(x)}))]
 
 
-length(c(Stat.Area.Eastside, Stat.Area.Westside, Stat.Area.SWAlitak, Stat.Area.Mainland)); length(unique(harvest16$Stat.Area))
-unique(harvest16$Stat.Area)[!unique(harvest16$Stat.Area) %in% c(Stat.Area.Eastside, Stat.Area.Westside, Stat.Area.SWAlitak, Stat.Area.Mainland)]
+harvest16$Geo <- ifelse(harvest16$Stat.Area %in% Stat.Area.Uganik, "Uganik",
+                        ifelse(harvest16$Stat.Area %in% Stat.Area.Uyak, "Uyak",
+                               ifelse(harvest16$Stat.Area %in% Stat.Area.NorthCape, "NorthCape",
+                                      ifelse(harvest16$Stat.Area %in% Stat.Area.SWNWAfognak, "SWNWAfognak",
+                                             ifelse(harvest16$Stat.Area %in% Stat.Area.NESEAfognak, "NESEAfognak",
+                                                    ifelse(harvest16$Stat.Area %in% Stat.Area.Sitkalidak, "Sitkalidak",
+                                                           ifelse(harvest16$Stat.Area %in% Stat.Area.NEKodiak, "NEKodiak",
+                                                                  ifelse(harvest16$Stat.Area %in% Stat.Area.Alitak, "Alitak",
+                                                                         ifelse(harvest16$Stat.Area %in% Stat.Area.MoserOlga, "MoserOlga",
+                                                                                ifelse(harvest16$Stat.Area %in% Stat.Area.Karluk, "Karluk",
+                                                                                       ifelse(harvest16$Stat.Area %in% Stat.Area.Ayakulik, "Ayakulik",
+                                                                                              ifelse(harvest16$Stat.Area %in% Stat.Area.NorthShelikof, "NorthShelikof",
+                                                                                                     ifelse(harvest16$Stat.Area %in% Stat.Area.Katmai, "Katmai",
+                                                                                                            ifelse(harvest16$Stat.Area %in% Stat.Area.CapeIgvak, "CapeIgvak", NA
+                                      ))))))))))))))
 
-
-harvest16$Geo <- ifelse(harvest16$Stat.Area %in% Stat.Area.Mainland, "Mainland",
-                        ifelse(harvest16$Stat.Area %in% Stat.Area.SWAlitak, "SWAlitak",
-                               ifelse(harvest16$Stat.Area %in% Stat.Area.Eastside, "Eastside",
-                                      ifelse(harvest16$Stat.Area %in% Stat.Area.Westside, "Westside", NA
-                                      ))))
+harvest16$Geo <- factor(harvest16$Geo, levels = c("Uganik", "Uyak", "NorthCape", "SWNWAfognak", "NESEAfognak", "Sitkalidak", "NEKodiak", "Alitak", "MoserOlga", "Karluk", "Ayakulik", "NorthShelikof", "Katmai", "CapeIgvak"))
 
 table(harvest16$Strata, harvest16$Geo)
 
 require(plyr)
-ddply(.data = harvest16, ~Geo+Strata, summarise, harvest = sum(Number))
+require(reshape)
+daply(.data = harvest16, ~Geo+Strata, summarise, harvest = sum(Number))
 
-aggregate(harvest16$Number, by = list(harvest16$Strata, harvest16$Geo), FUN = sum)
+cast(aggregate(Number ~ Geo + Strata, data = harvest16, sum), Geo ~ Strata, value = "Number")
+
+md <- melt(data = harvest16, id.vars = c("Strata", "Geo"), measure.vars = "Number", na.rm = TRUE)
+cast(md, Geo~Strata, sum)
