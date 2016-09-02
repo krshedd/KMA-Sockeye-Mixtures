@@ -3961,6 +3961,7 @@ harvest16$Geo <- factor(harvest16$Geo, levels = c("Uganik", "Uyak", "NorthCape",
 
 table(harvest16$Strata, harvest16$Geo)
 
+# Harvest by Spatio-Temporal Strata
 require(plyr)
 require(reshape)
 daply(.data = harvest16, ~Geo+Strata, summarise, harvest = sum(Number))
@@ -3975,6 +3976,17 @@ sum(aggregate(Number ~ Geo + Strata, data = harvest14, sum)[, "Number"])
 sum(aggregate(Number ~ Geo + Strata, data = harvest15, sum)[, "Number"])
 sum(aggregate(Number ~ Geo + Strata, data = harvest16, sum)[, "Number"])
 
+
+
+# Harvest by Date, By Strata
+harvest16.Geo.Day <- cast(aggregate(Number ~ Geo + Date.Fishing.Began, data = harvest16, sum), Date.Fishing.Began ~ Geo, value = "Number")
+harvest16.Geo.Day[is.na(harvest16.Geo.Day)] <- 0
+
+write.csv(x = harvest16.Geo.Day, file = "Harvest/Kodiak Sockeye Salmon Catch by Day and Geographic Area 2016.csv", row.names = FALSE)
+
+cast(aggregate(Number ~ Geo + Date.Fishing.Began, data = subset(x = harvest16, subset = Strata == "Early"), sum), Date.Fishing.Began ~ Geo, value = "Number")
+cast(aggregate(Number ~ Geo + Date.Fishing.Began, data = subset(x = harvest16, subset = Strata == "Middle"), sum), Date.Fishing.Began ~ Geo, value = "Number")
+cast(aggregate(Number ~ Geo + Date.Fishing.Began, data = subset(x = harvest16, subset = Strata == "Late"), sum), Date.Fishing.Began ~ Geo, value = "Number")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Likelihood profiles Ayakulik Early/Late ####
