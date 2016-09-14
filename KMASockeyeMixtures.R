@@ -3248,6 +3248,9 @@ KMA2015Strata_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2015Stra
 
 str(KMA2014Strata_EstimatesStats)
 
+sapply(c(KMA2014Strata_EstimatesStats, KMA2015Strata_EstimatesStats), function(mix) {table(mix[, "GR"] > 1.2)})
+round(KMA2014Strata_EstimatesStats$SUYAKC14_2_Middle[, c("mean", "GR")], 3)
+round(KMA2015Strata_EstimatesStats$SUGANC15_3_Late[, c("mean", "GR")], 3)
 
 
 
@@ -3814,6 +3817,14 @@ cast(md, Geo~Strata, sum)
 
 aggregate(Number ~ Date.Fishing.Began, data = subset(harvest14, subset = harvest14$Geo == "Uyak" & harvest14$Strata == "Late"), sum)
 
+
+
+
+t(data.matrix(cast(aggregate(Number ~ Geo + Strata, data = harvest14, sum), Geo ~ Strata, value = "Number"))[c(1,2,8,10,11,14), ])
+
+t(data.frame(cast(aggregate(Number ~ Geo + Strata, data = harvest14, sum), Geo ~ Strata, value = "Number"))[c(1,2,8,10,11,14), ])
+
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### 2015 Harvest Data ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -3987,6 +3998,103 @@ write.csv(x = harvest16.Geo.Day, file = "Harvest/Kodiak Sockeye Salmon Catch by 
 cast(aggregate(Number ~ Geo + Date.Fishing.Began, data = subset(x = harvest16, subset = Strata == "Early"), sum), Date.Fishing.Began ~ Geo, value = "Number")
 cast(aggregate(Number ~ Geo + Date.Fishing.Began, data = subset(x = harvest16, subset = Strata == "Middle"), sum), Date.Fishing.Began ~ Geo, value = "Number")
 cast(aggregate(Number ~ Geo + Date.Fishing.Began, data = subset(x = harvest16, subset = Strata == "Late"), sum), Date.Fishing.Began ~ Geo, value = "Number")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Harvest for Table 1 ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+md <- melt(data = harvest14, id.vars = c("Strata", "Geo"), measure.vars = "Number", na.rm = TRUE)
+x2014 <- t(data.frame(cast(md, Geo~Strata, sum))[c(1,2,10,11,8,14), ])
+write.xlsx(x = x2014, file = "V:/Documents/4_Westward/Sockeye/KMA 2014-2016/KMA Mixtures FMS/Table 1.xlsx",
+           col.names = FALSE, sheetName = "2014 Harvest", append = TRUE)
+
+md <- melt(data = harvest15, id.vars = c("Strata", "Geo"), measure.vars = "Number", na.rm = TRUE)
+x2015 <- t(data.frame(cast(md, Geo~Strata, sum))[c(1,2,10,11,8,14), ])
+write.xlsx(x = x2015, file = "V:/Documents/4_Westward/Sockeye/KMA 2014-2016/KMA Mixtures FMS/Table 1.xlsx",
+           col.names = FALSE, sheetName = "2015 Harvest", append = TRUE)
+
+md <- melt(data = harvest16, id.vars = c("Strata", "Geo"), measure.vars = "Number", na.rm = TRUE)
+x2016 <- t(data.frame(cast(md, Geo~Strata, sum))[c(1,2,10,11,8,14), ])
+write.xlsx(x = x2016, file = "V:/Documents/4_Westward/Sockeye/KMA 2014-2016/KMA Mixtures FMS/Table 1.xlsx",
+           col.names = FALSE, sheetName = "2016 Harvest", append = TRUE)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+samples14 <- read.csv(file = "Harvest/Bulk Tissue Inventory 2014.csv", as.is = TRUE)
+str(samples14)
+
+# Convert Date
+samples14$Bulk.Date <- as.Date(samples14$Bulk.Date, format = "%Y-%m-%d")
+samples14$Bulk.End.Date <- as.Date(samples14$Bulk.End.Date, format = "%Y-%m-%d")
+range(samples14$Bulk.Date)
+
+# Create Temporal Strata
+samples14$Strata <- ifelse(samples14$Bulk.Date >= as.Date("2014-06-01") & samples14$Bulk.Date <= as.Date("2014-06-27"),
+                           "Early",
+                           ifelse(samples14$Bulk.Date >= as.Date("2014-06-28") & samples14$Bulk.Date <= as.Date("2014-07-25"),
+                                  "Middle",
+                                  ifelse(samples14$Bulk.Date >= as.Date("2014-07-26") & samples14$Bulk.Date <= as.Date("2014-08-29"),
+                                         "Late",
+                                         NA)))
+
+samples14$Strata <- factor(samples14$Strata, levels = c("Early", "Middle", "Late"))
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+samples15 <- read.csv(file = "Harvest/Bulk Tissue Inventory 2015.csv", as.is = TRUE)
+str(samples15)
+
+# Convert Date
+samples15$Bulk.Date <- as.Date(samples15$Bulk.Date, format = "%Y-%m-%d")
+samples15$Bulk.End.Date <- as.Date(samples15$Bulk.End.Date, format = "%Y-%m-%d")
+range(samples15$Bulk.Date)
+
+# Create Temporal Strata
+samples15$Strata <- ifelse(samples15$Bulk.Date >= as.Date("2015-06-01") & samples15$Bulk.Date <= as.Date("2015-07-03"),
+                           "Early",
+                           ifelse(samples15$Bulk.Date >= as.Date("2015-07-04") & samples15$Bulk.Date <= as.Date("2015-08-01"),
+                                  "Middle",
+                                  ifelse(samples15$Bulk.Date >= as.Date("2015-08-02") & samples15$Bulk.Date <= as.Date("2015-08-29"),
+                                         "Late",
+                                         NA)))
+
+samples15$Strata <- factor(samples15$Strata, levels = c("Early", "Middle", "Late"))
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+samples16 <- read.csv(file = "Harvest/Bulk Tissue Inventory 2016.csv", as.is = TRUE)
+str(samples16)
+
+# Convert Date
+samples16$Bulk.Date <- as.Date(samples16$Bulk.Date, format = "%Y-%m-%d")
+samples16$Bulk.End.Date <- as.Date(samples16$Bulk.End.Date, format = "%Y-%m-%d")
+range(samples16$Bulk.Date)
+
+# Create Temporal Strata
+samples16$Strata <- ifelse(samples16$Bulk.Date >= as.Date("2016-06-01") & samples16$Bulk.Date <= as.Date("2016-06-27"),
+                           "Early",
+                           ifelse(samples16$Bulk.Date >= as.Date("2016-06-28") & samples16$Bulk.Date <= as.Date("2016-07-25"),
+                                  "Middle",
+                                  ifelse(samples16$Bulk.Date >= as.Date("2016-07-26") & samples16$Bulk.Date <= as.Date("2016-08-29"),
+                                         "Late",
+                                         NA)))
+
+samples16$Strata <- factor(samples16$Strata, levels = c("Early", "Middle", "Late"))
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+s2014 <- t(data.frame(cast(aggregate(Field.Count ~ Silly.Code + Strata, data = samples14, sum), Silly.Code ~ Strata, value = "Field.Count"))[c(4,5,3,2,1), ])
+s2014[is.na(s2014)] <- 0
+write.xlsx(x = s2014, file = "V:/Documents/4_Westward/Sockeye/KMA 2014-2016/KMA Mixtures FMS/Table 1.xlsx",
+           col.names = FALSE, sheetName = "2014 Samples", append = TRUE)
+
+s2015 <- t(data.frame(cast(aggregate(Field.Count ~ Silly.Code + Strata, data = samples15, sum), Silly.Code ~ Strata, value = "Field.Count"))[c(5,6,4,2,1,3), ])
+s2015[is.na(s2015)] <- 0
+write.xlsx(x = s2015, file = "V:/Documents/4_Westward/Sockeye/KMA 2014-2016/KMA Mixtures FMS/Table 1.xlsx",
+           col.names = FALSE, sheetName = "2015 Samples", append = TRUE)
+
+s2016 <- t(data.frame(cast(aggregate(Field.Count ~ Silly.Code + Strata, data = samples16, sum), Silly.Code ~ Strata, value = "Field.Count"))[c(5,6,4,2,1,3), ])
+s2016[is.na(s2016)] <- 0
+write.xlsx(x = s2016, file = "V:/Documents/4_Westward/Sockeye/KMA 2014-2016/KMA Mixtures FMS/Table 1.xlsx",
+           col.names = FALSE, sheetName = "2016 Samples", append = TRUE)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Likelihood profiles Ayakulik Early/Late ####
