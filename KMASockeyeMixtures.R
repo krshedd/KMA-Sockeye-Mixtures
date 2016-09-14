@@ -3335,7 +3335,6 @@ cex.yaxis <- 1.3
 cex.leg <- 1.1
 ci.lwd <- 2.5
 
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Make figures as .emf files
 
@@ -3350,6 +3349,7 @@ sapply(GeoMix, function(geomix) {
   
   layout(mat = layoutmat, widths = c(0.075, 1, 1), heights = c(0.9, 0.9, 1, 0.1))
   par(mar = rep(0, 4))
+  par(family = "times")
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   ## Y-axis label
@@ -3537,6 +3537,7 @@ sapply(GeoMix, function(geomix) {
   
   layout(mat = layoutmat, widths = c(0.075, 1, 1), heights = c(0.9, 0.9, 1, 0.1))
   par(mar = rep(0, 4))
+  par(family = "times")
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   ## Y-axis label
