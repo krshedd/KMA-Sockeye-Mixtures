@@ -1902,7 +1902,7 @@ ci.lwd <- 2.5
 require(devEMF)
 
 sapply(names(TempMix14[c(4, 5, 3, 2, 1)]), function(geomix) {
-  emf(file = paste("Figures/2014/", geomix, ".emf", sep = ''), width = 8.5, height = 6.5, family = "sans", bg = "white")
+  emf(file = paste("Figures/2014/", geomix, ".emf", sep = ''), width = 8.5, height = 6.5, family = "serif", bg = "white")
   par(mar = c(2.1, 4.1, 2.6, 0.6))
 
   Barplot1 <- barplot2(height = t(sapply(TempMix14[[geomix]], function(tempmix) {Estimates[[tempmix]][, "median"]})) * 100, 
@@ -1985,7 +1985,7 @@ ci.lwd <- 2.5
 ymax <- 140000
 
 sapply(names(TempMix14[c(4, 5, 3, 2, 1)]), function(geomix) {
-  emf(file = paste("Figures/2014/", geomix, "Harvest.emf", sep = ''), width = 8.5, height = 6.5, family = "sans", bg = "white")
+  emf(file = paste("Figures/2014/", geomix, "Harvest.emf", sep = ''), width = 8.5, height = 6.5, family = "serif", bg = "white")
   par(mar = c(2.1, 4.1, 2.6, 0.6))
   
   Barplot1 <- barplot2(height = t(sapply(TempMix14[[geomix]], function(tempmix) {Estimates[[tempmix]][, "median"]})), 
@@ -2907,7 +2907,7 @@ ci.lwd <- 2.5
 # dir.create("Figures/2015")
 
 sapply(names(TempMix15[c(4, 5, 3, 2, 1)]), function(geomix) {
-  emf(file = paste("Figures/2015/", geomix, ".emf", sep = ''), width = 8.5, height = 6.5, family = "sans", bg = "white")
+  emf(file = paste("Figures/2015/", geomix, ".emf", sep = ''), width = 8.5, height = 6.5, family = "serif", bg = "white")
   par(mar = c(2.1, 4.1, 2.6, 0.6))
   
   Barplot1 <- barplot2(height = t(sapply(TempMix15[[geomix]], function(tempmix) {Estimates[[tempmix]][, "median"]})) * 100, 
@@ -2993,7 +2993,7 @@ ci.lwd <- 2.5
 ymax <- 200000
 
 sapply(names(TempMix15[c(4, 5, 3, 2, 1)]), function(geomix) {
-  emf(file = paste("Figures/2015/", geomix, "Harvest.emf", sep = ''), width = 8.5, height = 6.5, family = "sans", bg = "white")
+  emf(file = paste("Figures/2015/", geomix, "Harvest.emf", sep = ''), width = 8.5, height = 6.5, family = "serif", bg = "white")
   par(mar = c(2.1, 4.1, 2.6, 0.6))
   
   Barplot1 <- barplot2(height = t(sapply(TempMix15[[geomix]], function(tempmix) {Estimates[[tempmix]][, "median"]})), 
@@ -3344,7 +3344,7 @@ require(gplots)
 
 sapply(GeoMix, function(geomix) {
   
-  emf(file = paste("Figures/All Years/", filenames[geomix], ".emf", sep = ''), width = 6, height = 5.75, family = "sans", bg = "white")
+  emf(file = paste("Figures/All Years/", filenames[geomix], ".emf", sep = ''), width = 6, height = 5.75, family = "serif", bg = "white")
   
   
   layout(mat = layoutmat, widths = c(0.075, 1, 1), heights = c(0.9, 0.9, 1, 0.1))
@@ -3532,7 +3532,7 @@ require(gplots)
 
 sapply(GeoMix, function(geomix) {
   
-  emf(file = paste("Figures/All Years/", filenames[geomix], ".emf", sep = ''), width = 6, height = 5.75, family = "sans", bg = "white")
+  emf(file = paste("Figures/All Years/", filenames[geomix], ".emf", sep = ''), width = 6, height = 5.75, family = "serif", bg = "white")
   
   
   layout(mat = layoutmat, widths = c(0.075, 1, 1), heights = c(0.9, 0.9, 1, 0.1))
