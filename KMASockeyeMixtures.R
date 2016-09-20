@@ -3933,7 +3933,7 @@ harvest16$Strata <- factor(harvest16$Strata, levels = c("Early", "Middle", "Late
 stat.areas <- unique(harvest16$Stat.Area)
 
 Stat.Area.Uganik <- stat.areas[which(stat.areas >= 25300 & stat.areas <= 25399)]
-Stat.Area.Uyak <- stat.areas[which(stat.areas >= 25400 & stat.areas <= 25450)]
+Stat.Area.Uyak <- stat.areas[which(stat.areas >= 25400 & stat.areas < 25450)]
 Stat.Area.NorthCape <- stat.areas[which(stat.areas >= 25930 & stat.areas <= 25939)]
 Stat.Area.SWNWAfognak <- stat.areas[which(stat.areas >= 25110 & stat.areas <= 25190)]
 Stat.Area.NESEAfognak <- stat.areas[which(stat.areas >= 25210 & stat.areas <= 25239)]
