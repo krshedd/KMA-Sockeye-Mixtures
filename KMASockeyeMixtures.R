@@ -3740,6 +3740,101 @@ for(mix in SheetNames) {
 
 
 
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 2014 Late Late Harvest for Appendix
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Defining caption variables
+
+EstimatesStats <- dget(file = "Estimates objects/Round4Mixtures_2014_EstimatesStats.txt")
+str(EstimatesStats)
+
+HarvestEstimatesStats <- sapply(names(EstimatesStats), function(strata) {
+    strata.split <- unlist(strsplit(x = strata, split = "_"))
+    strata.split <- c(strata.split[1], paste(c(strata.split[2], strata.split[3]), collapse = "_"))
+    
+    cbind(EstimatesStats[[strata]][, c("mean", "sd", "median", "5%", "95%")] * HarvestByStrata2014[strata.split[1], strata.split[2]],
+          EstimatesStats[[strata]][, c("P=0", "GR")])
+  }, simplify = FALSE )
+
+
+
+HarvestEstimatesStats <- c(KMA2014Strata_HarvestEstimatesStats, KMA2014_Annual_HarvestEstimatesStats,
+                           KMA2015Strata_HarvestEstimatesStats, KMA2015_Annual_HarvestEstimatesStats)
+
+SheetNames <- sort(names(EstimatesStats))
+names(SheetNames) <- SheetNames
+mixvec <- SheetNames
+
+
+# mix <- SheetNames[2]
+harvest <- HarvestByStrata2014
+dates <- matrix(data = rep("August 25-29", 3), nrow = 3, ncol = 1, 
+                dimnames = list(c("SKARLC14", "SUGANC14", "SUYAKC14"),
+                                "4_LateLate"))
+sampsize <- KMA2014_2015Strata_SampleSizes[, "Final"]
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+require(xlsx)
+
+for(mix in SheetNames) {
+  
+  # String split by "_
+  SheetNames.split <- unlist(strsplit(x = mix, split = "_"))
+  
+  
+  # The first element is the geographic area + year
+  geomix <- SheetNames.split[1]
+  yr <- unlist(strsplit(x = geomix, split = "C"))[2]
+  geo <- unlist(strsplit(x = geomix, split = "1"))[1]
+  
+  
+  # If it is not an annual roll-up, then get the strata number + strata name
+  if(length(SheetNames.split) > 1) {
+    tempmix <- paste(c(SheetNames.split[2], SheetNames.split[3]), collapse = "_")
+    
+    Caption <- paste("Table X.-Estimates of stock composition (%) and stock-specific harvest for temporal stratum ",
+                     SheetNames.split[2], " (", dates[geomix, tempmix],
+                     "; Harvest=", formatC(x = harvest[geomix, tempmix], format = "f", digits = 0, big.mark = ","),
+                     "; n=", sampsize[mix], ")", " of the ", GeoHeader[geo], ", 20", yr,
+                     ". Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and SD.",
+                     sep = '')
+  } else {
+    Caption <- paste("Table X.-Annual estimates of stock composition (%) and stock-specific harvest for the ", GeoHeader[geo], ", 20", yr,
+                     ". Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and SD.",
+                     sep = '')
+  }
+  
+  Disclaimer <- "Note: Stock composition estimates may not sum to 100% and stock-specific harvest estimates may not sum to the total harvest due to rounding error."
+  
+  
+  TableX <- matrix(data = "", nrow = 20, ncol = 13)
+  
+  TableX[1, 1] <- Caption
+  TableX[2, c(2, 9)] <- c("Stock Composition", "Stock-specific Harvest")
+  TableX[3, c(3, 10)] <- rep("90% CI", 2)
+  TableX[4, c(1, 2:4, 6:7, 9:13, 5)] <- c("Reporting Group", rep(c("Median", "5%", "95%", "Mean", "SD"), 2), "P=0")
+  TableX[5:18, 1] <- KMA14GroupsPC
+  TableX[5:18, c(2:4, 6:7)] <- formatC(x = EstimatesStats[[mix]][, c("median", "5%", "95%", "mean", "sd")] * 100, digits = 1, format = "f")
+  TableX[5:18, 5] <- formatC(x = EstimatesStats[[mix]][, "P=0"], digits = 2, format = "f")
+  TableX[5:18, 9:13] <- formatC(x = HarvestEstimatesStats[[mix]][, c("median", "5%", "95%", "mean", "sd")], digits = 0, format = "f", big.mark = ",")
+  TableX[19, 11:12] <- c("Total", formatC(x = sum(HarvestEstimatesStats[[mix]][, "mean"]), digits = 0, format = "f", big.mark = ","))
+  TableX[20, 1] <- Disclaimer
+  
+  
+  write.xlsx(x = as.data.frame(TableX), 
+             file = "Estimates tables/KMA Sockeye Estimates Tables.xlsx",
+             col.names = FALSE, row.names = FALSE, append = TRUE, sheetName = mix)
+}; beep(5)
+
+
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### 2014 Harvest Data ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -3905,6 +4000,17 @@ cast(md, Geo~Strata, sum)
 aggregate(Number ~ Date.Fishing.Began, data = subset(harvest15, subset = harvest15$Geo == "Uyak" & harvest15$Strata == "Middle"), sum)
 aggregate(Number ~ Fishery.Name, data = subset(harvest15, subset = harvest15$Geo == "Uyak" & harvest15$Strata == "Middle"), sum)
 cast(aggregate(Number ~ Fishery.Name + Date.Fishing.Began, data = subset(harvest15, subset = harvest15$Geo == "Uyak" & harvest15$Strata == "Middle"), sum), Date.Fishing.Began ~ Fishery.Name, value = "Number")
+
+
+
+aggregate(Number ~ Date.Fishing.Began, data = subset(harvest15, subset = harvest15$Geo == "Uganik" & harvest15$Strata == "Early"), sum)
+aggregate(Number ~ Date.Fishing.Began, data = subset(harvest15, subset = harvest15$Geo == "Uganik" & harvest15$Strata == "Late"), sum)
+aggregate(Number ~ Date.Fishing.Began, data = subset(harvest15, subset = harvest15$Geo == "Ayakulik" & harvest15$Strata == "Early"), sum)
+aggregate(Number ~ Date.Fishing.Began, data = subset(harvest15, subset = harvest15$Geo == "Ayakulik" & harvest15$Strata == "Middle"), sum)
+aggregate(Number ~ Date.Fishing.Began, data = subset(harvest15, subset = harvest15$Geo == "Alitak" & harvest15$Strata == "Middle"), sum)
+aggregate(Number ~ Date.Fishing.Began, data = subset(harvest15, subset = harvest15$Geo == "Alitak" & harvest15$Strata == "Late"), sum)
+
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### 2016 Harvest Data ####
