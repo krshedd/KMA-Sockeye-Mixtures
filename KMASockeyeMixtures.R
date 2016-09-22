@@ -3433,6 +3433,47 @@ sapply(GeoMix, function(geomix) {
 #### Plot Harvests for KMA Mixtures ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+KMA2014_Annual_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2014_Annual_HarvestEstimatesStats.txt")
+KMA2015_Annual_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2015_Annual_HarvestEstimatesStats.txt")
+
+# What is the total annual harvest per RG?
+KMA2014_HarvestByRG <- apply(sapply(KMA2014_Annual_HarvestEstimatesStats, function(geo) {geo[, "median"]}), 1, sum)
+KMA2015_HarvestByRG <- apply(sapply(KMA2015_Annual_HarvestEstimatesStats, function(geo) {geo[, "median"]}), 1, sum)
+
+KMA2014_HarvestByRG_LCI <- apply(sapply(KMA2014_Annual_HarvestEstimatesStats, function(geo) {geo[, "5%"]}), 1, sum)
+KMA2015_HarvestByRG_LCI <- apply(sapply(KMA2015_Annual_HarvestEstimatesStats, function(geo) {geo[, "5%"]}), 1, sum)
+
+KMA2014_HarvestByRG_UCI <- apply(sapply(KMA2014_Annual_HarvestEstimatesStats, function(geo) {geo[, "95%"]}), 1, sum)
+KMA2015_HarvestByRG_UCI <- apply(sapply(KMA2015_Annual_HarvestEstimatesStats, function(geo) {geo[, "95%"]}), 1, sum)
+
+# Size Parameters
+Groups <- KMA14GroupsPC
+Groups2Rows <- KMA14GroupsPC2Rows
+cex.lab <- 1.5
+cex.xaxis <- 0.5
+cex.yaxis <- 1.1
+cex.leg <- 1.1
+ci.lwd <- 2.5
+ymax <- max(c(KMA2014_HarvestByRG_UCI, KMA2015_HarvestByRG_UCI))
+
+
+par(mar = c(4.6, 4.6, 1, 1))
+Barplot <- barplot2(height = rbind(KMA2014_HarvestByRG, KMA2015_HarvestByRG), 
+                    beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
+                    ci.l = rbind(KMA2014_HarvestByRG_LCI, KMA2015_HarvestByRG_LCI), 
+                    ci.u = rbind(KMA2014_HarvestByRG_UCI, KMA2015_HarvestByRG_UCI), 
+                    ylim = c(0, ymax), col = c("cyan", "blue"), yaxt = "n", xaxt = 'n')
+axis(side = 2, at = seq(0, ymax, 50000), labels = formatC(x = seq(0, ymax, 50000) / 1000, big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+mtext(text = "Number of Fish Harvested (Thousands)", side = 2, line = 3, cex = cex.lab)
+mtext(text = Groups2Rows, side = 1, line = 1, at = apply(Barplot, 2, mean), adj = 0.5, cex = cex.xaxis)
+mtext(text = "Reporting Group", side = 1, line = 3, cex = cex.lab)
+legend(legend = c(2014, 2015), x = "topleft", fill = c("cyan", "blue"), border = "black", bty = "n", cex = cex.leg, title="")
+abline(h = 0, xpd = FALSE)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# Get data
 KMA2014Strata_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2014Strata_HarvestEstimatesStats.txt")
 KMA2015Strata_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2015Strata_HarvestEstimatesStats.txt")
 
