@@ -3347,7 +3347,7 @@ sapply(GeoMix, function(geomix) {
   emf(file = paste("Figures/All Years/", filenames[geomix], ".emf", sep = ''), width = 6, height = 5.75, family = "serif", bg = "white")
   
   
-  layout(mat = layoutmat, widths = c(0.075, 1, 1), heights = c(0.9, 0.9, 1, 0.1))
+  layout(mat = layoutmat, widths = c(0.075, 1, 1), heights = c(0.9, 0.9, 0.9, 0.15))
   par(mar = rep(0, 4))
   par(family = "times")
   
@@ -3386,7 +3386,7 @@ sapply(GeoMix, function(geomix) {
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   ## 2016 Barplot
   
-  par(mar = c(2, 1, 1, 1))
+  par(mar = c(1, 1, 1, 1))
   Barplot16 <- barplot2(height = matrix(data = rep(0, 45), nrow = 3, ncol = length(KMA14GroupsPC)),
                         beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
                         ci.l = matrix(data = rep(0, 45), nrow = 3, ncol = length(KMA14GroupsPC)),
@@ -3418,7 +3418,7 @@ sapply(GeoMix, function(geomix) {
   ## x-axis label
   par(mar = rep(0, 4))
   plot.new()
-  text(x = 0.5, y = 0.5, labels = "Reporting Group", cex = cex.lab)
+  text(x = 0.5, y = 0.25, labels = "Reporting Group", cex = cex.lab)
   
   
   dev.off()
@@ -3467,6 +3467,7 @@ axis(side = 2, at = seq(0, ymax, 50000), labels = formatC(x = seq(0, ymax, 50000
 mtext(text = "Number of Fish Harvested (Thousands)", side = 2, line = 3, cex = cex.lab)
 mtext(text = Groups2Rows, side = 1, line = 1, at = apply(Barplot, 2, mean), adj = 0.5, cex = cex.xaxis)
 mtext(text = "Reporting Group", side = 1, line = 3, cex = cex.lab)
+mtext(text = "Annual Stock-Specific Harvest\nfor Select KMA Fisheries", side = 3, cex = cex.lab, line = -2)
 legend(legend = c(2014, 2015), x = "topleft", fill = c("cyan", "blue"), border = "black", bty = "n", cex = cex.leg, title="")
 abline(h = 0, xpd = FALSE)
 
@@ -3504,7 +3505,7 @@ HarvestColors <- colorpanel(n = 3, low = "green", high = "white")
 
 #~~~~~~~~~~~~~~~~~~
 # 2014
-TempMix14 <- sapply(KMA2014, function(geo) {grep(pattern = geo, x = names(KMA2014Strata_EstimatesStats), value = TRUE)}, simplify = FALSE)
+TempMix14 <- sapply(KMA2014, function(geo) {grep(pattern = geo, x = names(KMA2014Strata_HarvestEstimatesStats), value = TRUE)}, simplify = FALSE)
 
 Legend14 <- setNames(object = c("June 1-27", "June 28-July 25", "July 26-August 29"), 
                      nm = c("1_Early", "2_Middle", "3_Late"))
@@ -3521,7 +3522,7 @@ HarvestEstimates14 <- KMA2014Strata_HarvestEstimatesStats
 
 #~~~~~~~~~~~~~~~~~~
 # 2015
-TempMix15 <- sapply(KMA2015, function(geo) {grep(pattern = geo, x = names(KMA2015Strata_EstimatesStats), value = TRUE)}, simplify = FALSE)
+TempMix15 <- sapply(KMA2015, function(geo) {grep(pattern = geo, x = names(KMA2015Strata_HarvestEstimatesStats), value = TRUE)}, simplify = FALSE)
 
 Legend15 <- setNames(object = c("June 1-July 3", "July 4-August 1", "August 2-29"), 
                      nm = c("1_Early", "2_Middle", "3_Late"))
@@ -3562,7 +3563,7 @@ cex.xaxis <- 0.5
 cex.yaxis <- 1.3
 cex.leg <- 1.1
 ci.lwd <- 2.5
-ymax <- max(sapply(c(HarvestEstimates14, HarvestEstimates15), function(strata) {strata[, "95%"]}))
+ymax <- 200000  # max(sapply(c(HarvestEstimates14, HarvestEstimates15), function(strata) {strata[, "95%"]}))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Make figures as .emf files
@@ -3576,7 +3577,7 @@ sapply(GeoMix, function(geomix) {
   emf(file = paste("Figures/All Years/", filenames[geomix], ".emf", sep = ''), width = 6, height = 5.75, family = "serif", bg = "white")
   
   
-  layout(mat = layoutmat, widths = c(0.075, 1, 1), heights = c(0.9, 0.9, 1, 0.1))
+  layout(mat = layoutmat, widths = c(0.075, 1, 1), heights = c(0.9, 0.9, 0.9, 0.15))
   par(mar = rep(0, 4))
   par(family = "times")
   
@@ -3615,7 +3616,7 @@ sapply(GeoMix, function(geomix) {
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   ## 2016 Barplot
   
-  par(mar = c(2, 1, 1, 1))
+  par(mar = c(1, 1, 1, 1))
   Barplot16 <- barplot2(height = matrix(data = rep(0, 45), nrow = 3, ncol = length(KMA14GroupsPC)),
                         beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
                         ci.l = matrix(data = rep(0, 45), nrow = 3, ncol = length(KMA14GroupsPC)),
@@ -3648,7 +3649,7 @@ sapply(GeoMix, function(geomix) {
   ## x-axis label
   par(mar = rep(0, 4))
   plot.new()
-  text(x = 0.5, y = 0.5, labels = "Reporting Group", cex = cex.lab)
+  text(x = 0.5, y = 0.25, labels = "Reporting Group", cex = cex.lab)
   
   
   dev.off()
