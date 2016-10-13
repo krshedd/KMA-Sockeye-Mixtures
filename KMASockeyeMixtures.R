@@ -3580,6 +3580,66 @@ objects(pattern = "\\.gcl")
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Round 1 MSA files for BAYES 2016 Early Strata ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+require(reshape)
+samp.df.2016 <- data.frame(t(sapply(KMA2016Strata, function(strata) {
+  location <- unlist(strsplit(x = strata, split = "_"))[1]
+  temporal.strata <- as.numeric(unlist(strsplit(x = strata, split = "_"))[2])
+  n <- get(paste(strata, ".gcl", sep = ""))$n
+  c(location = location, temporal.strata = temporal.strata, n = n)
+})))
+cast(data = samp.df.2016, location ~ temporal.strata)
+
+# Indetify Strata to Run
+KMA2016Strata_1_Early <- grep(pattern = "1_Early", x = KMA2016Strata, value = TRUE)
+Round1Mixtures_2016 <- c("SIGVAC15_2_Middle", KMA2016Strata_1_Early)
+dput(x = Round1Mixtures_2016, file = "Objects/Round1Mixtures_2016.txt")
+
+# Create rolling prior based on 2014 Round 1 estimates
+Round1Mixtures_2015_EstimatesStats <- dget(file = "Estimates objects/Round1Mixtures_2015_EstimatesStats.txt")
+
+Round1Mixtures_2016_Prior <- sapply(Round1Mixtures_2015_EstimatesStats, function(Mix) {
+  Prior.GCL(groupvec = KMA473PopsGroupVec14, groupweights = Mix[, "mean"], minval = 0.01)}, simplify = FALSE)
+names(Round1Mixtures_2016_Prior) <- gsub(pattern = "C15", replacement = "C16", x = names(Round1Mixtures_2016_Prior))  # This changes the names
+# Use a flat prior for SIGVAC15_2_Middle and SIGVAC16_1_Early as these temporal strata have never yet been analyzed
+Round1Mixtures_2016_Prior <- c(list("SIGVAC15_2_Middle" = KMA473Pops15FlatPrior), list("SIGVAC16_1_Early" = KMA473Pops15FlatPrior), Round1Mixtures_2016_Prior)
+Round1Mixtures_2016 %in% names(Round1Mixtures_2016_Prior)
+
+dput(x = Round1Mixtures_2016_Prior, file = "Objects/Round1Mixtures_2016_Prior.txt")
+str(Round1Mixtures_2016_Prior)
+
+# Verify
+sapply(Round1Mixtures_2016, function(geomix) {plot(as.vector(Round1Mixtures_2016_Prior[[geomix]]), type = "h", main = geomix)})
+
+## Dumping Mixture files
+sapply(Round1Mixtures_2016, function(Mix) {CreateMixture.GCL(sillys = Mix, loci = loci46, IDs = NULL, mixname = Mix, dir = "BAYES/2014-2016 Mixtures 46loci 14RG/Mixture", type = "BAYES", PT = FALSE)} )
+
+## Dumping Control files
+sapply(Round1Mixtures_2016, function(Mix) {
+  CreateControlFile.GCL(sillyvec = KMA473Pops, loci = loci46, mixname = Mix, basename = "KMA473Pops46Markers", suffix = "", nreps = 40000, nchains = 5,
+                        groupvec = KMA473PopsGroupVec14, priorvec = Round1Mixtures_2016_Prior[[Mix]], initmat = KMA473PopsInits, dir = "BAYES/2014-2016 Mixtures 46loci 14RG/Control",
+                        seeds = WASSIPSockeyeSeeds, thin = c(1, 1, 100), mixfortran = KMA47346MixtureFormat, basefortran = KMA47346Baseline, switches = "F T F T T T F")
+})
+
+## Create output directory
+sapply(Round1Mixtures_2016, function(Mix) {dir.create(paste("BAYES/2014-2016 Mixtures 46loci 14RG/Output/", Mix, sep = ""))})
+
+
+## Dumping Control files for 80K suspects
+# sapply(Round1Mixtures_2016[4:5], function(Mix) {
+#   CreateControlFile.GCL(sillyvec = KMA473Pops, loci = loci46, mixname = Mix, basename = "KMA473Pops46Markers", suffix = "", nreps = 80000, nchains = 5,
+#                         groupvec = KMA473PopsGroupVec14, priorvec = Round1Mixtures_2016_Prior[[Mix]], initmat = KMA473PopsInits, dir = "BAYES/2014-2016 Mixtures 46loci 14RG/Control",
+#                         seeds = WASSIPSockeyeSeeds, thin = c(1, 1, 100), mixfortran = KMA47346MixtureFormat, basefortran = KMA47346Baseline, switches = "F T F T T T F")
+# })
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Go run BAYES
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Plot Percentages for KMA Mixtures ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
