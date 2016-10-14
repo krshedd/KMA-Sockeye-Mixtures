@@ -3788,7 +3788,7 @@ sapply(Round1Mixtures_2016[5], function(Mix) {
 Round1Mixtures_2016_Estimates <- dget(file = "Estimates objects/Round1Mixtures_2016_Estimates.txt")
 
 sapply(Round1Mixtures_2016_EstimatesStats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # Issues with SKARLC16_1_Early
-sapply(Round1Mixtures80K_2016_EstimatesStats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # SKARLC16_1_Early resolved
+sapply(Round1Mixtures80K_2016_EstimatesStats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # SKARLC16_1_Early still bad, but better
 
 str(Round1Mixtures_2016_Estimates)
 str(Round1Mixtures80K_2016_Estimates)
@@ -3835,6 +3835,7 @@ Round2Mixtures_2016_Prior <- sapply(Round1Mixtures_2016_EstimatesStats_Final, fu
   Prior.GCL(groupvec = KMA473PopsGroupVec14, groupweights = Mix[, "mean"], minval = 0.01)}, simplify = FALSE)
 names(Round2Mixtures_2016_Prior) <- gsub(pattern = "1_Early", replacement = "2_Middle", 
                                          x = names(Round2Mixtures_2016_Prior))  # This changes the names
+Round2Mixtures_2016_Prior <- Round2Mixtures_2016_Prior[-1]
 dput(x = Round2Mixtures_2016_Prior, file = "Objects/Round2Mixtures_2016_Prior.txt")
 str(Round2Mixtures_2016_Prior)
 
@@ -3853,24 +3854,84 @@ sapply(Round2Mixtures_2016, function(Mix) {
 sapply(Round2Mixtures_2016, function(Mix) {dir.create(paste("BAYES/2014-2016 Mixtures 46loci 14RG/Output/", Mix, sep = ""))})
 
 ## Dumping Control files for 80K suspects
-sapply(Round2Mixtures_2016[5], function(Mix) {
-  CreateControlFile.GCL(sillyvec = KMA473Pops, loci = loci46, mixname = Mix, basename = "KMA473Pops46Markers", suffix = "", nreps = 80000, nchains = 5,
-                        groupvec = KMA473PopsGroupVec14, priorvec = Round2Mixtures_2016_Prior[[Mix]], initmat = KMA473PopsInits, dir = "BAYES/2014-2016 Mixtures 46loci 14RG/Control",
-                        seeds = WASSIPSockeyeSeeds, thin = c(1, 1, 100), mixfortran = KMA47346MixtureFormat, basefortran = KMA47346Baseline, switches = "F T F T T T F")
-})
+# sapply(Round2Mixtures_2016[5], function(Mix) {
+#   CreateControlFile.GCL(sillyvec = KMA473Pops, loci = loci46, mixname = Mix, basename = "KMA473Pops46Markers", suffix = "", nreps = 80000, nchains = 5,
+#                         groupvec = KMA473PopsGroupVec14, priorvec = Round2Mixtures_2016_Prior[[Mix]], initmat = KMA473PopsInits, dir = "BAYES/2014-2016 Mixtures 46loci 14RG/Control",
+#                         seeds = WASSIPSockeyeSeeds, thin = c(1, 1, 100), mixfortran = KMA47346MixtureFormat, basefortran = KMA47346Baseline, switches = "F T F T T T F")
+# })
 
-
-## Dumping Control files for 80K suspects, repeat
-sapply(Round2Mixtures_2016[4], function(Mix) {
-  CreateControlFile.GCL(sillyvec = KMA473Pops, loci = loci46, mixname = Mix, basename = "KMA473Pops46Markers", suffix = "", nreps = 80000, nchains = 5,
-                        groupvec = KMA473PopsGroupVec14, priorvec = Round2Mixtures_2016_Prior[[Mix]], initmat = KMA473PopsInits, dir = "BAYES/2014-2016 Mixtures 46loci 14RG/Control",
-                        seeds = WASSIPSockeyeSeeds, thin = c(1, 1, 100), mixfortran = KMA47346MixtureFormat, basefortran = KMA47346Baseline, switches = "F T F T T T F")
-})
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Go run BAYES
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Summarize Round 2 2016 Output ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Round2Mixtures_2016_Estimates <- CustomCombineBAYESOutput.GCL(
+  groupvec = seq(KMA14GroupsPC), groupnames = KMA14GroupsPC ,
+  maindir = "BAYES/2014-2016 Mixtures 46loci 14RG/Output/40K Iterations", 
+  mixvec = Round2Mixtures_2016, prior = "",  
+  ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1, PosteriorOutput = TRUE)
+
+# Dput 1) estimates stats + posterior output & 2) estimates stats
+dput(Round2Mixtures_2016_Estimates, file = "Estimates objects/Round2Mixtures_2016_Estimates.txt")
+dput(Round2Mixtures_2016_Estimates$Stats, file = "Estimates objects/Round2Mixtures_2016_EstimatesStats.txt")
+
+Round2Mixtures_2016_Estimates <- dget(file = "Estimates objects/Round2Mixtures_2016_Estimates.txt")
+Round2Mixtures_2016_EstimatesStats <- dget(file = "Estimates objects/Round2Mixtures_2016_EstimatesStats.txt")
+
+
+# Verify that Gelman-Rubin < 1.2
+sapply(Round2Mixtures_2016_Estimates$Stats, function(Mix) {Mix[, "GR"]})
+sapply(Round2Mixtures_2016_Estimates$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # Issues with SUGANC15_2_Middle
+require(gplots)
+par(mfrow = c(1, 1), mar = c(3.1, 4.6, 3.1, 1.1), oma = rep(0, 4))
+sapply(Round2Mixtures_2016[c(4, 5, 3, 2, 1)], function(Mix) {
+  BarPlot <- barplot2(Round2Mixtures_2016_EstimatesStats[[Mix]][, "GR"], col = "blue", ylim = c(1, pmax(1.5, max(Round2Mixtures_2016_EstimatesStats[[Mix]][, "GR"]))), ylab = "Gelman-Rubin", xpd = FALSE, main = Mix, names.arg = '', cex.lab = 1.5, cex.main = 2)
+  abline(h = 1.2, lwd = 3, xpd = FALSE)
+  text(x = BarPlot, y = 1, labels = KMA14GroupsPC2Rows, srt = 0, pos = 1, xpd = TRUE, cex = 0.55)
+})
+
+# Quick look at raw posterior output
+str(Round2Mixtures_2016_Estimates$Output)
+Round2Mixtures_2016_Header <- setNames(object = c("Alitak Section Middle July 4-August 1, 2016",
+                                                  "Ayakulik Section Middle July 4-August 1, 2016",
+                                                  "Karluk Section Middle July 4-August 1, 2016",
+                                                  "Uganik Section Middle July 4-August 1, 2016",
+                                                  "Uyak Section Middle July 4-August 1, 2016"), 
+                                       nm = Round2Mixtures_2016)
+dput(x = Round2Mixtures_2016_Header, file = "Objects/Round2Mixtures_2016_Header.txt")
+
+PlotPosterior(mixvec = Round2Mixtures_2016[c(4, 5, 3, 2, 1)], output = Round2Mixtures_2016_Estimates$Output, 
+              groups = KMA14GroupsPC, colors = KMA14Colors, 
+              header = Round2Mixtures_2016_Header, set.mfrow = c(5, 3), thin = 10)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Plot Round 2 2016 Results ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Quick and dirty plot
+QuickPlot(mixvec = Round2Mixtures_2016[c(4, 5, 3, 2, 1)], estimatesstats = Round2Mixtures_2016_Estimates, groups = KMA14GroupsPC, groups2rows = KMA14GroupsPC2Rows, colors = KMA14Colors, header = Round2Mixtures_2016_Header)
+
+## Quick barplot
+QuickBarplot(mixvec = Round2Mixtures_2016[c(4, 5, 3, 2, 1)], estimatesstats = Round2Mixtures_2016_Estimates, groups = KMA14GroupsPC, groups2rows = KMA14GroupsPC2Rows, header = Round2Mixtures_2016_Header)
+
+## Make violin plots of posteriors with RGs sorted
+ViolinPlot(mixvec = Round2Mixtures_2016[c(4, 5, 3, 2, 1)], estimates = Round2Mixtures_2016_Estimates, groups = KMA14GroupsPC2Rows, colors = KMA14Colors, header = Round2Mixtures_2016_Header)
+rm(Round2Mixtures_2016_Estimates)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Sneak Peak Round 2 2016 Results with Finer Scale Reporting Groups ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Round2Mixtures_2016_31RG_Estimates <- CustomCombineBAYESOutput.GCL(groupvec = KMA473PopsGroupVec31, groupnames = KMA31GroupsPC, 
+                                                                   maindir = "BAYES/2014-2016 Mixtures 46loci 14RG/Output", 
+                                                                   mixvec = Round2Mixtures_2016, prior = "",  
+                                                                   ext = "BOT", nchains = 5, burn = 0.5, alpha = 0.1, PosteriorOutput = TRUE)
+str(Round2Mixtures_2016_31RG_Estimates)
+QuickBarplot(mixvec = Round2Mixtures_2016[c(4, 5, 3, 2, 1)], estimatesstats = Round2Mixtures_2016_31RG_Estimates$Stats, groups = KMA31GroupsPC, header = Round2Mixtures_2016_Header)
 
 
 
