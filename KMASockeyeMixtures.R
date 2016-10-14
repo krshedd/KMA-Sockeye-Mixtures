@@ -1716,6 +1716,13 @@ dimnames(HarvestByStrata2015.mat) <- list(HarvestByStrata2015$location, c("1_Ear
 dput(x = HarvestByStrata2015.mat, file = "Objects/HarvestByStrata2015.txt"); rm(HarvestByStrata2015.mat)
 HarvestByStrata2015 <- dget(file = "Objects/HarvestByStrata2015.txt")
 
+HarvestByStrata2016 <- read.table(file = "Harvest/2016HarvestByStrata.txt", header = TRUE, sep = "\t", as.is = TRUE)
+HarvestByStrata2016.mat <- data.matrix(HarvestByStrata2016[, -1])
+dimnames(HarvestByStrata2016.mat) <- list(HarvestByStrata2016$location, c("1_Early", "2_Middle", "3_Late"))
+dput(x = HarvestByStrata2016.mat, file = "Objects/HarvestByStrata2016.txt"); rm(HarvestByStrata2016.mat)
+HarvestByStrata2016 <- dget(file = "Objects/HarvestByStrata2016.txt")
+
+
 max(HarvestByStrata2014, HarvestByStrata2015, na.rm = TRUE)
 
 
@@ -4376,23 +4383,31 @@ DatesStrata2014_Final <- dget(file = "Objects/DatesStrata2014_Final.txt")
 DatesStrata2015_Final <- dget(file = "Objects/DatesStrata2015_Final.txt")
 
 
+# DatesStrata2016 <- read.table(file = "Harvest/2016DatesByStrata.txt", header = TRUE, sep = "\t", as.is = TRUE)
+# DatesStrata2016.mat <- as.matrix(DatesStrata2016[-1])
+# dimnames(DatesStrata2016.mat) <- list(DatesStrata2016$location, c("1_Early", "2_Middle", "3_Late"))
+# dput(x = DatesStrata2016.mat, file = "Objects/DatesStrata2016_Final.txt"); rm(DatesStrata2016.mat)
+DatesStrata2016_Final <- dget(file = "Objects/DatesStrata2016_Final.txt")
+
+
 ## Sample sizes
-# KMA2014_2015Strata_SampleSizes_Final <- KMA2014_2015Strata_SampleSizes[, "Final"]
-# LateLateStrata <- grep(pattern = "LateLate", x = names(KMA2014_2015Strata_SampleSizes_Final))
-# KMA2014_2015Strata_SampleSizes_Final[LateLateStrata-1] <- KMA2014_2015Strata_SampleSizes_Final[LateLateStrata-1] + KMA2014_2015Strata_SampleSizes_Final[LateLateStrata]
-# KMA2014_2015Strata_SampleSizes_Final_Condense <- KMA2014_2015Strata_SampleSizes_Final[-LateLateStrata]
-# dput(x = KMA2014_2015Strata_SampleSizes_Final_Condense, file = "Objects/KMA2014_2015Strata_SampleSizes_Final_Condense.txt")
-KMA2014_2015Strata_SampleSizes_Final_Condense <- dget(file = "Objects/KMA2014_2015Strata_SampleSizes_Final_Condense.txt")
+# KMA2014_2016Strata_SampleSizes_Final <- KMA2014_2016Strata_SampleSizes[, "Final"]
+# LateLateStrata <- grep(pattern = "LateLate", x = names(KMA2014_2016Strata_SampleSizes_Final))
+# KMA2014_2016Strata_SampleSizes_Final[LateLateStrata-1] <- KMA2014_2016Strata_SampleSizes_Final[LateLateStrata-1] + KMA2014_2016Strata_SampleSizes_Final[LateLateStrata]
+# KMA2014_2016Strata_SampleSizes_Final_Condense <- KMA2014_2016Strata_SampleSizes_Final[-LateLateStrata]
+# dput(x = KMA2014_2016Strata_SampleSizes_Final_Condense, file = "Objects/KMA2014_2016Strata_SampleSizes_Final_Condense.txt")
+KMA2014_2016Strata_SampleSizes_Final_Condense <- dget(file = "Objects/KMA2014_2016Strata_SampleSizes_Final_Condense.txt")
 
 
 ## Geographic headers
-# GeoHeader <- setNames(object = c(paste("Cape Alitak/Humpy Deadman Section (257-10,20,50,60,70)", sep = ''),
-#                                  paste("Ayakulik/Halibut Bay Section (256-10", "\u2013", "256-30)", sep = ''),
-#                                  paste("Karluk/Sturgeon Section (255-10", "\u2013", "255-20; 256-40)", sep = ''),
-#                                  paste("Uganik/Kupreanof Section (253)", sep = ''),
-#                                  paste("Uyak Bay Section (254)", sep = '')),
-#                       nm = unlist(strsplit(x = KMA2015, split = "15")))
-# dput(x = GeoHeader, file = "Objects/GeoHeader.txt")
+GeoHeader <- setNames(object = c(paste0("Alitak (257-10, 20, 50, 60, 70)"),
+                                 paste0("Ayakulik-Halibut Bay (256-10", "\u2013", "256-30)"),
+                                 paste0("Igvak (262-75, 80, 90, 95)"),
+                                 paste0("Karluk-Sturgeon (255-10, 20; 256-40)"),
+                                 paste0("Uganik-Kupreanof (253)"),
+                                 paste0("Uyak (254)")),
+                      nm = unlist(strsplit(x = KMA2016, split = "16")))
+dput(x = GeoHeader, file = "Objects/GeoHeader.txt")
 GeoHeader <- dget(file = "Objects/GeoHeader.txt")
 
 
@@ -4447,11 +4462,11 @@ for(mix in SheetNames) {
     Caption <- paste("Table X.-Estimates of stock composition (%) and stock-specific harvest for temporal stratum ",
                      SheetNames.split[2], " (", dates[geomix, tempmix],
                      "; Harvest=", formatC(x = harvest[geomix, tempmix], format = "f", digits = 0, big.mark = ","),
-                     "; n=", sampsize[mix], ")", " of the ", GeoHeader[geo], ", 20", yr,
+                     "; n=", sampsize[mix], ")", " of ", GeoHeader[geo], ", 20", yr,
                      ". Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and SD.",
                      sep = '')
   } else {
-    Caption <- paste("Table X.-Annual estimates of stock composition (%) and stock-specific harvest for the ", GeoHeader[geo], ", 20", yr,
+    Caption <- paste("Table X.-Annual estimates of stock composition (%) and stock-specific harvest for ", GeoHeader[geo], ", 20", yr,
                      ". Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and SD.",
                      sep = '')
   }
