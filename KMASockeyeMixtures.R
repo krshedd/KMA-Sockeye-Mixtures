@@ -3860,12 +3860,12 @@ sapply(Round2Mixtures_2016, function(Mix) {
 ## Create output directory
 sapply(Round2Mixtures_2016, function(Mix) {dir.create(paste("BAYES/2014-2016 Mixtures 46loci 14RG/Output/", Mix, sep = ""))})
 
-## Dumping Control files for 80K suspects
-# sapply(Round2Mixtures_2016[5], function(Mix) {
-#   CreateControlFile.GCL(sillyvec = KMA473Pops, loci = loci46, mixname = Mix, basename = "KMA473Pops46Markers", suffix = "", nreps = 80000, nchains = 5,
-#                         groupvec = KMA473PopsGroupVec14, priorvec = Round2Mixtures_2016_Prior[[Mix]], initmat = KMA473PopsInits, dir = "BAYES/2014-2016 Mixtures 46loci 14RG/Control",
-#                         seeds = WASSIPSockeyeSeeds, thin = c(1, 1, 100), mixfortran = KMA47346MixtureFormat, basefortran = KMA47346Baseline, switches = "F T F T T T F")
-# })
+## Dumping Control files for 80K
+sapply(Round2Mixtures_2016[2], function(Mix) {
+  CreateControlFile.GCL(sillyvec = KMA473Pops, loci = loci46, mixname = Mix, basename = "KMA473Pops46Markers", suffix = "", nreps = 80000, nchains = 5,
+                        groupvec = KMA473PopsGroupVec14, priorvec = Round2Mixtures_2016_Prior[[Mix]], initmat = KMA473PopsInits, dir = "BAYES/2014-2016 Mixtures 46loci 14RG/Control",
+                        seeds = WASSIPSockeyeSeeds, thin = c(1, 1, 100), mixfortran = KMA47346MixtureFormat, basefortran = KMA47346Baseline, switches = "F T F T T T F")
+})
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -3903,15 +3903,16 @@ sapply(Round2Mixtures_2016[c(4, 5, 3, 2, 1)], function(Mix) {
 
 # Quick look at raw posterior output
 str(Round2Mixtures_2016_Estimates$Output)
-Round2Mixtures_2016_Header <- setNames(object = c("Alitak Section Middle July 4-August 1, 2016",
-                                                  "Ayakulik Section Middle July 4-August 1, 2016",
-                                                  "Karluk Section Middle July 4-August 1, 2016",
-                                                  "Uganik Section Middle July 4-August 1, 2016",
-                                                  "Uyak Section Middle July 4-August 1, 2016"), 
+Round2Mixtures_2016_Header <- setNames(object = c("Alitak Section Middle June 28-July 25, 2016",
+                                                  "Ayakulik Section Middle June 28-July 25, 2016",
+                                                  "Igvak Section Middle June 28-July 25, 2016",
+                                                  "Karluk Section Middle June 28-July 25, 2016",
+                                                  "Uganik Section Middle June 28-July 25, 2016",
+                                                  "Uyak Section Middle June 28-July 25, 2016"), 
                                        nm = Round2Mixtures_2016)
 dput(x = Round2Mixtures_2016_Header, file = "Objects/Round2Mixtures_2016_Header.txt")
 
-PlotPosterior(mixvec = Round2Mixtures_2016[c(4, 5, 3, 2, 1)], output = Round2Mixtures_2016_Estimates$Output, 
+PlotPosterior(mixvec = Round2Mixtures_2016[c(3, 5, 6, 4, 2, 1)], output = Round2Mixtures_2016_Estimates$Output, 
               groups = KMA14GroupsPC, colors = KMA14Colors, 
               header = Round2Mixtures_2016_Header, set.mfrow = c(5, 3), thin = 10)
 
@@ -3919,14 +3920,11 @@ PlotPosterior(mixvec = Round2Mixtures_2016[c(4, 5, 3, 2, 1)], output = Round2Mix
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Plot Round 2 2016 Results ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## Quick and dirty plot
-QuickPlot(mixvec = Round2Mixtures_2016[c(4, 5, 3, 2, 1)], estimatesstats = Round2Mixtures_2016_Estimates, groups = KMA14GroupsPC, groups2rows = KMA14GroupsPC2Rows, colors = KMA14Colors, header = Round2Mixtures_2016_Header)
-
 ## Quick barplot
-QuickBarplot(mixvec = Round2Mixtures_2016[c(4, 5, 3, 2, 1)], estimatesstats = Round2Mixtures_2016_Estimates, groups = KMA14GroupsPC, groups2rows = KMA14GroupsPC2Rows, header = Round2Mixtures_2016_Header)
+QuickBarplot(mixvec = Round2Mixtures_2016[c(3, 5, 6, 4, 2, 1)], estimatesstats = Round2Mixtures_2016_Estimates, groups = KMA14GroupsPC, groups2rows = KMA14GroupsPC2Rows, header = Round2Mixtures_2016_Header)
 
 ## Make violin plots of posteriors with RGs sorted
-ViolinPlot(mixvec = Round2Mixtures_2016[c(4, 5, 3, 2, 1)], estimates = Round2Mixtures_2016_Estimates, groups = KMA14GroupsPC2Rows, colors = KMA14Colors, header = Round2Mixtures_2016_Header)
+ViolinPlot(mixvec = Round2Mixtures_2016[c(3, 5, 6, 4, 2, 1)], estimates = Round2Mixtures_2016_Estimates, groups = KMA14GroupsPC2Rows, colors = KMA14Colors, header = Round2Mixtures_2016_Header)
 rm(Round2Mixtures_2016_Estimates)
 
 
