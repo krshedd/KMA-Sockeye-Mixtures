@@ -2869,6 +2869,18 @@ cast(data = samp.df.2015, location ~ temporal.strata)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 KMA2015Strata_1_Early_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2015Strata_1_Early_EstimatesStats.txt")
 KMA2015Strata_2_Middle_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2015Strata_2_Middle_EstimatesStats.txt")
+
+#~~~~~~~~
+# Add Igvak 2_Middle 2015
+str(KMA2015Strata_2_Middle_EstimatesStats)
+SIGVAC15_2_Middle_EstimatesStats <- dget(file = "Estimates objects/Round1Mixtures_2016_EstimatesStats.txt")[1]
+str(SIGVAC15_2_Middle_EstimatesStats)
+
+KMA2015Strata_2_Middle_EstimatesStats <- c(KMA2015Strata_2_Middle_EstimatesStats[1:2], SIGVAC15_2_Middle_EstimatesStats, KMA2015Strata_2_Middle_EstimatesStats[3:5])
+str(KMA2015Strata_2_Middle_EstimatesStats)
+dput(x = KMA2015Strata_2_Middle_EstimatesStats, file = "Estimates objects/Final/KMA2015Strata_2_Middle_EstimatesStats.txt")
+#~~~~~~~~
+
 KMA2015Strata_3_Late_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2015Strata_3_Late_EstimatesStats.txt")
 
 KMA2015Strata_EstimatesStats <- c(KMA2015Strata_1_Early_EstimatesStats, 
@@ -3044,7 +3056,7 @@ sort(sapply(c(Round1Mixtures_2015_Estimates_Final$Output,
 sapply(KMA2015, function(geomix) {
   assign(x = paste(geomix, "_Annual_Stratified", sep = ''), 
          value = StratifiedEstimator.GCL(
-           groupvec = seq(KMA14GroupsPC), groupnames = KMA14GroupsPC, maindir = "BAYES/2014-2015 Mixtures 46loci 14RG/Output", 
+           groupvec = seq(KMA14GroupsPC), groupnames = KMA14GroupsPC, maindir = "BAYES/2014-2016 Mixtures 46loci 14RG/Output", 
            mixvec = paste(geomix, colnames(HarvestByStrata2015)[!is.na(HarvestByStrata2015[geomix,])], sep = "_"), 
            catchvec = HarvestByStrata2015[geomix, !is.na(HarvestByStrata2015[geomix,])], 
            newname = paste(geomix, "_Annual_Stratified", sep = ''), priorname = '',
@@ -3061,6 +3073,13 @@ KMA2015_Annual_EstimatesStats <- sapply(KMA2015, function(geomix) {
   get(paste(geomix, "_Annual_Stratified", sep = ''))$Stats
 }, simplify = FALSE)
 str(KMA2015_Annual_EstimatesStats)
+
+# Add Igvak 2_Middle 2015
+str(KMA2015Strata_2_Middle_EstimatesStats)
+SIGVAC15_2_Middle_EstimatesStats <- dget(file = "Estimates objects/Round1Mixtures_2016_EstimatesStats.txt")[1]
+str(SIGVAC15_2_Middle_EstimatesStats)
+
+KMA2015_Annual_EstimatesStats <- c(KMA2015_Annual_EstimatesStats[1:2], list("SIGVAC15" = SIGVAC15_2_Middle_EstimatesStats[[1]]), KMA2015_Annual_EstimatesStats[3:5])
 dput(x = KMA2015_Annual_EstimatesStats, file = "Estimates objects/Final/KMA2015_Annual_EstimatesStats.txt")
 
 
@@ -4042,7 +4061,7 @@ Round2Mixtures_2016_EstimatesStats_Final <- dget(file = "Estimates objects/Round
 sapply(Round2Mixtures_2016_Estimates_Final$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # SAYAKC16_2_Middle resolved
 
 # Dput final Early Strata Estimates from 2016
-dput(x = Round2Mixtures_2016_EstimatesStats_Final, file = "Estimates objects/Final/KMA2016Strata_1_Early_EstimatesStats.txt")
+dput(x = Round2Mixtures_2016_EstimatesStats_Final, file = "Estimates objects/Final/KMA2016Strata_2_Middle_EstimatesStats.txt")
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -4200,7 +4219,7 @@ sapply(Round3Mixtures_2016[2], function(Mix) {
 # Quick look at raw posterior output
 str(Round3Mixtures80K_2016_Estimates$Output)
 
-PlotPosterior(mixvec = Round3Mixtures_2016[2], output = Round3Mixtures80K_2016_Estimates$Output, 
+PlotPosterior(mixvec = Round3Mixtures_2016[5], output = Round3Mixtures80K_2016_Estimates$Output, 
               groups = KMA14GroupsPC, colors = KMA14Colors, 
               header = Round3Mixtures_2016_Header[2], set.mfrow = c(5, 3), thin = 10)
 
@@ -4245,12 +4264,12 @@ sapply(Round3Mixtures_2016[5], function(Mix) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Dputting Final Round 3 2016 Estimates ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Keeping 40K iteration results from SALITC16_2_Middle, SKARLC16_2_Middle, SIGVAC_2_Middle, SUGANC16_2_Middle, and SUYAKC16_2_Middle as GR was < 1.2 and thats "our business rule"
-# Using 80K iteration results from SAYAKC16_2_Middle
+# Keeping 40K iteration results from SALITC16_3_Late, SAYAKC16_3_Late, SKARLC16_3_Late, and SUGANC16_3_Late as GR was < 1.2 and thats "our business rule"
+# Using 80K iteration results from SUYAKC16_3_Late
 Round3Mixtures_2016_Estimates <- dget(file = "Estimates objects/Round3Mixtures_2016_Estimates.txt")
 
-sapply(Round3Mixtures_2016_EstimatesStats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # Issues with SAYAKC16_2_Middle
-sapply(Round3Mixtures80K_2016_EstimatesStats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # SAYAKC16_2_Middle resolved
+sapply(Round3Mixtures_2016_EstimatesStats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # Issues with SUYAKC16_3_Late
+sapply(Round3Mixtures80K_2016_EstimatesStats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # SUYAKC16_3_Late resolved
 
 str(Round3Mixtures_2016_Estimates)
 str(Round3Mixtures80K_2016_Estimates)
@@ -4266,10 +4285,459 @@ dput(x = Round3Mixtures_2016_Estimates_Final$Stats, file = "Estimates objects/Ro
 Round3Mixtures_2016_Estimates_Final <- dget(file = "Estimates objects/Round3Mixtures_2016_Estimates_Final.txt")
 Round3Mixtures_2016_EstimatesStats_Final <- dget(file = "Estimates objects/Round3Mixtures_2016_EstimatesStats_Final.txt")
 
-sapply(Round3Mixtures_2016_Estimates_Final$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # SAYAKC16_2_Middle resolved
+sapply(Round3Mixtures_2016_Estimates_Final$Stats, function(Mix) {table(Mix[, "GR"] > 1.2)})  # SUYAKC16_3_Late resolved
 
 # Dput final Early Strata Estimates from 2016
-dput(x = Round3Mixtures_2016_EstimatesStats_Final, file = "Estimates objects/Final/KMA2016Strata_1_Early_EstimatesStats.txt")
+dput(x = Round3Mixtures_2016_EstimatesStats_Final, file = "Estimates objects/Final/KMA2016Strata_3_Late_EstimatesStats.txt")
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Create Final Estimates Objects for Each Temporal Strata ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# View as tables by year
+require(reshape)
+samp.df.2016 <- data.frame(t(sapply(KMA2016Strata, function(strata) {
+  location <- unlist(strsplit(x = strata, split = "_"))[1]
+  temporal.strata <- as.numeric(unlist(strsplit(x = strata, split = "_"))[2])
+  n <- get(paste(strata, ".gcl", sep = ""))$n
+  c(location = location, temporal.strata = temporal.strata, n = n)
+})))
+cast(data = samp.df.2016, location ~ temporal.strata)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Plot stock composition results 2016 KMA Mixtures ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+KMA2016Strata_1_Early_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2016Strata_1_Early_EstimatesStats.txt")
+KMA2016Strata_2_Middle_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2016Strata_2_Middle_EstimatesStats.txt")
+KMA2016Strata_3_Late_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2016Strata_3_Late_EstimatesStats.txt")
+
+KMA2016Strata_EstimatesStats <- c(KMA2016Strata_1_Early_EstimatesStats, 
+                                  KMA2016Strata_2_Middle_EstimatesStats, 
+                                  KMA2016Strata_3_Late_EstimatesStats)
+str(KMA2016Strata_EstimatesStats)
+
+# Add Igvak 2015 to KMA2015Strata_EstimatesStats
+KMA2015Strata_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2015Strata_EstimatesStats.txt")
+str(KMA2015Strata_EstimatesStats)
+KMA2015Strata_EstimatesStats <- c(KMA2015Strata_EstimatesStats[1:7], KMA2016Strata_EstimatesStats[1], KMA2015Strata_EstimatesStats[8:15])
+str(KMA2015Strata_EstimatesStats)
+dput(x = KMA2015Strata_EstimatesStats, file = "Estimates objects/Final/KMA2015Strata_EstimatesStats.txt")
+
+
+# Dput KMA2016Strata_EstimatesStats
+KMA2016Strata_EstimatesStats <- KMA2016Strata_EstimatesStats[-1]
+str(KMA2016Strata_EstimatesStats)
+dput(x = KMA2016Strata_EstimatesStats, file = "Estimates objects/Final/KMA2016Strata_EstimatesStats.txt")
+KMA2016Strata_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2016Strata_EstimatesStats.txt")
+
+str(KMA2016Strata_EstimatesStats)
+
+
+
+
+TempMix16 <- sapply(KMA2016, function(geo) {grep(pattern = geo, x = names(KMA2016Strata_EstimatesStats), value = TRUE)}, simplify = FALSE)
+
+Legend16 <- setNames(object = c("June 1-27", "June 28-July 25", "July 26-August 29"), 
+                     nm = c("1_Early", "2_Middle", "3_Late"))
+TempLegend16 <- sapply(KMA2016, function(geo) {
+  Legend16[sapply(TempMix16[[geo]], function(strata) {unlist(strsplit(x = strata, split = paste(geo, "_", sep = '')))[2]} )]
+}, simplify = FALSE)
+
+GeoHeader <- setNames(object = c(paste("Cape Alitak/Humpy Deadman 257-10,20,50,60,70", sep = ''),
+                                 paste("Ayakulik/Halibut Bay 256-10", "\u2013", "256-30", sep = ''),
+                                 paste("Cape Igvak 262-75,80,90,95", sep = ''),
+                                 paste("Karluk/Sturgeon 255-10", "\u2013", "255-20; 256-40", sep = ''),
+                                 paste("Uganik/Kupreanof 253", sep = ''),
+                                 paste("Uyak Bay 254", sep = '')),
+                      nm = unlist(strsplit(x = KMA2016, split = "16")))
+dput(x = GeoHeader, file = "Objects/GeoHeader.txt")
+
+ProportionColors <- colorpanel(n = 3, low = "blue", high = "white")
+TempProportionColors16 <- sapply(KMA2016, function(geo) {
+  ProportionColors[sapply(TempMix16[[geo]], function(strata) {as.numeric(unlist(strsplit(x = strata, split = "_"))[2])} )]
+}, simplify = FALSE)
+
+Estimates <- KMA2016Strata_EstimatesStats
+Groups <- KMA14GroupsPC
+Groups2Rows <- KMA14GroupsPC2Rows
+cex.lab <- 1.5
+cex.yaxis <- 1.3
+cex.xaxis <- 0.6
+cex.main <- 1.7
+cex.leg <- 1.3
+ci.lwd <- 2.5
+
+# dir.create("Figures/2016")
+
+sapply(names(TempMix16[c(3, 5, 6, 4, 2, 1)]), function(geomix) {
+  emf(file = paste("Figures/2016/", geomix, ".emf", sep = ''), width = 8.5, height = 6.5, family = "serif", bg = "white")
+  par(mar = c(2.1, 4.1, 2.6, 0.6))
+  
+  Barplot1 <- barplot2(height = t(sapply(TempMix16[[geomix]], function(tempmix) {Estimates[[tempmix]][, "median"]})) * 100, 
+                       beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
+                       ci.l = t(sapply(TempMix16[[geomix]], function(tempmix) {Estimates[[tempmix]][, "5%"]})) * 100, 
+                       ci.u = t(sapply(TempMix16[[geomix]], function(tempmix) {Estimates[[tempmix]][, "95%"]})) * 100, 
+                       ylim = c(0, 100), col = TempProportionColors16[[geomix]], cex.axis = cex.yaxis, yaxt = "n", xaxt = 'n')
+  axis(side = 2, at = seq(0, 100, 25), labels = formatC(x = seq(0, 100, 25), big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+  legend(legend = TempLegend16[[geomix]], x = "topleft", fill = TempProportionColors16[[geomix]], border = "black", bty = "n", cex = cex.leg, title="2016")
+  abline(h = 0, xpd = FALSE)
+  
+  mtext(text = "Percentage of Catch", side = 2, cex = cex.yaxis, line = 3)
+  mtext(text = Groups2Rows, side = 1, line = 1, at = apply(Barplot1, 2, mean), adj = 0.5, cex = cex.xaxis)
+  mtext(text = GeoHeader[unlist(strsplit(geomix, split = "16"))], side = 3, cex = cex.main, line = 1)
+  dev.off()
+})
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Plot stock specific harvest results 2016 KMA Mixtures ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Multiply by harvest
+HarvestByStrata2016
+# Nothing to collapse, final is same as preliminary
+HarvestByStrata2016_Final <- HarvestByStrata2016
+dput(x = HarvestByStrata2016_Final, file = "Objects/HarvestByStrata2016_Final.txt")
+
+
+KMA2016Strata_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2016Strata_EstimatesStats.txt")
+str(KMA2016Strata_EstimatesStats)
+names(KMA2016Strata_EstimatesStats)
+dimnames(KMA2016Strata_EstimatesStats[[1]])
+
+
+KMA2016Strata_HarvestEstimatesStats <- sapply(names(KMA2016Strata_EstimatesStats), function(strata) {
+  strata.split <- unlist(strsplit(x = strata, split = "_"))
+  strata.split <- c(strata.split[1], paste(c(strata.split[2], strata.split[3]), collapse = "_"))
+  
+  cbind(KMA2016Strata_EstimatesStats[[strata]][, c("mean", "sd", "median", "5%", "95%")] * HarvestByStrata2016_Final[strata.split[1], strata.split[2]],
+        KMA2016Strata_EstimatesStats[[strata]][, c("P=0", "GR")])
+}, simplify = FALSE )
+
+dput(x = KMA2016Strata_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2016Strata_HarvestEstimatesStats.txt")
+KMA2016Strata_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2016Strata_HarvestEstimatesStats.txt")
+str(KMA2016Strata_HarvestEstimatesStats)
+
+
+TempMix16 <- sapply(KMA2016, function(geo) {grep(pattern = geo, x = names(KMA2016Strata_EstimatesStats), value = TRUE)}, simplify = FALSE)
+
+Legend16 <- setNames(object = c("June 1-27", "June 28-July 25", "July 26-August 29"), 
+                     nm = c("1_Early", "2_Middle", "3_Late"))
+TempLegend16 <- sapply(KMA2016, function(geo) {
+  Legend16[sapply(TempMix16[[geo]], function(strata) {unlist(strsplit(x = strata, split = paste(geo, "_", sep = '')))[2]} )]
+}, simplify = FALSE)
+
+GeoHeader <- setNames(object = c(paste("Cape Alitak/Humpy Deadman 257-10,20,50,60,70", sep = ''),
+                                 paste("Ayakulik/Halibut Bay 256-10", "\u2013", "256-30", sep = ''),
+                                 paste("Cape Igvak 262-75,80,90,95", sep = ''),
+                                 paste("Karluk/Sturgeon 255-10", "\u2013", "255-20; 256-40", sep = ''),
+                                 paste("Uganik/Kupreanof 253", sep = ''),
+                                 paste("Uyak Bay 254", sep = '')),
+                      nm = unlist(strsplit(x = KMA2016, split = "16")))
+
+HarvestColors <- colorpanel(n = 3, low = "green", high = "white")
+TempHarvestColors16 <- sapply(KMA2016, function(geo) {
+  HarvestColors[sapply(TempMix16[[geo]], function(strata) {as.numeric(unlist(strsplit(x = strata, split = "_"))[2])} )]
+}, simplify = FALSE)
+
+
+
+# What should ymax be?
+max(sapply(KMA2016Strata_HarvestEstimatesStats, function(strata) strata[, "95%"]))
+
+
+Estimates <- KMA2016Strata_HarvestEstimatesStats
+Groups <- KMA14GroupsPC
+Groups2Rows <- KMA14GroupsPC2Rows
+cex.lab <- 1.5
+cex.yaxis <- 1.3
+cex.xaxis <- 0.6
+cex.main <- 1.7
+cex.leg <- 1.3
+ci.lwd <- 2.5
+ymax <- 200000
+
+sapply(names(TempMix16[c(3, 5, 6, 4, 2, 1)]), function(geomix) {
+  emf(file = paste("Figures/2016/", geomix, "Harvest.emf", sep = ''), width = 8.5, height = 6.5, family = "serif", bg = "white")
+  par(mar = c(2.1, 4.1, 2.6, 0.6))
+  
+  Barplot1 <- barplot2(height = t(sapply(TempMix16[[geomix]], function(tempmix) {Estimates[[tempmix]][, "median"]})), 
+                       beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
+                       ci.l = t(sapply(TempMix16[[geomix]], function(tempmix) {Estimates[[tempmix]][, "5%"]})), 
+                       ci.u = t(sapply(TempMix16[[geomix]], function(tempmix) {Estimates[[tempmix]][, "95%"]})), 
+                       ylim = c(0, ymax), col = TempHarvestColors16[[geomix]], cex.axis = cex.yaxis, yaxt = "n", xaxt = 'n')
+  axis(side = 2, at = seq(0, ymax, 20000), labels = formatC(x = seq(0, ymax, 20000) / 1000, big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+  legend(legend = TempLegend16[[geomix]], x = "topleft", fill = TempHarvestColors16[[geomix]], border = "black", bty = "n", cex = cex.leg, title="2016")
+  abline(h = 0, xpd = FALSE)
+  
+  mtext(text = "Number of Fish Harvested (Thousands)", side = 2, cex = cex.yaxis, line = 3)
+  mtext(text = Groups2Rows, side = 1, line = 1, at = apply(Barplot1, 2, mean), adj = 0.5, cex = cex.xaxis)
+  mtext(text = GeoHeader[unlist(strsplit(geomix, split = "16"))], side = 3, cex = cex.main, line = 1)
+  dev.off()
+})
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Stratified Regional Roll-Ups 2016 ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+HarvestByStrata2016
+
+paste(geomix, colnames(HarvestByStrata2016)[!is.na(HarvestByStrata2016[geomix,])], sep = "_")
+
+
+HarvestByStrata2016[geomix, !is.na(HarvestByStrata2016[geomix,])]
+
+# Which mixtures were 80K as opposed to 40K?
+Round1Mixtures_2016_Estimates_Final <- dget(file = "Estimates objects/Round1Mixtures_2016_Estimates_Final.txt")
+Round2Mixtures_2016_Estimates_Final <- dget(file = "Estimates objects/Round2Mixtures_2016_Estimates_Final.txt")
+Round3Mixtures_2016_Estimates_Final <- dget(file = "Estimates objects/Round3Mixtures_2016_Estimates_Final.txt")
+
+sort(sapply(c(Round1Mixtures_2016_Estimates_Final$Output,
+              Round2Mixtures_2016_Estimates_Final$Output,
+              Round3Mixtures_2016_Estimates_Final$Output),
+            function(mixture) {dim(mixture)[1] == 200000} ), decreasing = TRUE)
+
+
+# For this to work properly, the output mixture directories all need to be in the same place (can be moved back afterwards)
+sapply(KMA2016, function(geomix) {
+  assign(x = paste(geomix, "_Annual_Stratified", sep = ''), 
+         value = StratifiedEstimator.GCL(
+           groupvec = seq(KMA14GroupsPC), groupnames = KMA14GroupsPC, maindir = "BAYES/2014-2016 Mixtures 46loci 14RG/Output", 
+           mixvec = paste(geomix, colnames(HarvestByStrata2016)[!is.na(HarvestByStrata2016[geomix,])], sep = "_"), 
+           catchvec = HarvestByStrata2016[geomix, !is.na(HarvestByStrata2016[geomix,])], 
+           newname = paste(geomix, "_Annual_Stratified", sep = ''), priorname = '',
+           ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1), 
+         pos = 1)
+  dput(x = get(paste(geomix, "_Annual_Stratified", sep = '')), file = paste("Estimates objects/", geomix, "_Annual_Stratified.txt", sep = ''))
+} ); beep(5)
+
+str(SALITC16_Annual_Stratified)
+
+
+# Create a list object with all Stratified Annual Rollups for the "Estimates objects/Final" folder
+KMA2016_Annual_EstimatesStats <- sapply(KMA2016, function(geomix) {
+  get(paste(geomix, "_Annual_Stratified", sep = ''))$Stats
+}, simplify = FALSE)
+str(KMA2016_Annual_EstimatesStats)
+dput(x = KMA2016_Annual_EstimatesStats, file = "Estimates objects/Final/KMA2016_Annual_EstimatesStats.txt")
+
+
+
+
+# Create a list object with all Stratified Annual Harvest
+KMA2016_Annual_HarvestEstimatesStats <- sapply(KMA2016, function(strata) {
+  cbind(KMA2016_Annual_EstimatesStats[[strata]][, c("mean", "sd", "median", "5%", "95%")] * sum(HarvestByStrata2016_Final[strata, ], na.rm = TRUE),
+        KMA2016_Annual_EstimatesStats[[strata]][, c("P=0", "GR")])
+}, simplify = FALSE )
+
+str(KMA2016_Annual_HarvestEstimatesStats)
+dput(x = KMA2016_Annual_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2016_Annual_HarvestEstimatesStats.txt")
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Create a matrix of annual means
+#~~~~~~~~~~~~~~~~~~
+# 2014
+KMA2014_Annual_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2014_Annual_EstimatesStats.txt")
+Annual2014_Stratified_Estimates <- sapply(KMA2014, function(geomix) {
+  KMA2014_Annual_EstimatesStats[[geomix]][, "mean"]
+})
+Annual2014_Stratified_Estimates <- cbind(Annual2014_Stratified_Estimates[, 1:2], "SIGVAC14" = rep(0, 14), Annual2014_Stratified_Estimates[, 3:5])
+
+
+KMA2014_Annual_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2014_Annual_HarvestEstimatesStats.txt")
+Annual2014_Stratified_HarvestEstimates <- sapply(KMA2014, function(geomix) {
+  round(KMA2014_Annual_HarvestEstimatesStats[[geomix]][, "mean"])
+})
+Annual2014_Stratified_HarvestEstimates <- cbind(Annual2014_Stratified_HarvestEstimates[, 1:2], "SIGVAC14" = rep(0, 14), Annual2014_Stratified_HarvestEstimates[, 3:5])
+
+
+
+#~~~~~~~~~~~~~~~~~~
+# 2015
+KMA2015_Annual_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2015_Annual_EstimatesStats.txt")
+Annual2015_Stratified_Estimates <- sapply(KMA2015, function(geomix) {
+  KMA2015_Annual_EstimatesStats[[geomix]][, "mean"]
+})
+
+
+KMA2015_Annual_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2015_Annual_HarvestEstimatesStats.txt")
+Annual2015_Stratified_HarvestEstimates <- sapply(KMA2015, function(geomix) {
+  round(KMA2015_Annual_HarvestEstimatesStats[[geomix]][, "mean"])
+})
+
+
+
+#~~~~~~~~~~~~~~~~~~
+# 2016
+KMA2016_Annual_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2016_Annual_EstimatesStats.txt")
+Annual2016_Stratified_Estimates <- sapply(KMA2016, function(geomix) {
+  KMA2016_Annual_EstimatesStats[[geomix]][, "mean"]
+})
+
+
+KMA2016_Annual_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2016_Annual_HarvestEstimatesStats.txt")
+Annual2016_Stratified_HarvestEstimates <- sapply(KMA2016, function(geomix) {
+  round(KMA2016_Annual_HarvestEstimatesStats[[geomix]][, "mean"])
+})
+
+
+
+require(lattice)
+new.colors <- colorRampPalette(c("white", "black"))
+levelplot(t(Annual2016_Stratified_Estimates[14:1, c(3,5,6,4,2,1)]), col.regions = new.colors, xlab = "Reporting Group", 
+          ylab = "Fishery", main = "2016 Proportion", at = seq(0, 1, length.out = 100), aspect = "fill", 
+          scales = list(x = list(rot = 45)),
+          panel = function(...) {
+            panel.levelplot(...)
+          })
+
+require(lattice)
+new.colors <- colorRampPalette(c("white", "black"))
+levelplot(t(Annual2015_Stratified_Estimates[14:1, c(3,5,6,4,2,1)]), col.regions = new.colors, xlab = "Reporting Group", 
+          ylab = "Fishery", main = "2015 Proportion", at = seq(0, 1, length.out = 100), aspect = "fill", 
+          scales = list(x = list(rot = 45)),
+          panel = function(...) {
+            panel.levelplot(...)
+          })
+
+require(lattice)
+new.colors <- colorRampPalette(c("white", "black"))
+levelplot(t(Annual2014_Stratified_Estimates[14:1, c(3,5,6,4,2,1)]), col.regions = new.colors, xlab = "Reporting Group", 
+          ylab = "Fishery", main = "2014 Proportion", at = seq(0, 1, length.out = 100), aspect = "fill", 
+          scales = list(x = list(rot = 45)),
+          panel = function(...) {
+            panel.levelplot(...)
+          })
+
+
+# Bubble chart
+require(ggplot2)
+require(reshape2)
+Annual2015_Stratified_Estimates_df <- melt(Annual2015_Stratified_Estimates)
+names(Annual2015_Stratified_Estimates_df) <- c("RG", "Fishery", "Proportion")
+ggplot(data = Annual2015_Stratified_Estimates_df, aes(x = Fishery, y = RG, size = Proportion)) + geom_point()
+
+
+# Create a matrix of annual median harvest
+Annual2015_Stratified_HarvestEstimates <- sapply(KMA2015, function(geomix) {
+  round(KMA2015_Annual_HarvestEstimatesStats[[geomix]][, "mean"])
+})
+
+
+require(lattice)
+max(Annual2015_Stratified_HarvestEstimates)
+
+new.colors <- colorRampPalette(c("white", "black"))
+levelplot(t(Annual2016_Stratified_HarvestEstimates[14:1, c(3,5,6,4,2,1)]), col.regions = new.colors, xlab = "Reporting Group", 
+          ylab = "Fishery", main = "2016 Harvest", at = seq(0, 250000, length.out = 100), aspect = "fill", 
+          scales = list(x = list(rot = 45)),
+          panel = function(...) {
+            panel.levelplot(...)
+          })
+
+new.colors <- colorRampPalette(c("white", "black"))
+levelplot(t(Annual2015_Stratified_HarvestEstimates[14:1, c(3,5,6,4,2,1)]), col.regions = new.colors, xlab = "Reporting Group", 
+          ylab = "Fishery", main = "2015 Harvest", at = seq(0, 250000, length.out = 100), aspect = "fill", 
+          scales = list(x = list(rot = 45)),
+          panel = function(...) {
+            panel.levelplot(...)
+          })
+
+new.colors <- colorRampPalette(c("white", "black"))
+levelplot(t(Annual2014_Stratified_HarvestEstimates[14:1, c(3,5,6,4,2,1)]), col.regions = new.colors, xlab = "Reporting Group", 
+          ylab = "Fishery", main = "2014 Harvest", at = seq(0, 250000, length.out = 100), aspect = "fill", 
+          scales = list(x = list(rot = 45)),
+          panel = function(...) {
+            panel.levelplot(...)
+          })
+
+sort(rowSums(Annual2016_Stratified_HarvestEstimates))
+sort(rowSums(Annual2015_Stratified_HarvestEstimates))
+sort(rowSums(Annual2014_Stratified_HarvestEstimates))
+
+
+KMA_AnnualHarvest_14RG <- cbind("2014" = rowSums(Annual2014_Stratified_HarvestEstimates),
+                                "2015" = rowSums(Annual2015_Stratified_HarvestEstimates),
+                                '2016' = rowSums(Annual2016_Stratified_HarvestEstimates))
+KMA_AnnualHarvest_14RG
+
+apply(KMA_AnnualHarvest_14RG, 2, function(yr) {round(yr["Cook Inlet"] / sum(yr) * 100, 1)})
+
+# Bubble chart example
+apply(col2rgb(KMA14Colors), 2, function(col) {rgb(red = col[1], green = col[2], blue = col[3], maxColorValue = 255)} )
+
+# 2016
+Annual2016_Stratified_HarvestEstimates_df <- melt(Annual2016_Stratified_HarvestEstimates)
+names(Annual2016_Stratified_HarvestEstimates_df) <- c("RG", "Fishery", "Harvest")
+Annual2016_Stratified_HarvestEstimates_df$RG <- factor(Annual2016_Stratified_HarvestEstimates_df$RG, levels = rev(KMA14GroupsPC))
+Annual2016_Stratified_HarvestEstimates_df$Fishery <- factor(Annual2016_Stratified_HarvestEstimates_df$Fishery, levels = KMA2016[c(3,5,6,4,2,1)])
+Annual2016_Stratified_HarvestEstimates_df$Color <- rep(rev(KMA14Colors), 5)
+str(Annual2016_Stratified_HarvestEstimates_df)
+
+
+ggplot(data = Annual2016_Stratified_HarvestEstimates_df, aes(x = Fishery, y = RG, size = Harvest, color = RG)) + geom_point() + scale_size_area(max_size = 25) + scale_color_manual(values = rev(rep(KMA14Colors, 5)))
+
+
+ggplot(data = Annual2016_Stratified_HarvestEstimates_df, aes(x = Fishery, y = RG, size = Harvest, color = RG)) + 
+  geom_point() + 
+  scale_size_continuous(limits = c(0, 250000), breaks = seq(50000, 250000, 50000), range = c(0, 25)) + 
+  scale_color_manual(values = rev(rep(KMA14Colors, 5))) +
+  ggtitle("2016 Harvest")
+
+# 2015
+Annual2015_Stratified_HarvestEstimates_df <- melt(Annual2015_Stratified_HarvestEstimates)
+names(Annual2015_Stratified_HarvestEstimates_df) <- c("RG", "Fishery", "Harvest")
+Annual2015_Stratified_HarvestEstimates_df$RG <- factor(Annual2015_Stratified_HarvestEstimates_df$RG, levels = rev(KMA14GroupsPC))
+Annual2015_Stratified_HarvestEstimates_df$Fishery <- factor(Annual2015_Stratified_HarvestEstimates_df$Fishery, levels = KMA2015[c(3,5,6,4,2,1)])
+Annual2015_Stratified_HarvestEstimates_df$Color <- rep(rev(KMA14Colors), 5)
+str(Annual2015_Stratified_HarvestEstimates_df)
+
+
+ggplot(data = Annual2015_Stratified_HarvestEstimates_df, aes(x = Fishery, y = RG, size = Harvest, color = RG)) + geom_point() + scale_size_area(max_size = 25) + scale_color_manual(values = rev(rep(KMA14Colors, 5)))
+
+
+ggplot(data = Annual2015_Stratified_HarvestEstimates_df, aes(x = Fishery, y = RG, size = Harvest, color = RG)) + 
+  geom_point() + 
+  scale_size_continuous(limits = c(0, 250000), breaks = seq(50000, 250000, 50000), range = c(0, 25)) + 
+  scale_color_manual(values = rev(rep(KMA14Colors, 5))) +
+  ggtitle("2015 Harvest")
+
+
+# 2014
+Annual2014_Stratified_HarvestEstimates_df <- melt(Annual2014_Stratified_HarvestEstimates)
+names(Annual2014_Stratified_HarvestEstimates_df) <- c("RG", "Fishery", "Harvest")
+Annual2014_Stratified_HarvestEstimates_df$RG <- factor(Annual2014_Stratified_HarvestEstimates_df$RG, levels = rev(KMA14GroupsPC))
+Annual2014_Stratified_HarvestEstimates_df$Fishery <- factor(Annual2014_Stratified_HarvestEstimates_df$Fishery, levels = gsub(pattern = "15", replacement = "14", x = KMA2015)[c(3,5,6,4,2,1)])
+Annual2014_Stratified_HarvestEstimates_df$Color <- rep(rev(KMA14Colors), 5)
+str(Annual2014_Stratified_HarvestEstimates_df)
+
+ggplot(data = Annual2014_Stratified_HarvestEstimates_df, aes(x = Fishery, y = RG, size = Harvest, color = RG)) + geom_point() + scale_size_area(max_size = 25) + scale_color_manual(values = rev(rep(KMA14Colors, 5)))
+
+ggplot(data = Annual2014_Stratified_HarvestEstimates_df, aes(x = Fishery, y = RG, size = Harvest, color = RG)) + 
+  geom_point() + 
+  scale_size_continuous(limits = c(0, 250000), breaks = seq(50000, 250000, 50000), range = c(0, 25)) + 
+  scale_color_manual(values = rev(rep(KMA14Colors, 5))) +
+  ggtitle("2014 Harvest")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
