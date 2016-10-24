@@ -4859,6 +4859,407 @@ KMA2016Strata_Regional_EstimatesStats["SKARLC16_1_Early"]
 which(sapply(KMA2016Strata_Regional_Estimates$Output, function(mix) {dim(mix)[1]}) == 200000)
 
 
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Stratified Regional Roll-Ups 2014 ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+names(KMA2014Strata_Regional_EstimatesStats)
+
+HarvestByStrata2014_Final
+
+# Regional stratified estiamtes for 2014 Uganik, Uyak, and Karluk 3_Late (combining 3_Late with 4_LateLate)
+sapply(rownames(HarvestByStrata2014)[!is.na(HarvestByStrata2014[, 4])], function(geomix) {
+  assign(x = paste(geomix, "_3_Late_Stratified", sep = ''), 
+         value = StratifiedEstimator.GCL(
+           groupvec = KMA473PopsGroupVec6_14RG, groupnames = KMA6GroupsPC, maindir = "BAYES/2014-2016 Mixtures 46loci 14RG/Output", 
+           mixvec = c(paste(geomix, "_3_Late", sep = ''), paste(geomix, "_4_LateLate", sep = '')), 
+           catchvec = HarvestByStrata2014[geomix, c("3_Late", "4_LateLate")], newname = paste(geomix, "_3_Late_Stratified_Regional", sep = ''), priorname = '',
+           ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1), 
+         pos = 1)
+  dput(x = get(paste(geomix, "_3_Late_Stratified", sep = '')), file = paste("Estimates objects/", geomix, "_3_Late_Stratified_Regional.txt", sep = ''))
+} ); beep(5)
+
+str(SKARLC14_3_Late_Stratified)
+
+# Update 2014 Strata results
+KMA2014Strata_Regional_EstimatesStats[["SKARLC14_3_Late"]] <- SKARLC14_3_Late_Stratified$Stats
+KMA2014Strata_Regional_EstimatesStats[["SUGANC14_3_Late"]] <- SUGANC14_3_Late_Stratified$Stats
+KMA2014Strata_Regional_EstimatesStats[["SUYAKC14_3_Late"]] <- SUYAKC14_3_Late_Stratified$Stats
+
+# Dput final Strata restuls
+dput(x = KMA2014Strata_Regional_EstimatesStats, file = "Estimates objects/Final/KMA2014Strata_Regional_EstimatesStats.txt")
+dput(x = KMA2015Strata_Regional_EstimatesStats, file = "Estimates objects/Final/KMA2015Strata_Regional_EstimatesStats.txt")
+dput(x = KMA2016Strata_Regional_EstimatesStats, file = "Estimates objects/Final/KMA2016Strata_Regional_EstimatesStats.txt")
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# For this to work properly, the output mixture directories all need to be in the same place (can be moved back afterwards)
+sapply(KMA2014, function(geomix) {
+  assign(x = paste(geomix, "_Annual_Stratified", sep = ''), 
+         value = StratifiedEstimator.GCL(
+           groupvec = KMA473PopsGroupVec6_14RG, groupnames = KMA6GroupsPC, maindir = "BAYES/2014-2016 Mixtures 46loci 14RG/Output", 
+           mixvec = paste(geomix, colnames(HarvestByStrata2014)[!is.na(HarvestByStrata2014[geomix,])], sep = "_"), 
+           catchvec = HarvestByStrata2014[geomix, !is.na(HarvestByStrata2014[geomix,])], 
+           newname = paste(geomix, "_Annual_Stratified_Regional", sep = ''), priorname = '',
+           ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1), 
+         pos = 1)
+  dput(x = get(paste(geomix, "_Annual_Stratified", sep = '')), file = paste("Estimates objects/", geomix, "_Annual_Stratified_Regional.txt", sep = ''))
+} ); beep(5)
+
+str(SALITC14_Annual_Stratified)
+
+
+# Create a list object with all Stratified Annual Rollups for the "Estimates objects/Final" folder
+KMA2014_Annual_Regional_EstimatesStats <- sapply(KMA2014, function(geomix) {
+  Stats <- get(paste(geomix, "_Annual_Stratified", sep = ''))$Stats
+  Stats
+}, simplify = FALSE)
+str(KMA2014_Annual_Regional_EstimatesStats)
+dput(x = KMA2014_Annual_Regional_EstimatesStats, file = "Estimates objects/Final/KMA2014_Annual_Regional_EstimatesStats.txt")
+
+
+# Create a list object with all Stratified Annual Harvest
+KMA2014_Annual_Regional_HarvestEstimatesStats <- sapply(KMA2014, function(strata) {
+  cbind(KMA2014_Annual_Regional_EstimatesStats[[strata]][, c("mean", "sd", "median", "5%", "95%")] * sum(HarvestByStrata2014_Final[strata, ], na.rm = TRUE),
+        KMA2014_Annual_Regional_EstimatesStats[[strata]][, c("P=0", "GR")])
+}, simplify = FALSE )
+
+dput(x = KMA2014_Annual_Regional_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2014_Annual_Regional_HarvestEstimatesStats.txt")
+str(KMA2014_Annual_Regional_HarvestEstimatesStats)
+
+
+
+
+# Create Strata_Regional_HarvestEstimatesStats
+KMA2014Strata_Regional_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2014Strata_Regional_EstimatesStats.txt")
+KMA2014Strata_Regional_HarvestEstimatesStats <- sapply(names(KMA2014Strata_Regional_EstimatesStats)[-grep(pattern = "LateLate", x = names(KMA2014Strata_Regional_EstimatesStats))], function(strata) {
+  strata.split <- unlist(strsplit(x = strata, split = "_"))
+  strata.split <- c(strata.split[1], paste(c(strata.split[2], strata.split[3]), collapse = "_"))
+  
+  cbind(KMA2014Strata_Regional_EstimatesStats[[strata]][, c("mean", "sd", "median", "5%", "95%")] * HarvestByStrata2014_Final[strata.split[1], strata.split[2]],
+        KMA2014Strata_Regional_EstimatesStats[[strata]][, c("P=0", "GR")])
+}, simplify = FALSE )
+str(KMA2014Strata_Regional_HarvestEstimatesStats)
+
+dput(x = KMA2014Strata_Regional_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2014Strata_Regional_HarvestEstimatesStats.txt")
+
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Create KMA-wide annual rollup
+# 14RG
+#~~~~~~~~~~~~~~~~~~
+KMA2014_Annual_Stratified <- StratifiedEstimator.GCL(
+  groupvec = seq(KMA14GroupsPC), groupnames = KMA14GroupsPC, maindir = "BAYES/2014-2016 Mixtures 46loci 14RG/Output", 
+  mixvec = KMA2014Strata, 
+  catchvec = as.vector(na.omit(as.vector(t(HarvestByStrata2014[sort(KMA2014), ])))), 
+  newname = "KMA2014_Annual_Stratified", priorname = '',
+  ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1
+)
+str(KMA2014_Annual_Stratified)
+dput(x = KMA2014_Annual_Stratified, file = "Estimates objects/KMA2014_Annual_Stratified.txt")
+KMA2014_Annual_Stratified_EstimatesStats <- KMA2014_Annual_Stratified$Stats
+dput(x = KMA2014_Annual_Stratified_EstimatesStats, file = "Estimates objects/Final/KMA2014_Annual_Stratified_EstimatesStats.txt")
+
+# Create a list object with all Stratified Annual Harvest
+#~~~~~~~~~~~~~~~~~~
+KMA2014_Annual_Stratified_HarvestEstimatesStats <-
+  cbind(KMA2014_Annual_Stratified_EstimatesStats[, c("mean", "sd", "median", "5%", "95%")] * sum(HarvestByStrata2014_Final, na.rm = TRUE),
+        KMA2014_Annual_Stratified_EstimatesStats[, c("P=0", "GR")])
+dput(x = KMA2014_Annual_Stratified_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2014_Annual_Stratified_HarvestEstimatesStats.txt")
+str(KMA2014_Annual_Stratified_HarvestEstimatesStats)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 6RG
+#~~~~~~~~~~~~~~~~~~
+KMA2014_Annual_Regional_Stratified <- StratifiedEstimator.GCL(
+  groupvec = KMA473PopsGroupVec6_14RG, groupnames = KMA6GroupsPC, maindir = "BAYES/2014-2016 Mixtures 46loci 14RG/Output", 
+  mixvec = KMA2014Strata, 
+  catchvec = as.vector(na.omit(as.vector(t(HarvestByStrata2014[sort(KMA2014), ])))), 
+  newname = "KMA2014_Annual_Regional_Stratified", priorname = '',
+  ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1
+)
+str(KMA2014_Annual_Regional_Stratified)
+dput(x = KMA2014_Annual_Regional_Stratified, file = "Estimates objects/KMA2014_Annual_Regional_Stratified.txt")
+KMA2014_Annual_Regional_Stratified_EstimatesStats <- KMA2014_Annual_Regional_Stratified$Stats
+dput(x = KMA2014_Annual_Regional_Stratified_EstimatesStats, file = "Estimates objects/Final/KMA2014_Annual_Regional_Stratified_EstimatesStats.txt")
+
+# Create a list object with all Stratified Annual_Regional Harvest
+#~~~~~~~~~~~~~~~~~~
+KMA2014_Annual_Regional_Stratified_HarvestEstimatesStats <-
+  cbind(KMA2014_Annual_Regional_Stratified_EstimatesStats[, c("mean", "sd", "median", "5%", "95%")] * sum(HarvestByStrata2014_Final, na.rm = TRUE),
+        KMA2014_Annual_Regional_Stratified_EstimatesStats[, c("P=0", "GR")])
+dput(x = KMA2014_Annual_Regional_Stratified_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2014_Annual_Regional_Stratified_HarvestEstimatesStats.txt")
+str(KMA2014_Annual_Regional_Stratified_HarvestEstimatesStats)
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Stratified Regional Roll-Ups 2015 ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+HarvestByStrata2015_Final
+
+KMA2015Strata_Regional_Estimates <- dget(file = "Estimates objects/KMA2015Strata_Regional_Estimates.txt")
+which(sapply(KMA2015Strata_Regional_Estimates$Output, function(mix) {dim(mix)[1]}) == 200000)
+
+
+# For this to work properly, the output mixture directories all need to be in the same place (can be moved back afterwards)
+sapply(KMA2015[-3], function(geomix) {
+  assign(x = paste(geomix, "_Annual_Stratified", sep = ''), 
+         value = StratifiedEstimator.GCL(
+           groupvec = KMA473PopsGroupVec6_14RG, groupnames = KMA6GroupsPC, maindir = "BAYES/2014-2016 Mixtures 46loci 14RG/Output", 
+           mixvec = paste(geomix, colnames(HarvestByStrata2015)[!is.na(HarvestByStrata2015[geomix,])], sep = "_"), 
+           catchvec = HarvestByStrata2015[geomix, !is.na(HarvestByStrata2015[geomix,])], 
+           newname = paste(geomix, "_Annual_Stratified_Regional", sep = ''), priorname = '',
+           ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1), 
+         pos = 1)
+  dput(x = get(paste(geomix, "_Annual_Stratified", sep = '')), file = paste("Estimates objects/", geomix, "_Annual_Stratified_Regional.txt", sep = ''))
+} ); beep(5)
+
+str(SALITC15_Annual_Stratified)
+
+
+# Create a list object with all Stratified Annual Rollups for the "Estimates objects/Final" folder
+KMA2015_Annual_Regional_EstimatesStats <- sapply(KMA2015[-3], function(geomix) {
+  Stats <- get(paste(geomix, "_Annual_Stratified", sep = ''))$Stats
+  Stats
+}, simplify = FALSE)
+str(KMA2015_Annual_Regional_EstimatesStats)
+
+# Add Igvak 2_Middle 2015
+SIGVAC15_2_Middle_EstimatesStats <- dget(file = "Estimates objects/KMA2015Strata_Regional_EstimatesStats.txt")["SIGVAC15_2_Middle"]
+str(SIGVAC15_2_Middle_EstimatesStats)
+
+KMA2015_Annual_Regional_EstimatesStats <- c(KMA2015_Annual_Regional_EstimatesStats[1:2], list("SIGVAC15" = SIGVAC15_2_Middle_EstimatesStats[[1]]), KMA2015_Annual_Regional_EstimatesStats[3:5])
+str(KMA2015_Annual_Regional_EstimatesStats)
+dput(x = KMA2015_Annual_Regional_EstimatesStats, file = "Estimates objects/Final/KMA2015_Annual_Regional_EstimatesStats.txt")
+
+
+
+
+# Create a list object with all Stratified Annual Harvest
+KMA2015_Annual_Regional_HarvestEstimatesStats <- sapply(KMA2015, function(strata) {
+  cbind(KMA2015_Annual_Regional_EstimatesStats[[strata]][, c("mean", "sd", "median", "5%", "95%")] * sum(HarvestByStrata2015_Final[strata, ], na.rm = TRUE),
+        KMA2015_Annual_Regional_EstimatesStats[[strata]][, c("P=0", "GR")])
+}, simplify = FALSE )
+
+dput(x = KMA2015_Annual_Regional_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2015_Annual_Regional_HarvestEstimatesStats.txt")
+str(KMA2015_Annual_Regional_HarvestEstimatesStats)
+
+
+
+
+# Create Strata_Regional_HarvestEstimatesStats
+KMA2015Strata_Regional_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2015Strata_Regional_EstimatesStats.txt")
+KMA2015Strata_Regional_HarvestEstimatesStats <- sapply(names(KMA2015Strata_Regional_EstimatesStats), function(strata) {
+  strata.split <- unlist(strsplit(x = strata, split = "_"))
+  strata.split <- c(strata.split[1], paste(c(strata.split[2], strata.split[3]), collapse = "_"))
+  
+  cbind(KMA2015Strata_Regional_EstimatesStats[[strata]][, c("mean", "sd", "median", "5%", "95%")] * HarvestByStrata2015_Final[strata.split[1], strata.split[2]],
+        KMA2015Strata_Regional_EstimatesStats[[strata]][, c("P=0", "GR")])
+}, simplify = FALSE )
+str(KMA2015Strata_Regional_HarvestEstimatesStats)
+
+dput(x = KMA2015Strata_Regional_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2015Strata_Regional_HarvestEstimatesStats.txt")
+
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Create KMA-wide annual rollup
+# 14RG
+#~~~~~~~~~~~~~~~~~~
+KMA2015_Annual_Stratified <- StratifiedEstimator.GCL(
+  groupvec = seq(KMA14GroupsPC), groupnames = KMA14GroupsPC, maindir = "BAYES/2014-2016 Mixtures 46loci 14RG/Output", 
+  mixvec = KMA2015Strata, 
+  catchvec = as.vector(na.omit(as.vector(t(HarvestByStrata2015_Final[sort(KMA2015), ])))), 
+  newname = "KMA2015_Annual_Stratified", priorname = '',
+  ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1
+)
+str(KMA2015_Annual_Stratified)
+dput(x = KMA2015_Annual_Stratified, file = "Estimates objects/KMA2015_Annual_Stratified.txt")
+KMA2015_Annual_Stratified_EstimatesStats <- KMA2015_Annual_Stratified$Stats
+dput(x = KMA2015_Annual_Stratified_EstimatesStats, file = "Estimates objects/Final/KMA2015_Annual_Stratified_EstimatesStats.txt")
+
+# Create a list object with all Stratified Annual Harvest
+#~~~~~~~~~~~~~~~~~~
+KMA2015_Annual_Stratified_HarvestEstimatesStats <-
+  cbind(KMA2015_Annual_Stratified_EstimatesStats[, c("mean", "sd", "median", "5%", "95%")] * sum(HarvestByStrata2015_Final, na.rm = TRUE),
+        KMA2015_Annual_Stratified_EstimatesStats[, c("P=0", "GR")])
+dput(x = KMA2015_Annual_Stratified_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2015_Annual_Stratified_HarvestEstimatesStats.txt")
+str(KMA2015_Annual_Stratified_HarvestEstimatesStats)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 6RG
+#~~~~~~~~~~~~~~~~~~
+KMA2015_Annual_Regional_Stratified <- StratifiedEstimator.GCL(
+  groupvec = KMA473PopsGroupVec6_14RG, groupnames = KMA6GroupsPC, maindir = "BAYES/2014-2016 Mixtures 46loci 14RG/Output", 
+  mixvec = KMA2015Strata, 
+  catchvec = as.vector(na.omit(as.vector(t(HarvestByStrata2015_Final[sort(KMA2015), ])))), 
+  newname = "KMA2015_Annual_Regional_Stratified", priorname = '',
+  ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1
+)
+str(KMA2015_Annual_Regional_Stratified)
+dput(x = KMA2015_Annual_Regional_Stratified, file = "Estimates objects/KMA2015_Annual_Regional_Stratified.txt")
+KMA2015_Annual_Regional_Stratified_EstimatesStats <- KMA2015_Annual_Regional_Stratified$Stats
+dput(x = KMA2015_Annual_Regional_Stratified_EstimatesStats, file = "Estimates objects/Final/KMA2015_Annual_Regional_Stratified_EstimatesStats.txt")
+
+# Create a list object with all Stratified Annual_Regional Harvest
+#~~~~~~~~~~~~~~~~~~
+KMA2015_Annual_Regional_Stratified_HarvestEstimatesStats <-
+  cbind(KMA2015_Annual_Regional_Stratified_EstimatesStats[, c("mean", "sd", "median", "5%", "95%")] * sum(HarvestByStrata2015_Final, na.rm = TRUE),
+        KMA2015_Annual_Regional_Stratified_EstimatesStats[, c("P=0", "GR")])
+dput(x = KMA2015_Annual_Regional_Stratified_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2015_Annual_Regional_Stratified_HarvestEstimatesStats.txt")
+str(KMA2015_Annual_Regional_Stratified_HarvestEstimatesStats)
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Stratified Regional Roll-Ups 2016 ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+HarvestByStrata2016_Final
+
+KMA2016Strata_Regional_Estimates <- dget(file = "Estimates objects/KMA2016Strata_Regional_Estimates.txt")
+which(sapply(KMA2016Strata_Regional_Estimates$Output, function(mix) {dim(mix)[1]}) == 200000)
+
+
+# For this to work properly, the output mixture directories all need to be in the same place (can be moved back afterwards)
+sapply(KMA2016, function(geomix) {
+  assign(x = paste(geomix, "_Annual_Stratified", sep = ''), 
+         value = StratifiedEstimator.GCL(
+           groupvec = KMA473PopsGroupVec6_14RG, groupnames = KMA6GroupsPC, maindir = "BAYES/2014-2016 Mixtures 46loci 14RG/Output", 
+           mixvec = paste(geomix, colnames(HarvestByStrata2016)[!is.na(HarvestByStrata2016[geomix,])], sep = "_"), 
+           catchvec = HarvestByStrata2016[geomix, !is.na(HarvestByStrata2016[geomix,])], 
+           newname = paste(geomix, "_Annual_Stratified_Regional", sep = ''), priorname = '',
+           ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1), 
+         pos = 1)
+  dput(x = get(paste(geomix, "_Annual_Stratified", sep = '')), file = paste("Estimates objects/", geomix, "_Annual_Stratified_Regional.txt", sep = ''))
+} ); beep(5)
+
+str(SALITC16_Annual_Stratified)
+
+
+# Create a list object with all Stratified Annual Rollups for the "Estimates objects/Final" folder
+KMA2016_Annual_Regional_EstimatesStats <- sapply(KMA2016, function(geomix) {
+  Stats <- get(paste(geomix, "_Annual_Stratified", sep = ''))$Stats
+  Stats
+}, simplify = FALSE)
+str(KMA2016_Annual_Regional_EstimatesStats)
+dput(x = KMA2016_Annual_Regional_EstimatesStats, file = "Estimates objects/Final/KMA2016_Annual_Regional_EstimatesStats.txt")
+
+
+
+
+# Create a list object with all Stratified Annual Harvest
+KMA2016_Annual_Regional_HarvestEstimatesStats <- sapply(KMA2016, function(strata) {
+  cbind(KMA2016_Annual_Regional_EstimatesStats[[strata]][, c("mean", "sd", "median", "5%", "95%")] * sum(HarvestByStrata2016_Final[strata, ], na.rm = TRUE),
+        KMA2016_Annual_Regional_EstimatesStats[[strata]][, c("P=0", "GR")])
+}, simplify = FALSE )
+
+dput(x = KMA2016_Annual_Regional_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2016_Annual_Regional_HarvestEstimatesStats.txt")
+str(KMA2016_Annual_Regional_HarvestEstimatesStats)
+
+
+
+
+# Create Strata_Regional_HarvestEstimatesStats
+KMA2016Strata_Regional_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2016Strata_Regional_EstimatesStats.txt")
+KMA2016Strata_Regional_HarvestEstimatesStats <- sapply(names(KMA2016Strata_Regional_EstimatesStats), function(strata) {
+  strata.split <- unlist(strsplit(x = strata, split = "_"))
+  strata.split <- c(strata.split[1], paste(c(strata.split[2], strata.split[3]), collapse = "_"))
+  
+  cbind(KMA2016Strata_Regional_EstimatesStats[[strata]][, c("mean", "sd", "median", "5%", "95%")] * HarvestByStrata2016_Final[strata.split[1], strata.split[2]],
+        KMA2016Strata_Regional_EstimatesStats[[strata]][, c("P=0", "GR")])
+}, simplify = FALSE )
+str(KMA2016Strata_Regional_HarvestEstimatesStats)
+
+dput(x = KMA2016Strata_Regional_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2016Strata_Regional_HarvestEstimatesStats.txt")
+
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Create KMA-wide annual rollup
+# 14RG
+#~~~~~~~~~~~~~~~~~~
+KMA2016_Annual_Stratified <- StratifiedEstimator.GCL(
+  groupvec = seq(KMA14GroupsPC), groupnames = KMA14GroupsPC, maindir = "BAYES/2014-2016 Mixtures 46loci 14RG/Output", 
+  mixvec = KMA2016Strata, 
+  catchvec = as.vector(na.omit(as.vector(t(HarvestByStrata2016_Final[sort(KMA2016), ])))), 
+  newname = "KMA2016_Annual_Stratified", priorname = '',
+  ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1
+)
+str(KMA2016_Annual_Stratified)
+dput(x = KMA2016_Annual_Stratified, file = "Estimates objects/KMA2016_Annual_Stratified.txt")
+KMA2016_Annual_Stratified_EstimatesStats <- KMA2016_Annual_Stratified$Stats
+dput(x = KMA2016_Annual_Stratified_EstimatesStats, file = "Estimates objects/Final/KMA2016_Annual_Stratified_EstimatesStats.txt")
+
+# Create a list object with all Stratified Annual Harvest
+#~~~~~~~~~~~~~~~~~~
+KMA2016_Annual_Stratified_HarvestEstimatesStats <-
+  cbind(KMA2016_Annual_Stratified_EstimatesStats[, c("mean", "sd", "median", "5%", "95%")] * sum(HarvestByStrata2016_Final, na.rm = TRUE),
+        KMA2016_Annual_Stratified_EstimatesStats[, c("P=0", "GR")])
+dput(x = KMA2016_Annual_Stratified_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2016_Annual_Stratified_HarvestEstimatesStats.txt")
+str(KMA2016_Annual_Stratified_HarvestEstimatesStats)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 6RG
+#~~~~~~~~~~~~~~~~~~
+KMA2016_Annual_Regional_Stratified <- StratifiedEstimator.GCL(
+  groupvec = KMA473PopsGroupVec6_14RG, groupnames = KMA6GroupsPC, maindir = "BAYES/2014-2016 Mixtures 46loci 14RG/Output", 
+  mixvec = KMA2016Strata, 
+  catchvec = as.vector(na.omit(as.vector(t(HarvestByStrata2016_Final[sort(KMA2016), ])))), 
+  newname = "KMA2016_Annual_Regional_Stratified", priorname = '',
+  ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1
+)
+str(KMA2016_Annual_Regional_Stratified)
+dput(x = KMA2016_Annual_Regional_Stratified, file = "Estimates objects/KMA2016_Annual_Regional_Stratified.txt")
+KMA2016_Annual_Regional_Stratified_EstimatesStats <- KMA2016_Annual_Regional_Stratified$Stats
+dput(x = KMA2016_Annual_Regional_Stratified_EstimatesStats, file = "Estimates objects/Final/KMA2016_Annual_Regional_Stratified_EstimatesStats.txt")
+
+# Create a list object with all Stratified Annual_Regional Harvest
+#~~~~~~~~~~~~~~~~~~
+KMA2016_Annual_Regional_Stratified_HarvestEstimatesStats <-
+  cbind(KMA2016_Annual_Regional_Stratified_EstimatesStats[, c("mean", "sd", "median", "5%", "95%")] * sum(HarvestByStrata2016_Final, na.rm = TRUE),
+        KMA2016_Annual_Regional_Stratified_EstimatesStats[, c("P=0", "GR")])
+dput(x = KMA2016_Annual_Regional_Stratified_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2016_Annual_Regional_Stratified_HarvestEstimatesStats.txt")
+str(KMA2016_Annual_Regional_Stratified_HarvestEstimatesStats)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Plot Percentages for KMA Mixtures ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -5017,7 +5418,7 @@ sapply(GeoMix, function(geomix) {
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   ## 2016 Barplot
   geomix16 <- grep(pattern = geomix, x = names(TempMix16), value = TRUE)
-  par(mar = c(2, 1, 1, 1))
+  par(mar = c(1, 1, 1, 1))
   Barplot16 <- barplot2(height = t(sapply(TempMix16[[geomix16]], function(tempmix) {Estimates16[[tempmix]][, "median"]})) * 100,
                         beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
                         ci.l = t(sapply(TempMix16[[geomix16]], function(tempmix) {Estimates16[[tempmix]][, "5%"]})) * 100,
@@ -5255,7 +5656,7 @@ sapply(GeoMix, function(geomix) {
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   ## 2016 Barplot
   geomix16 <- grep(pattern = geomix, x = names(TempMix16), value = TRUE)
-  par(mar = c(2, 1, 1, 1))
+  par(mar = c(1, 1, 1, 1))
   Barplot16 <- barplot2(height = t(sapply(TempMix16[[geomix16]], function(tempmix) {HarvestEstimates16[[tempmix]][, "median"]})),
                         beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
                         ci.l = t(sapply(TempMix16[[geomix16]], function(tempmix) {HarvestEstimates16[[tempmix]][, "5%"]})),
@@ -5509,6 +5910,33 @@ for(mix in SheetNames) {
              file = "Estimates tables/KMA Sockeye Estimates Tables.xlsx",
              col.names = FALSE, row.names = FALSE, append = TRUE, sheetName = mix)
 }; beep(5)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
