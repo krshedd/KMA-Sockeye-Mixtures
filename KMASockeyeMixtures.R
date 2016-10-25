@@ -6632,6 +6632,237 @@ sapply(GeoMix, function(geomix) {
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Plot Annual KMA Percentages ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+KMA2014_Annual_Stratified_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2014_Annual_Stratified_EstimatesStats.txt")
+KMA2015_Annual_Stratified_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2015_Annual_Stratified_EstimatesStats.txt")
+KMA2016_Annual_Stratified_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2016_Annual_Stratified_EstimatesStats.txt")
+
+KMA2014_Annual_Regional_Stratified_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2014_Annual_Regional_Stratified_EstimatesStats.txt")
+KMA2015_Annual_Regional_Stratified_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2015_Annual_Regional_Stratified_EstimatesStats.txt")
+KMA2016_Annual_Regional_Stratified_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2016_Annual_Regional_Stratified_EstimatesStats.txt")
+
+
+# Three barplot layout
+layoutmat <- matrix(data=c(  1, 2, 3,
+                             4, 5, 6), nrow = 2, ncol = 3, byrow = TRUE)
+
+ProportionColors <- colorpanel(n = 3, low = "blue", high = "white")
+
+#~~~~~~~~~~~~~~~~~~
+# Size Parameters
+Groups <- KMA14GroupsPC
+Groups2Rows <- KMA14GroupsPC2Rows
+SubRegGroups <- KMA14GroupsPC[2:11]
+cex.lab <- 1.5
+cex.xaxis <- 0.5  # 0.5
+cex.yaxis <- 1.3
+cex.leg <- 1.5  # 1.1
+ci.lwd <- 2.5
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Make figures as .emf files
+
+# dir.create("Figures/All Years")
+require(devEMF)
+require(gplots)
+
+
+
+emf(file = "Figures/All Years/KMA Proportions 2014-2016.emf", width = 6, height = 5.75, family = "serif", bg = "white")
+
+
+layout(mat = layoutmat, widths = c(0.075, 0.375, 0.6725), heights = c(2.7, 0.15))
+par(mar = rep(0, 4))
+par(family = "times")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Y-axis label
+plot.new()
+text(x = 0.25, y = 0.5, labels = "Percentage of KMA Harvest", srt = 90, cex = cex.lab)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Barplot Regional
+par(mar = c(1, 1, 1.5, 0))
+Barplot <- barplot2(height = t(cbind(KMA2014_Annual_Regional_Stratified_EstimatesStats[, "median"],
+                                     KMA2015_Annual_Regional_Stratified_EstimatesStats[, "median"],
+                                     KMA2016_Annual_Regional_Stratified_EstimatesStats[, "median"])) * 100, 
+                    beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
+                    ci.l = t(cbind(KMA2014_Annual_Regional_Stratified_EstimatesStats[, "5%"],
+                                   KMA2015_Annual_Regional_Stratified_EstimatesStats[, "5%"],
+                                   KMA2016_Annual_Regional_Stratified_EstimatesStats[, "5%"])) * 100, 
+                    ci.u = t(cbind(KMA2014_Annual_Regional_Stratified_EstimatesStats[, "95%"],
+                                   KMA2015_Annual_Regional_Stratified_EstimatesStats[, "95%"],
+                                   KMA2016_Annual_Regional_Stratified_EstimatesStats[, "95%"])) * 100, 
+                    ylim = c(0, 100), col = ProportionColors, yaxt = "n", xaxt = 'n')
+axis(side = 2, at = seq(0, 100, 25), labels = formatC(x = seq(0, 100, 25), big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+# legend(legend = 2014:2016, x = "topleft", fill = ProportionColors, border = "black", bty = "n", cex = cex.leg, title="")
+abline(h = 0, xpd = FALSE)
+mtext(text = c(Groups2Rows[1], "Chignik\n", "Kodiak\n", Groups2Rows[12:14]), side = 1, line = 1, at = colMeans(Barplot), adj = 0.5, cex = cex.xaxis)
+
+## Barplot Subregional
+par(mar = c(1, 1, 1.5, 0))
+Barplot <- barplot2(height = t(cbind(KMA2014_Annual_Stratified_EstimatesStats[SubRegGroups, "median"],
+                                     KMA2015_Annual_Stratified_EstimatesStats[SubRegGroups, "median"],
+                                     KMA2016_Annual_Stratified_EstimatesStats[SubRegGroups, "median"])) * 100, 
+                    beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
+                    ci.l = t(cbind(KMA2014_Annual_Stratified_EstimatesStats[SubRegGroups, "5%"],
+                                   KMA2015_Annual_Stratified_EstimatesStats[SubRegGroups, "5%"],
+                                   KMA2016_Annual_Stratified_EstimatesStats[SubRegGroups, "5%"])) * 100, 
+                    ci.u = t(cbind(KMA2014_Annual_Stratified_EstimatesStats[SubRegGroups, "95%"],
+                                   KMA2015_Annual_Stratified_EstimatesStats[SubRegGroups, "95%"],
+                                   KMA2016_Annual_Stratified_EstimatesStats[SubRegGroups, "95%"])) * 100, 
+                    ylim = c(0, 100), col = ProportionColors, yaxt = "n", xaxt = 'n')
+axis(side = 2, at = seq(0, 100, 25), labels = FALSE, cex.axis = cex.yaxis)
+legend(legend = 2014:2016, x = min(Barplot[, 6]), y = 100, fill = ProportionColors, border = "black", bty = "n", cex = cex.leg, title="")
+abline(h = 0, xpd = FALSE)
+abline(v = mean(Barplot[, 2:3]), lty = 2)
+mtext(text = Groups2Rows[2:11], side = 1, line = 1, at = colMeans(Barplot) + c(rep(0, 2), 0.25, 0.5, 0.25, -0.25, 0, 0.25, 0.25, 0), adj = 0.5, cex = cex.xaxis)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Blank Corner
+par(mar = rep(0, 4))
+plot.new()
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## x-axis label
+par(mar = rep(0, 4))
+plot.new()
+text(x = 0.5, y = 0.25, labels = "Regional Reporting Group", cex = cex.lab)
+
+par(mar = rep(0, 4))
+plot.new()
+text(x = 0.5, y = 0.25, labels = "Subregional Reporting Group", cex = cex.lab)
+
+
+dev.off()
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Plot Annual KMA Harvest ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+KMA2014_Annual_Stratified_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2014_Annual_Stratified_HarvestEstimatesStats.txt")
+KMA2015_Annual_Stratified_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2015_Annual_Stratified_HarvestEstimatesStats.txt")
+KMA2016_Annual_Stratified_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2016_Annual_Stratified_HarvestEstimatesStats.txt")
+
+KMA2014_Annual_Regional_Stratified_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2014_Annual_Regional_Stratified_HarvestEstimatesStats.txt")
+KMA2015_Annual_Regional_Stratified_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2015_Annual_Regional_Stratified_HarvestEstimatesStats.txt")
+KMA2016_Annual_Regional_Stratified_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2016_Annual_Regional_Stratified_HarvestEstimatesStats.txt")
+
+
+# Three barplot layout
+layoutmat <- matrix(data=c(  1, 2, 3,
+                             4, 5, 6), nrow = 2, ncol = 3, byrow = TRUE)
+
+HarvestColors <- colorpanel(n = 3, low = "green", high = "white")
+
+#~~~~~~~~~~~~~~~~~~
+# Size Parameters
+Groups <- KMA14GroupsPC
+Groups2Rows <- KMA14GroupsPC2Rows
+cex.lab <- 1.5
+cex.xaxis <- 0.5
+cex.yaxis <- 1.3
+cex.leg <- 1.5  # 1.1
+ci.lwd <- 2.5
+ymax <- 1400000  # max(sapply(list(KMA2014_Annual_Regional_Stratified_HarvestEstimatesStats, KMA2015_Annual_Regional_Stratified_HarvestEstimatesStats, KMA2016_Annual_Regional_Stratified_HarvestEstimatesStats), function(strata) {strata[, "95%"]}))
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Make figures as .emf files
+
+# dir.create("Figures/All Years")
+require(devEMF)
+require(gplots)
+
+
+
+emf(file = "Figures/All Years/KMA Harvest 2014-2016.emf", width = 6, height = 5.75, family = "serif", bg = "white")
+
+
+layout(mat = layoutmat, widths = c(0.075, 0.375, 0.6725), heights = c(2.7, 0.15))
+par(mar = rep(0, 4))
+par(family = "times")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Y-axis label
+plot.new()
+text(x = 0.25, y = 0.5, labels = "Number of Fish Harvested (Thousands)", srt = 90, cex = cex.lab)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Barplot Regional
+par(mar = c(1, 1, 1.5, 0))
+Barplot <- barplot2(height = t(cbind(KMA2014_Annual_Regional_Stratified_HarvestEstimatesStats[, "median"],
+                                     KMA2015_Annual_Regional_Stratified_HarvestEstimatesStats[, "median"],
+                                     KMA2016_Annual_Regional_Stratified_HarvestEstimatesStats[, "median"])), 
+                    beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
+                    ci.l = t(cbind(KMA2014_Annual_Regional_Stratified_HarvestEstimatesStats[, "5%"],
+                                   KMA2015_Annual_Regional_Stratified_HarvestEstimatesStats[, "5%"],
+                                   KMA2016_Annual_Regional_Stratified_HarvestEstimatesStats[, "5%"])), 
+                    ci.u = t(cbind(KMA2014_Annual_Regional_Stratified_HarvestEstimatesStats[, "95%"],
+                                   KMA2015_Annual_Regional_Stratified_HarvestEstimatesStats[, "95%"],
+                                   KMA2016_Annual_Regional_Stratified_HarvestEstimatesStats[, "95%"])), 
+                    ylim = c(0, ymax), col = HarvestColors, yaxt = "n", xaxt = 'n')
+axis(side = 2, at = seq(0, ymax, 200000), labels = formatC(x = seq(0, ymax, 200000) / 1000, big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+# legend(legend = 2014:2016, x = "topleft", fill = HarvestColors, border = "black", bty = "n", cex = cex.leg, title="")
+abline(h = 0, xpd = FALSE)
+
+mtext(text = c(Groups2Rows[1], "Chignik\n", "Kodiak\n", Groups2Rows[12:14]), side = 1, line = 1, at = colMeans(Barplot), adj = 0.5, cex = cex.xaxis)
+
+## Barplot Subregional
+par(mar = c(1, 1, 1.5, 0))
+Barplot <- barplot2(height = t(cbind(KMA2014_Annual_Stratified_HarvestEstimatesStats[SubRegGroups, "median"],
+                                     KMA2015_Annual_Stratified_HarvestEstimatesStats[SubRegGroups, "median"],
+                                     KMA2016_Annual_Stratified_HarvestEstimatesStats[SubRegGroups, "median"])), 
+                    beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
+                    ci.l = t(cbind(KMA2014_Annual_Stratified_HarvestEstimatesStats[SubRegGroups, "5%"],
+                                   KMA2015_Annual_Stratified_HarvestEstimatesStats[SubRegGroups, "5%"],
+                                   KMA2016_Annual_Stratified_HarvestEstimatesStats[SubRegGroups, "5%"])), 
+                    ci.u = t(cbind(KMA2014_Annual_Stratified_HarvestEstimatesStats[SubRegGroups, "95%"],
+                                   KMA2015_Annual_Stratified_HarvestEstimatesStats[SubRegGroups, "95%"],
+                                   KMA2016_Annual_Stratified_HarvestEstimatesStats[SubRegGroups, "95%"])), 
+                    ylim = c(0, ymax), col = HarvestColors, yaxt = "n", xaxt = 'n')
+axis(side = 2, at = seq(0, ymax, 200000), labels = FALSE, cex.axis = cex.yaxis)
+legend(legend = 2014:2016, x = min(Barplot[, 6]), y = ymax, fill = HarvestColors, border = "black", bty = "n", cex = cex.leg, title="")
+abline(h = 0, xpd = FALSE)
+abline(v = mean(Barplot[, 2:3]), lty = 2)
+mtext(text = Groups2Rows[2:11], side = 1, line = 1, at = colMeans(Barplot) + c(rep(0, 2), 0.25, 0.5, 0.25, -0.25, 0, 0.25, 0.25, 0), adj = 0.5, cex = cex.xaxis)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Blank Corner
+par(mar = rep(0, 4))
+plot.new()
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## x-axis label
+par(mar = rep(0, 4))
+plot.new()
+text(x = 0.5, y = 0.25, labels = "Regional Reporting Group", cex = cex.lab)
+
+par(mar = rep(0, 4))
+plot.new()
+text(x = 0.5, y = 0.25, labels = "Subregional Reporting Group", cex = cex.lab)
+
+dev.off()
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Table Regional Results ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
