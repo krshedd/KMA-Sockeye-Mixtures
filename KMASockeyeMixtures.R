@@ -6972,9 +6972,9 @@ for(mix in SheetNames) {
 # Table Annual KMA Results
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-KMApercent <- c()
+KMApercent <- setNames(object = c(46.7, 55.2, 62.4), nm = 2014:2016)
 
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # dir.create("Estimates tables")
 require(xlsx)
 
@@ -7023,12 +7023,6 @@ for(yr in 14:16){
 
 
 
-
-
-
-
-
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 2014 Late Late Harvest for Appendix
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -7047,11 +7041,20 @@ HarvestEstimatesStats <- sapply(names(EstimatesStats), function(strata) {
   cbind(EstimatesStats[[strata]][, c("mean", "sd", "median", "5%", "95%")] * HarvestByStrata2014[strata.split[1], strata.split[2]],
         EstimatesStats[[strata]][, c("P=0", "GR")])
 }, simplify = FALSE )
+str(HarvestEstimatesStats)
 
+Regional_EstimatesStats <- dget(file = "Estimates objects/KMA2014Strata_Regional_EstimatesStats.txt")
+str(Regional_EstimatesStats)
 
+Regional_HarvestEstimatesStats <- sapply(names(EstimatesStats), function(strata) {
+  strata.split <- unlist(strsplit(x = strata, split = "_"))
+  strata.split <- c(strata.split[1], paste(c(strata.split[2], strata.split[3]), collapse = "_"))
+  
+  cbind(Regional_EstimatesStats[[strata]][, c("mean", "sd", "median", "5%", "95%")] * HarvestByStrata2014[strata.split[1], strata.split[2]],
+        Regional_EstimatesStats[[strata]][, c("P=0", "GR")])
+}, simplify = FALSE )
+str(Regional_HarvestEstimatesStats)
 
-HarvestEstimatesStats <- c(KMA2014Strata_HarvestEstimatesStats, KMA2014_Annual_HarvestEstimatesStats,
-                           KMA2015Strata_HarvestEstimatesStats, KMA2015_Annual_HarvestEstimatesStats)
 
 SheetNames <- sort(names(EstimatesStats))
 names(SheetNames) <- SheetNames
@@ -7087,14 +7090,14 @@ for(mix in SheetNames) {
   if(length(SheetNames.split) > 1) {
     tempmix <- paste(c(SheetNames.split[2], SheetNames.split[3]), collapse = "_")
     
-    Caption <- paste("Table X.-Estimates of stock composition (%) and stock-specific harvest for temporal stratum ",
+    Caption <- paste("Table X.-Regional and subregional (within Chignik and Kodiak) estimates of stock composition (%) and stock-specific harvest for temporal stratum ",
                      SheetNames.split[2], " (", dates[geomix, tempmix],
                      "; Harvest=", formatC(x = harvest[geomix, tempmix], format = "f", digits = 0, big.mark = ","),
-                     "; n=", sampsize[mix], ")", " of the ", GeoHeader[geo], ", 20", yr,
+                     "; n=", sampsize[mix], ")", " of ", GeoHeader[geo], ", 20", yr,
                      ". Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and SD.",
                      sep = '')
   } else {
-    Caption <- paste("Table X.-Annual estimates of stock composition (%) and stock-specific harvest for the ", GeoHeader[geo], ", 20", yr,
+    Caption <- paste("Table X.-Annual regional and subregional (within Chignik and Kodiak) estimates of stock composition (%) and stock-specific harvest for ", GeoHeader[geo], ", 20", yr,
                      ". Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and SD.",
                      sep = '')
   }
@@ -7102,24 +7105,29 @@ for(mix in SheetNames) {
   Disclaimer <- "Note: Stock composition estimates may not sum to 100% and stock-specific harvest estimates may not sum to the total harvest due to rounding error."
   
   
-  TableX <- matrix(data = "", nrow = 20, ncol = 13)
+  TableX <- matrix(data = "", nrow = 24, ncol = 14)
   
   TableX[1, 1] <- Caption
-  TableX[2, c(2, 9)] <- c("Stock Composition", "Stock-specific Harvest")
-  TableX[3, c(3, 10)] <- rep("90% CI", 2)
-  TableX[4, c(1, 2:4, 6:7, 9:13, 5)] <- c("Reporting Group", rep(c("Median", "5%", "95%", "Mean", "SD"), 2), "P=0")
-  TableX[5:18, 1] <- KMA14GroupsPC
-  TableX[5:18, c(2:4, 6:7)] <- formatC(x = EstimatesStats[[mix]][, c("median", "5%", "95%", "mean", "sd")] * 100, digits = 1, format = "f")
-  TableX[5:18, 5] <- formatC(x = EstimatesStats[[mix]][, "P=0"], digits = 2, format = "f")
-  TableX[5:18, 9:13] <- formatC(x = HarvestEstimatesStats[[mix]][, c("median", "5%", "95%", "mean", "sd")], digits = 0, format = "f", big.mark = ",")
-  TableX[19, 11:12] <- c("Total", formatC(x = sum(HarvestEstimatesStats[[mix]][, "mean"]), digits = 0, format = "f", big.mark = ","))
-  TableX[20, 1] <- Disclaimer
-  
+  TableX[2, c(3, 10)] <- c("Stock Composition", "Stock-specific Harvest")
+  TableX[3, c(1, 4, 11)] <- c("Reporting Group", rep("90% CI", 2))
+  TableX[4, c(1, 2, 3:5, 7:8, 10:14, 6)] <- c("Regional", "Subregional", rep(c("Median", "5%", "95%", "Mean", "SD"), 2), "P=0")
+  TableX[5:10, 1] <- c(KMA14GroupsPC[1], "Chignik", "Kodiak", KMA14GroupsPC[12:14])
+  TableX[5:10, c(3:5, 7:8)] <- formatC(x = Regional_EstimatesStats[[mix]][, c("median", "5%", "95%", "mean", "sd")] * 100, digits = 1, format = "f")
+  TableX[5:10, 6] <- formatC(x = Regional_EstimatesStats[[mix]][, "P=0"], digits = 2, format = "f")
+  TableX[5:10, 10:14] <- formatC(x = Regional_HarvestEstimatesStats[[mix]][, c("median", "5%", "95%", "mean", "sd")], digits = 0, format = "f", big.mark = ",")
+  TableX[11, 12:13] <- c("Total", formatC(x = sum(Regional_HarvestEstimatesStats[[mix]][, "mean"]), digits = 0, format = "f", big.mark = ","))
+  TableX[c(13, 16), 1] <- c("Chignik", "Kodiak")
+  TableX[c(13:14, 16:23), 2] <- c(SubRegGroups[1:3], "Ayakulik / Frazer", SubRegGroups[5:10])
+  TableX[c(13:14, 16:23), c(3:5, 7:8)] <- formatC(x = EstimatesStats[[mix]][SubRegGroups, c("median", "5%", "95%", "mean", "sd")] * 100, digits = 1, format = "f")
+  TableX[c(13:14, 16:23), 6] <- formatC(x = EstimatesStats[[mix]][SubRegGroups, "P=0"], digits = 2, format = "f")
+  TableX[c(13:14, 16:23), 10:14] <- formatC(x = HarvestEstimatesStats[[mix]][SubRegGroups, c("median", "5%", "95%", "mean", "sd")], digits = 0, format = "f", big.mark = ",")
+  TableX[24, 1] <- Disclaimer
   
   write.xlsx(x = as.data.frame(TableX), 
-             file = "Estimates tables/KMA Sockeye Estimates Tables.xlsx",
+             file = "Estimates tables/KMA Sockeye Estimates Tables Regional.xlsx",
              col.names = FALSE, row.names = FALSE, append = TRUE, sheetName = mix)
 }; beep(5)
+
 
 
 
