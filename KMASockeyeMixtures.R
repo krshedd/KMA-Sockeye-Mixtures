@@ -6856,15 +6856,23 @@ KMA2014_2016Strata_SampleSizes_Final_Condense <- dget(file = "Objects/KMA2014_20
 
 
 ## Geographic headers
-GeoHeader <- setNames(object = c(paste0("Alitak (257-10, 20, 50, 60, 70)"),
-                                 paste0("Ayakulik-Halibut Bay (256-10", "\u2013", "256-30)"),
-                                 paste0("Igvak (262-75, 80, 90, 95)"),
-                                 paste0("Karluk-Sturgeon (255-10, 20; 256-40)"),
-                                 paste0("Uganik-Kupreanof (253)"),
-                                 paste0("Uyak (254)")),
+# GeoHeader <- setNames(object = c(paste0("Alitak (statistical areas 257-10, 20, 50, 60, 70)"),
+#                                  paste0("Ayakulik-Halibut Bay (statistical areas 256-10", "\u2013", "256-30)"),
+#                                  paste0("Igvak (statistical areas 262-75, 80, 90, 95)"),
+#                                  paste0("Karluk-Sturgeon (statistical areas 255-10, 20; 256-40)"),
+#                                  paste0("Uganik-Kupreanof (statistical areas 253-10", "\u2013", "253-35)"),
+#                                  paste0("Uyak (statistical areas 254-10)", "\u2013", "254-41)")),
+#                       nm = unlist(strsplit(x = KMA2016, split = "16")))
+GeoHeader <- setNames(object = c(paste0("Alitak (statistical areas 257-10, 20, 50, 60, 70)"),
+                                 paste0("Ayakulik-Halibut Bay (statistical areas 256-10, 15, 20, 25, 30)"),
+                                 paste0("Igvak (statistical areas 262-75, 80, 90, 95)"),
+                                 paste0("Karluk-Sturgeon (statistical areas 255-10, 20; 256-40)"),
+                                 paste0("Uganik-Kupreanof (statistical areas 253-11, 12, 13, 14, 31, 32, 33, 34, 35)"),
+                                 paste0("Uyak (statistical areas 254-10, 20, 21, 30, 31, 40, 41)")),
                       nm = unlist(strsplit(x = KMA2016, split = "16")))
 dput(x = GeoHeader, file = "Objects/GeoHeader.txt")
 GeoHeader <- dget(file = "Objects/GeoHeader.txt")
+
 
 
 # Get Final Estimates Objects
@@ -6931,11 +6939,11 @@ for(mix in SheetNames) {
                      SheetNames.split[2], " (", dates[geomix, tempmix],
                      "; Harvest=", formatC(x = harvest[geomix, tempmix], format = "f", digits = 0, big.mark = ","),
                      "; n=", sampsize[mix], ")", " of ", GeoHeader[geo], ", 20", yr,
-                     ". Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and SD.",
+                     ". Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and standard deviation (SD).",
                      sep = '')
   } else {
     Caption <- paste("Table X.-Annual regional and subregional (within Chignik and Kodiak) estimates of stock composition (%) and stock-specific harvest for ", GeoHeader[geo], ", 20", yr,
-                     ". Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and SD.",
+                     ". Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and standard deviation (SD).",
                      sep = '')
   }
   
@@ -6972,7 +6980,7 @@ for(mix in SheetNames) {
 # Table Annual KMA Results
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-KMApercent <- setNames(object = c(46.7, 55.2, 62.4), nm = 2014:2016)
+KMApercent <- setNames(object = c(46.7, 55.2, 62.4), nm = 14:16)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # dir.create("Estimates tables")
@@ -6988,7 +6996,7 @@ for(yr in 14:16){
   
   
   Caption <- paste("Table X.-Annual regional and subregional (within Chignik and Kodiak) estimates of stock composition (%) and stock-specific harvest for KMA, 20", yr,
-                   ". Note that these annual summaries only include strata sampled for this project, which account for ", KMApercent[yr],"% of the KMA commercial sockeye salmon harvest. Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and SD.",
+                   ". Note that these annual summaries only include strata sampled for this project, which account for ", KMApercent[yr],"% of the KMA commercial sockeye salmon harvest. Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and standard deviation (SD).",
                    sep = '')
   
   
@@ -7087,20 +7095,14 @@ for(mix in SheetNames) {
   
   
   # If it is not an annual roll-up, then get the strata number + strata name
-  if(length(SheetNames.split) > 1) {
-    tempmix <- paste(c(SheetNames.split[2], SheetNames.split[3]), collapse = "_")
-    
-    Caption <- paste("Table X.-Regional and subregional (within Chignik and Kodiak) estimates of stock composition (%) and stock-specific harvest for temporal stratum ",
-                     SheetNames.split[2], " (", dates[geomix, tempmix],
-                     "; Harvest=", formatC(x = harvest[geomix, tempmix], format = "f", digits = 0, big.mark = ","),
-                     "; n=", sampsize[mix], ")", " of ", GeoHeader[geo], ", 20", yr,
-                     ". Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and SD.",
-                     sep = '')
-  } else {
-    Caption <- paste("Table X.-Annual regional and subregional (within Chignik and Kodiak) estimates of stock composition (%) and stock-specific harvest for ", GeoHeader[geo], ", 20", yr,
-                     ". Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and SD.",
-                     sep = '')
-  }
+  tempmix <- paste(c(SheetNames.split[2], SheetNames.split[3]), collapse = "_")
+  
+  Caption <- paste("Table X.-Regional and subregional (within Chignik and Kodiak) estimates of stock composition (%) and stock-specific harvest for temporal stratum ",
+                   SheetNames.split[2], " (", dates[geomix, tempmix],
+                   "; Harvest=", formatC(x = harvest[geomix, tempmix], format = "f", digits = 0, big.mark = ","),
+                   "; n=", sampsize[mix], ")", " of ", GeoHeader[geo], ", 20", yr,
+                   ". Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and standard deviation (SD).",
+                   sep = '')
   
   Disclaimer <- "Note: Stock composition estimates may not sum to 100% and stock-specific harvest estimates may not sum to the total harvest due to rounding error."
   
