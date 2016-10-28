@@ -6996,7 +6996,7 @@ for(yr in 14:16){
   
   
   Caption <- paste("Table X.-Annual regional and subregional (within Chignik and Kodiak) estimates of stock composition (%) and stock-specific harvest for KMA, 20", yr,
-                   ". Note that these annual summaries only include strata sampled for this project, which account for ", KMApercent[yr],"% of the KMA commercial sockeye salmon harvest. Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and standard deviation (SD).",
+                   ". Note that these annual summaries only include strata sampled for this project, which account for ", KMApercent[as.character(yr)],"% of the KMA commercial sockeye salmon harvest. Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and standard deviation (SD).",
                    sep = '')
   
   
