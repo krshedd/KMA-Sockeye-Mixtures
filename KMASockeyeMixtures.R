@@ -7132,14 +7132,42 @@ for(mix in SheetNames) {
 
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Double Check Final Numbers ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# Compare Cook Inlet mean values between 14RG and 6RG estimates
+
+names(KMA2014Strata_EstimatesStats)
+names(KMA2014Strata_Regional_EstimatesStats)
+
+sapply(KMA2014Strata[-grep(pattern = "LateLate", x = KMA2014Strata)], function(mix) {
+  KMA2014Strata_EstimatesStats[[mix]]["Cook Inlet", "mean"] - KMA2014Strata_Regional_EstimatesStats[[mix]]["Cook Inlet", "mean"]
+})
+
+
+sapply(KMA2015Strata, function(mix) {
+  KMA2015Strata_EstimatesStats[[mix]]["Cook Inlet", "mean"] - KMA2015Strata_Regional_EstimatesStats[[mix]]["Cook Inlet", "mean"]
+})
+
+sapply(KMA2016Strata, function(mix) {
+  KMA2016Strata_EstimatesStats[[mix]]["Cook Inlet", "mean"] - KMA2016Strata_Regional_EstimatesStats[[mix]]["Cook Inlet", "mean"]
+})
 
 
 
+sapply(KMA2014Strata[-grep(pattern = "LateLate", x = KMA2014Strata)], function(mix) {
+  KMA2014Strata_HarvestEstimatesStats[[mix]]["Cook Inlet", "mean"] - KMA2014Strata_Regional_HarvestEstimatesStats[[mix]]["Cook Inlet", "mean"]
+})
 
 
+sapply(KMA2015Strata, function(mix) {
+  KMA2015Strata_HarvestEstimatesStats[[mix]]["Cook Inlet", "mean"] - KMA2015Strata_Regional_HarvestEstimatesStats[[mix]]["Cook Inlet", "mean"]
+})
 
-
-
+sapply(KMA2016Strata, function(mix) {
+  KMA2016Strata_HarvestEstimatesStats[[mix]]["Cook Inlet", "mean"] - KMA2016Strata_Regional_HarvestEstimatesStats[[mix]]["Cook Inlet", "mean"]
+})
 
 
 
