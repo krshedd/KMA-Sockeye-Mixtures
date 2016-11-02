@@ -5804,6 +5804,7 @@ KMA2014_Annual_Stratified_HarvestEstimatesStats <-
 dput(x = KMA2014_Annual_Stratified_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2014_Annual_Stratified_HarvestEstimatesStats.txt")
 str(KMA2014_Annual_Stratified_HarvestEstimatesStats)
 
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 6RG
 #~~~~~~~~~~~~~~~~~~
@@ -5826,6 +5827,81 @@ KMA2014_Annual_Regional_Stratified_HarvestEstimatesStats <-
         KMA2014_Annual_Regional_Stratified_EstimatesStats[, c("P=0", "GR")])
 dput(x = KMA2014_Annual_Regional_Stratified_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2014_Annual_Regional_Stratified_HarvestEstimatesStats.txt")
 str(KMA2014_Annual_Regional_Stratified_HarvestEstimatesStats)
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Create KMA-wide temporal rollup
+# 14RG
+#~~~~~~~~~~~~~~~~~~
+sapply(c("Early", "Middle", "Late"), function(tempmix) {
+  assign(x = paste("KMA2014_", tempmix, "_Stratified", sep = ''), 
+         value = StratifiedEstimator.GCL(
+           groupvec = seq(KMA14GroupsPC), groupnames = KMA14GroupsPC, maindir = "BAYES/2014-2016 Mixtures 46loci 14RG/Output", 
+           mixvec = grep(pattern = tempmix, x = KMA2014Strata, value = TRUE), 
+           catchvec = t(HarvestByStrata2014)[!is.na(t(HarvestByStrata2014))][grep(pattern = tempmix, x = KMA2014Strata)], 
+           newname = paste("KMA2014_", tempmix, "_Stratified", sep = ''), priorname = '',
+           ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1), 
+         pos = 1)
+  dput(x = get(paste("KMA2014_", tempmix, "_Stratified", sep = '')), file = paste("Estimates objects/KMA2014_", tempmix, "_Stratified.txt", sep = ''))
+} ); beep(5)
+str(KMA2014_Early_Stratified)
+
+
+# Create a list object with all Stratified Annual Rollups for the "Estimates objects/Final" folder
+KMA2014_Temporal_Annual_EstimatesStats <- sapply(c("Early", "Middle", "Late"), function(tempmix) {
+  Stats <- get(paste("KMA2014_", tempmix, "_Stratified", sep = ''))$Stats
+  Stats
+}, simplify = FALSE)
+str(KMA2014_Temporal_Annual_EstimatesStats)
+dput(x = KMA2014_Temporal_Annual_EstimatesStats, file = "Estimates objects/Final/KMA2014_Temporal_Annual_EstimatesStats.txt")
+
+
+# Create a list object with all Stratified Annual Harvest
+KMA2014_Temporal_Annual_HarvestEstimatesStats <- sapply(c("Early", "Middle", "Late"), function(tempmix) {
+  cbind(KMA2014_Temporal_Annual_EstimatesStats[[tempmix]][, c("mean", "sd", "median", "5%", "95%")] * sum(HarvestByStrata2014_Final[, grep(x = colnames(HarvestByStrata2014_Final), pattern = tempmix)], na.rm = TRUE),
+        KMA2014_Temporal_Annual_EstimatesStats[[tempmix]][, c("P=0", "GR")])
+}, simplify = FALSE )
+
+dput(x = KMA2014_Temporal_Annual_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2014_Temporal_Annual_HarvestEstimatesStats.txt")
+str(KMA2014_Temporal_Annual_HarvestEstimatesStats)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 6RG
+#~~~~~~~~~~~~~~~~~~
+sapply(c("Early", "Middle", "Late"), function(tempmix) {
+  assign(x = paste("KMA2014_", tempmix, "_Regional_Stratified", sep = ''), 
+         value = StratifiedEstimator.GCL(
+           groupvec = KMA473PopsGroupVec6_14RG, groupnames = KMA6GroupsPC, maindir = "BAYES/2014-2016 Mixtures 46loci 14RG/Output", 
+           mixvec = grep(pattern = tempmix, x = KMA2014Strata, value = TRUE), 
+           catchvec = t(HarvestByStrata2014)[!is.na(t(HarvestByStrata2014))][grep(pattern = tempmix, x = KMA2014Strata)], 
+           newname = paste("KMA2014_", tempmix, "_Regional_Stratified", sep = ''), priorname = '',
+           ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1), 
+         pos = 1)
+  dput(x = get(paste("KMA2014_", tempmix, "_Regional_Stratified", sep = '')), file = paste("Estimates objects/KMA2014_", tempmix, "_Regional_Stratified.txt", sep = ''))
+} ); beep(5)
+str(KMA2014_Early_Regional_Stratified)
+
+
+# Create a list object with all Stratified Annual Rollups for the "Estimates objects/Final" folder
+KMA2014_Temporal_Annual_Regional_EstimatesStats <- sapply(c("Early", "Middle", "Late"), function(tempmix) {
+  Stats <- get(paste("KMA2014_", tempmix, "_Regional_Stratified", sep = ''))$Stats
+  Stats
+}, simplify = FALSE)
+str(KMA2014_Temporal_Annual_Regional_EstimatesStats)
+dput(x = KMA2014_Temporal_Annual_Regional_EstimatesStats, file = "Estimates objects/Final/KMA2014_Temporal_Annual_Regional_EstimatesStats.txt")
+
+
+# Create a list object with all Stratified Annual Harvest
+KMA2014_Temporal_Annual_Regional_HarvestEstimatesStats <- sapply(c("Early", "Middle", "Late"), function(tempmix) {
+  cbind(KMA2014_Temporal_Annual_Regional_EstimatesStats[[tempmix]][, c("mean", "sd", "median", "5%", "95%")] * sum(HarvestByStrata2014_Final[, grep(x = colnames(HarvestByStrata2014_Final), pattern = tempmix)], na.rm = TRUE),
+        KMA2014_Temporal_Annual_Regional_EstimatesStats[[tempmix]][, c("P=0", "GR")])
+}, simplify = FALSE )
+str(KMA2014_Temporal_Annual_Regional_HarvestEstimatesStats)
+dput(x = KMA2014_Temporal_Annual_Regional_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2014_Temporal_Annual_Regional_HarvestEstimatesStats.txt")
+
+
+
 
 
 
@@ -5949,6 +6025,77 @@ str(KMA2015_Annual_Regional_Stratified_HarvestEstimatesStats)
 
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Create KMA-wide temporal rollup
+# 14RG
+#~~~~~~~~~~~~~~~~~~
+sapply(c("Early", "Middle", "Late"), function(tempmix) {
+  assign(x = paste("KMA2015_", tempmix, "_Stratified", sep = ''), 
+         value = StratifiedEstimator.GCL(
+           groupvec = seq(KMA14GroupsPC), groupnames = KMA14GroupsPC, maindir = "BAYES/2014-2016 Mixtures 46loci 14RG/Output", 
+           mixvec = grep(pattern = tempmix, x = KMA2015Strata, value = TRUE), 
+           catchvec = t(HarvestByStrata2015)[!is.na(t(HarvestByStrata2015))][grep(pattern = tempmix, x = KMA2015Strata)], 
+           newname = paste("KMA2015_", tempmix, "_Stratified", sep = ''), priorname = '',
+           ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1), 
+         pos = 1)
+  dput(x = get(paste("KMA2015_", tempmix, "_Stratified", sep = '')), file = paste("Estimates objects/KMA2015_", tempmix, "_Stratified.txt", sep = ''))
+} ); beep(5)
+str(KMA2015_Early_Stratified)
+
+
+# Create a list object with all Stratified Annual Rollups for the "Estimates objects/Final" folder
+KMA2015_Temporal_Annual_EstimatesStats <- sapply(c("Early", "Middle", "Late"), function(tempmix) {
+  Stats <- get(paste("KMA2015_", tempmix, "_Stratified", sep = ''))$Stats
+  Stats
+}, simplify = FALSE)
+str(KMA2015_Temporal_Annual_EstimatesStats)
+dput(x = KMA2015_Temporal_Annual_EstimatesStats, file = "Estimates objects/Final/KMA2015_Temporal_Annual_EstimatesStats.txt")
+
+
+# Create a list object with all Stratified Annual Harvest
+KMA2015_Temporal_Annual_HarvestEstimatesStats <- sapply(c("Early", "Middle", "Late"), function(tempmix) {
+  cbind(KMA2015_Temporal_Annual_EstimatesStats[[tempmix]][, c("mean", "sd", "median", "5%", "95%")] * sum(HarvestByStrata2015_Final[, grep(x = colnames(HarvestByStrata2015_Final), pattern = tempmix)], na.rm = TRUE),
+        KMA2015_Temporal_Annual_EstimatesStats[[tempmix]][, c("P=0", "GR")])
+}, simplify = FALSE )
+str(KMA2015_Temporal_Annual_HarvestEstimatesStats)
+dput(x = KMA2015_Temporal_Annual_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2015_Temporal_Annual_HarvestEstimatesStats.txt")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 6RG
+#~~~~~~~~~~~~~~~~~~
+sapply(c("Early", "Middle", "Late"), function(tempmix) {
+  assign(x = paste("KMA2015_", tempmix, "_Regional_Stratified", sep = ''), 
+         value = StratifiedEstimator.GCL(
+           groupvec = KMA473PopsGroupVec6_14RG, groupnames = KMA6GroupsPC, maindir = "BAYES/2014-2016 Mixtures 46loci 14RG/Output", 
+           mixvec = grep(pattern = tempmix, x = KMA2015Strata, value = TRUE), 
+           catchvec = t(HarvestByStrata2015)[!is.na(t(HarvestByStrata2015))][grep(pattern = tempmix, x = KMA2015Strata)], 
+           newname = paste("KMA2015_", tempmix, "_Regional_Stratified", sep = ''), priorname = '',
+           ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1), 
+         pos = 1)
+  dput(x = get(paste("KMA2015_", tempmix, "_Regional_Stratified", sep = '')), file = paste("Estimates objects/KMA2015_", tempmix, "_Regional_Stratified.txt", sep = ''))
+} ); beep(5)
+str(KMA2015_Early_Regional_Stratified)
+
+
+# Create a list object with all Stratified Annual Rollups for the "Estimates objects/Final" folder
+KMA2015_Temporal_Annual_Regional_EstimatesStats <- sapply(c("Early", "Middle", "Late"), function(tempmix) {
+  Stats <- get(paste("KMA2015_", tempmix, "_Regional_Stratified", sep = ''))$Stats
+  Stats
+}, simplify = FALSE)
+str(KMA2015_Temporal_Annual_Regional_EstimatesStats)
+dput(x = KMA2015_Temporal_Annual_Regional_EstimatesStats, file = "Estimates objects/Final/KMA2015_Temporal_Annual_Regional_EstimatesStats.txt")
+
+
+# Create a list object with all Stratified Annual Harvest
+KMA2015_Temporal_Annual_Regional_HarvestEstimatesStats <- sapply(c("Early", "Middle", "Late"), function(tempmix) {
+  cbind(KMA2015_Temporal_Annual_Regional_EstimatesStats[[tempmix]][, c("mean", "sd", "median", "5%", "95%")] * sum(HarvestByStrata2015_Final[, grep(x = colnames(HarvestByStrata2015_Final), pattern = tempmix)], na.rm = TRUE),
+        KMA2015_Temporal_Annual_Regional_EstimatesStats[[tempmix]][, c("P=0", "GR")])
+}, simplify = FALSE )
+str(KMA2015_Temporal_Annual_Regional_HarvestEstimatesStats)
+dput(x = KMA2015_Temporal_Annual_Regional_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2015_Temporal_Annual_Regional_HarvestEstimatesStats.txt")
+
+
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Stratified Regional Roll-Ups 2016 ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -6059,6 +6206,78 @@ KMA2016_Annual_Regional_Stratified_HarvestEstimatesStats <-
         KMA2016_Annual_Regional_Stratified_EstimatesStats[, c("P=0", "GR")])
 dput(x = KMA2016_Annual_Regional_Stratified_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2016_Annual_Regional_Stratified_HarvestEstimatesStats.txt")
 str(KMA2016_Annual_Regional_Stratified_HarvestEstimatesStats)
+
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Create KMA-wide temporal rollup
+# 14RG
+#~~~~~~~~~~~~~~~~~~
+sapply(c("Early", "Middle", "Late"), function(tempmix) {
+  assign(x = paste("KMA2016_", tempmix, "_Stratified", sep = ''), 
+         value = StratifiedEstimator.GCL(
+           groupvec = seq(KMA14GroupsPC), groupnames = KMA14GroupsPC, maindir = "BAYES/2014-2016 Mixtures 46loci 14RG/Output", 
+           mixvec = grep(pattern = tempmix, x = KMA2016Strata, value = TRUE), 
+           catchvec = t(HarvestByStrata2016)[!is.na(t(HarvestByStrata2016))][grep(pattern = tempmix, x = KMA2016Strata)], 
+           newname = paste("KMA2016_", tempmix, "_Stratified", sep = ''), priorname = '',
+           ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1), 
+         pos = 1)
+  dput(x = get(paste("KMA2016_", tempmix, "_Stratified", sep = '')), file = paste("Estimates objects/KMA2016_", tempmix, "_Stratified.txt", sep = ''))
+} ); beep(5)
+str(KMA2016_Early_Stratified)
+
+
+# Create a list object with all Stratified Annual Rollups for the "Estimates objects/Final" folder
+KMA2016_Temporal_Annual_EstimatesStats <- sapply(c("Early", "Middle", "Late"), function(tempmix) {
+  Stats <- get(paste("KMA2016_", tempmix, "_Stratified", sep = ''))$Stats
+  Stats
+}, simplify = FALSE)
+str(KMA2016_Temporal_Annual_EstimatesStats)
+dput(x = KMA2016_Temporal_Annual_EstimatesStats, file = "Estimates objects/Final/KMA2016_Temporal_Annual_EstimatesStats.txt")
+
+
+# Create a list object with all Stratified Annual Harvest
+KMA2016_Temporal_Annual_HarvestEstimatesStats <- sapply(c("Early", "Middle", "Late"), function(tempmix) {
+  cbind(KMA2016_Temporal_Annual_EstimatesStats[[tempmix]][, c("mean", "sd", "median", "5%", "95%")] * sum(HarvestByStrata2016_Final[, grep(x = colnames(HarvestByStrata2016_Final), pattern = tempmix)], na.rm = TRUE),
+        KMA2016_Temporal_Annual_EstimatesStats[[tempmix]][, c("P=0", "GR")])
+}, simplify = FALSE )
+str(KMA2016_Temporal_Annual_HarvestEstimatesStats)
+dput(x = KMA2016_Temporal_Annual_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2016_Temporal_Annual_HarvestEstimatesStats.txt")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 6RG
+#~~~~~~~~~~~~~~~~~~
+sapply(c("Early", "Middle", "Late"), function(tempmix) {
+  assign(x = paste("KMA2016_", tempmix, "_Regional_Stratified", sep = ''), 
+         value = StratifiedEstimator.GCL(
+           groupvec = KMA473PopsGroupVec6_14RG, groupnames = KMA6GroupsPC, maindir = "BAYES/2014-2016 Mixtures 46loci 14RG/Output", 
+           mixvec = grep(pattern = tempmix, x = KMA2016Strata, value = TRUE), 
+           catchvec = t(HarvestByStrata2016)[!is.na(t(HarvestByStrata2016))][grep(pattern = tempmix, x = KMA2016Strata)], 
+           newname = paste("KMA2016_", tempmix, "_Regional_Stratified", sep = ''), priorname = '',
+           ext = "RGN", nchains = 5, burn = 0.5, alpha = 0.1), 
+         pos = 1)
+  dput(x = get(paste("KMA2016_", tempmix, "_Regional_Stratified", sep = '')), file = paste("Estimates objects/KMA2016_", tempmix, "_Regional_Stratified.txt", sep = ''))
+} ); beep(5)
+str(KMA2016_Early_Regional_Stratified)
+
+
+# Create a list object with all Stratified Annual Rollups for the "Estimates objects/Final" folder
+KMA2016_Temporal_Annual_Regional_EstimatesStats <- sapply(c("Early", "Middle", "Late"), function(tempmix) {
+  Stats <- get(paste("KMA2016_", tempmix, "_Regional_Stratified", sep = ''))$Stats
+  Stats
+}, simplify = FALSE)
+str(KMA2016_Temporal_Annual_Regional_EstimatesStats)
+dput(x = KMA2016_Temporal_Annual_Regional_EstimatesStats, file = "Estimates objects/Final/KMA2016_Temporal_Annual_Regional_EstimatesStats.txt")
+
+
+# Create a list object with all Stratified Annual Harvest
+KMA2016_Temporal_Annual_Regional_HarvestEstimatesStats <- sapply(c("Early", "Middle", "Late"), function(tempmix) {
+  cbind(KMA2016_Temporal_Annual_Regional_EstimatesStats[[tempmix]][, c("mean", "sd", "median", "5%", "95%")] * sum(HarvestByStrata2016_Final[, grep(x = colnames(HarvestByStrata2016_Final), pattern = tempmix)], na.rm = TRUE),
+        KMA2016_Temporal_Annual_Regional_EstimatesStats[[tempmix]][, c("P=0", "GR")])
+}, simplify = FALSE )
+str(KMA2016_Temporal_Annual_Regional_HarvestEstimatesStats)
+dput(x = KMA2016_Temporal_Annual_Regional_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2016_Temporal_Annual_Regional_HarvestEstimatesStats.txt")
 
 
 
@@ -6813,6 +7032,381 @@ text(x = 0.5, y = 0.25, labels = "Subregional Reporting Group", cex = cex.lab)
 
 dev.off()
 
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Plot Annual Temporal KMA Percentages ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+KMA2014_Temporal_Annual_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2014_Temporal_Annual_EstimatesStats.txt")
+KMA2015_Temporal_Annual_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2015_Temporal_Annual_EstimatesStats.txt")
+KMA2016_Temporal_Annual_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2016_Temporal_Annual_EstimatesStats.txt")
+str(KMA2014_Temporal_Annual_EstimatesStats)
+
+KMA2014_Temporal_Annual_Regional_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2014_Temporal_Annual_Regional_EstimatesStats.txt")
+KMA2015_Temporal_Annual_Regional_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2015_Temporal_Annual_Regional_EstimatesStats.txt")
+KMA2016_Temporal_Annual_Regional_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2016_Temporal_Annual_Regional_EstimatesStats.txt")
+str(KMA2016_Temporal_Annual_Regional_EstimatesStats)
+
+
+# Three barplot layout
+layoutmat <- matrix(data=c(  1, 2, 3,
+                             1, 4, 5,
+                             1, 6, 7,
+                             8, 9, 10), nrow = 4, ncol = 3, byrow = TRUE)
+
+
+# If showing proportions (percetages) use blue, otherwise green as "low"
+ProportionColors <- colorpanel(n = 3, low = "blue", high = "white")
+
+
+#~~~~~~~~~~~~~~~~~~
+# 2014
+Legend14 <- setNames(object = c("June 1-27", "June 28-July 25", "July 26-August 29"), 
+                     nm = c("1_Early", "2_Middle", "3_Late"))
+
+Estimates14 <- KMA2014_Temporal_Annual_EstimatesStats
+
+RegionalEstimates14 <- KMA2014_Temporal_Annual_Regional_EstimatesStats
+
+#~~~~~~~~~~~~~~~~~~
+# 2015
+Legend15 <- setNames(object = c("June 1-July 3", "July 4-August 1", "August 2-29"), 
+                     nm = c("1_Early", "2_Middle", "3_Late"))
+
+Estimates15 <- KMA2015_Temporal_Annual_EstimatesStats
+
+RegionalEstimates15 <- KMA2015_Temporal_Annual_Regional_EstimatesStats
+
+#~~~~~~~~~~~~~~~~~~
+# 2016
+Legend16 <- setNames(object = c("June 1-27", "June 28-July 25", "July 26-August 29"),
+                     nm = c("1_Early", "2_Middle", "3_Late"))
+
+Estimates16 <- KMA2016_Temporal_Annual_EstimatesStats
+
+RegionalEstimates16 <- KMA2016_Temporal_Annual_Regional_EstimatesStats
+
+#~~~~~~~~~~~~~~~~~~
+# Size Parameters
+Groups <- KMA14GroupsPC
+Groups2Rows <- KMA14GroupsPC2Rows
+SubRegGroups <- KMA14GroupsPC[2:11]
+cex.lab <- 1.5
+cex.xaxis <- 0.5  # 0.5
+cex.yaxis <- 1.3
+cex.leg <- 1.1
+ci.lwd <- 2.5
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Make figures as .emf files
+
+# dir.create("Figures/All Years")
+require(devEMF)
+require(gplots)
+
+
+emf(file = paste("Figures/All Years/KMA Temporal Proportions 2014-2016.emf", sep = ''), width = 6, height = 5.75, family = "serif", bg = "white")
+
+
+layout(mat = layoutmat, widths = c(0.075, 0.375, 0.625), heights = c(0.9, 0.9, 0.9, 0.15))
+par(mar = rep(0, 4))
+par(family = "times")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Y-axis label
+plot.new()
+text(x = 0.25, y = 0.5, labels = "Percentage of Catch", srt = 90, cex = cex.lab)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## 2014 Barplot Regional
+par(mar = c(1, 1, 1, 0))
+Barplot14 <- barplot2(height = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {RegionalEstimates14[[tempmix]][, "median"]})) * 100, 
+                      beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
+                      ci.l = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {RegionalEstimates14[[tempmix]][, "5%"]})) * 100, 
+                      ci.u = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {RegionalEstimates14[[tempmix]][, "95%"]})) * 100, 
+                      ylim = c(0, 100), col = ProportionColors, yaxt = "n", xaxt = 'n')
+axis(side = 2, at = seq(0, 100, 25), labels = formatC(x = seq(0, 100, 25), big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+abline(h = 0, xpd = FALSE)
+
+#~~~~~~~~~~~~~~~~
+## 2014 Barplot SubRegional
+
+par(mar = c(1, 1, 1, 0))
+Barplot14 <- barplot2(height = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {Estimates14[[tempmix]][SubRegGroups, "median"]})) * 100, 
+                      beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
+                      ci.l = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {Estimates14[[tempmix]][SubRegGroups, "5%"]})) * 100, 
+                      ci.u = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {Estimates14[[tempmix]][SubRegGroups, "95%"]})) * 100, 
+                      ylim = c(0, 100), col = ProportionColors, yaxt = "n", xaxt = 'n')
+axis(side = 2, at = seq(0, 100, 25), labels = FALSE, cex.axis = cex.yaxis)
+legend(legend = Legend14, x = min(Barplot14[, 6]), y = 100, fill = ProportionColors, border = "black", bty = "n", cex = cex.leg, title="2014")
+abline(h = 0, xpd = FALSE)
+abline(v = mean(Barplot14[, 2:3]), lty = 2)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## 2015 Barplot Regional
+par(mar = c(1, 1, 1, 0))
+Barplot15 <- barplot2(height = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {RegionalEstimates15[[tempmix]][, "median"]})) * 100, 
+                      beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
+                      ci.l = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {RegionalEstimates15[[tempmix]][, "5%"]})) * 100, 
+                      ci.u = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {RegionalEstimates15[[tempmix]][, "95%"]})) * 100, 
+                      ylim = c(0, 100), col = ProportionColors, yaxt = "n", xaxt = 'n')
+axis(side = 2, at = seq(0, 100, 25), labels = formatC(x = seq(0, 100, 25), big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+abline(h = 0, xpd = FALSE)
+#~~~~~~~~~~~~~~~~
+## 2015 Barplot SubRegional
+geomix15 <- grep(pattern = geomix, x = names(TempMix15), value = TRUE)
+par(mar = c(1, 1, 1, 0))
+Barplot15 <- barplot2(height = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {Estimates15[[tempmix]][SubRegGroups, "median"]})) * 100, 
+                      beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
+                      ci.l = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {Estimates15[[tempmix]][SubRegGroups, "5%"]})) * 100, 
+                      ci.u = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {Estimates15[[tempmix]][SubRegGroups, "95%"]})) * 100, 
+                      ylim = c(0, 100), col = ProportionColors, yaxt = "n", xaxt = 'n')
+axis(side = 2, at = seq(0, 100, 25), labels = FALSE, cex.axis = cex.yaxis)
+legend(legend = Legend15, x = min(Barplot15[, 6]), y = 100, fill = ProportionColors, border = "black", bty = "n", cex = cex.leg, title="2015")
+abline(h = 0, xpd = FALSE)
+abline(v = mean(Barplot15[, 2:3]), lty = 2)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## 2016 Barplot Regional
+geomix16 <- grep(pattern = geomix, x = names(TempMix16), value = TRUE)
+par(mar = c(1, 1, 1, 0))
+Barplot16 <- barplot2(height = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {RegionalEstimates16[[tempmix]][, "median"]})) * 100, 
+                      beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
+                      ci.l = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {RegionalEstimates16[[tempmix]][, "5%"]})) * 100, 
+                      ci.u = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {RegionalEstimates16[[tempmix]][, "95%"]})) * 100, 
+                      ylim = c(0, 100), col = ProportionColors, yaxt = "n", xaxt = 'n')
+axis(side = 2, at = seq(0, 100, 25), labels = formatC(x = seq(0, 100, 25), big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+abline(h = 0, xpd = FALSE)
+mtext(text = c(Groups2Rows[1], "Chignik\n", "Kodiak\n", Groups2Rows[12:14]), side = 1, line = 1, at = colMeans(Barplot16), adj = 0.5, cex = cex.xaxis)
+# text(x = colMeans(Barplot16), y = -6, labels = c(Groups2Rows[1], "Chignik\n", "Kodiak\n", Groups2Rows[12:14]), adj = 0.5, cex = cex.xaxis, srt = 45, xpd = TRUE)
+#~~~~~~~~~~~~~~~~
+## 2016 Barplot SubRegional
+geomix16 <- grep(pattern = geomix, x = names(TempMix16), value = TRUE)
+par(mar = c(1, 1, 1, 0))
+Barplot16 <- barplot2(height = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {Estimates16[[tempmix]][SubRegGroups, "median"]})) * 100, 
+                      beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
+                      ci.l = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {Estimates16[[tempmix]][SubRegGroups, "5%"]})) * 100, 
+                      ci.u = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {Estimates16[[tempmix]][SubRegGroups, "95%"]})) * 100, 
+                      ylim = c(0, 100), col = ProportionColors, yaxt = "n", xaxt = 'n')
+axis(side = 2, at = seq(0, 100, 25), labels = FALSE, cex.axis = cex.yaxis)
+legend(legend = Legend16, x = min(Barplot16[, 6]), y = 100, fill = ProportionColors, border = "black", bty = "n", cex = cex.leg, title="2016")
+abline(h = 0, xpd = FALSE)
+abline(v = mean(Barplot16[, 2:3]), lty = 2)
+mtext(text = Groups2Rows[2:11], side = 1, line = 1, at = colMeans(Barplot16) + c(rep(0, 2), 0.25, 0.5, 0.25, -0.25, 0, 0.25, 0.25, 0), adj = 0.5, cex = cex.xaxis)
+# text(x = colMeans(Barplot16), y = -6, labels = Groups2Rows[2:11], adj = 0.5, cex = cex.xaxis, srt = 45, xpd = TRUE)
+# - c(rep(0.5, 3), rep(0, 2), rep(0.5, 2), rep(0, 3))
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Blank Corner
+par(mar = rep(0, 4))
+plot.new()
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## x-axis label
+par(mar = rep(0, 4))
+plot.new()
+text(x = 0.5, y = 0.25, labels = "Regional Reporting Group", cex = cex.lab)
+
+par(mar = rep(0, 4))
+plot.new()
+text(x = 0.5, y = 0.25, labels = "Subregional Reporting Group", cex = cex.lab)
+
+dev.off()
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Plot Harvest for KMA Strata Mixtures 14RG/6RG ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+KMA2014_Temporal_Annual_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2014_Temporal_Annual_HarvestEstimatesStats.txt")
+KMA2015_Temporal_Annual_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2015_Temporal_Annual_HarvestEstimatesStats.txt")
+KMA2016_Temporal_Annual_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2016_Temporal_Annual_HarvestEstimatesStats.txt")
+str(KMA2014_Temporal_Annual_HarvestEstimatesStats)
+
+KMA2014_Temporal_Annual_Regional_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2014_Temporal_Annual_Regional_HarvestEstimatesStats.txt")
+KMA2015_Temporal_Annual_Regional_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2015_Temporal_Annual_Regional_HarvestEstimatesStats.txt")
+KMA2016_Temporal_Annual_Regional_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2016_Temporal_Annual_Regional_HarvestEstimatesStats.txt")
+str(KMA2014_Temporal_Annual_Regional_HarvestEstimatesStats)
+
+
+# Three barplot layout
+layoutmat <- matrix(data=c(  1, 2, 3,
+                             1, 4, 5,
+                             1, 6, 7,
+                             8, 9, 10), nrow = 4, ncol = 3, byrow = TRUE)
+
+# If showing proportions (percetages) use blue, otherwise green as "low"
+HarvestColors <- colorpanel(n = 3, low = "green", high = "white")
+
+
+#~~~~~~~~~~~~~~~~~~
+# 2014
+Legend14 <- setNames(object = c("June 1-27", "June 28-July 25", "July 26-August 29"), 
+                     nm = c("1_Early", "2_Middle", "3_Late"))
+
+HarvestEstimates14 <- KMA2014_Temporal_Annual_HarvestEstimatesStats
+
+RegionalHarvestEstimates14 <- KMA2014_Temporal_Annual_Regional_HarvestEstimatesStats
+
+#~~~~~~~~~~~~~~~~~~
+# 2015
+Legend15 <- setNames(object = c("June 1-July 3", "July 4-August 1", "August 2-29"), 
+                     nm = c("1_Early", "2_Middle", "3_Late"))
+
+HarvestEstimates15 <- KMA2015_Temporal_Annual_HarvestEstimatesStats
+
+RegionalHarvestEstimates15 <- KMA2015_Temporal_Annual_Regional_HarvestEstimatesStats
+
+#~~~~~~~~~~~~~~~~~~
+# 2016
+Legend16 <- setNames(object = c("June 1-27", "June 28-July 25", "July 26-August 29"),
+                     nm = c("1_Early", "2_Middle", "3_Late"))
+
+HarvestEstimates16 <- KMA2016_Temporal_Annual_HarvestEstimatesStats
+
+RegionalHarvestEstimates16 <- KMA2016_Temporal_Annual_Regional_HarvestEstimatesStats
+
+#~~~~~~~~~~~~~~~~~~
+# Size Parameters
+Groups <- KMA14GroupsPC
+Groups2Rows <- KMA14GroupsPC2Rows
+SubRegGroups <- KMA14GroupsPC[2:11]
+cex.lab <- 1.5
+cex.xaxis <- 0.5  # 0.5
+cex.yaxis <- 1.3
+cex.leg <- 1.1
+ci.lwd <- 2.5
+ymax <- 500000  # max(sapply(c(RegionalHarvestEstimates14, RegionalHarvestEstimates15, RegionalHarvestEstimates16), function(strata) {strata[, "95%"]}))
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Make figures as .emf files
+
+# dir.create("Figures/All Years")
+require(devEMF)
+require(gplots)
+
+
+emf(file = paste("Figures/All Years/KMA Temporal Harvest 2014-2016.emf", sep = ''), width = 6, height = 5.75, family = "serif", bg = "white")
+
+
+layout(mat = layoutmat, widths = c(0.075, 0.375, 0.625), heights = c(0.9, 0.9, 0.9, 0.15))
+par(mar = rep(0, 4))
+par(family = "times")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Y-axis label
+plot.new()
+text(x = 0.25, y = 0.5, labels = "Number of Fish Harvested (Thousands)", srt = 90, cex = cex.lab)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## 2014 Barplot Regional
+par(mar = c(1, 1, 1, 0))
+Barplot14 <- barplot2(height = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {RegionalHarvestEstimates14[[tempmix]][, "median"]})), 
+                      beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
+                      ci.l = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {RegionalHarvestEstimates14[[tempmix]][, "5%"]})), 
+                      ci.u = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {RegionalHarvestEstimates14[[tempmix]][, "95%"]})), 
+                      ylim = c(0, ymax), col = HarvestColors, yaxt = "n", xaxt = 'n')
+axis(side = 2, at = seq(0, ymax, 125000), labels = formatC(x = seq(0, ymax, 125000) / 1000, big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+abline(h = 0, xpd = FALSE)
+
+#~~~~~~~~~~~~~~~~
+## 2014 Barplot SubRegional
+par(mar = c(1, 1, 1, 0))
+Barplot14 <- barplot2(height = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {HarvestEstimates14[[tempmix]][SubRegGroups, "median"]})), 
+                      beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
+                      ci.l = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {HarvestEstimates14[[tempmix]][SubRegGroups, "5%"]})), 
+                      ci.u = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {HarvestEstimates14[[tempmix]][SubRegGroups, "95%"]})), 
+                      ylim = c(0, ymax), col = HarvestColors, yaxt = "n", xaxt = 'n')
+axis(side = 2, at = seq(0, ymax, 125000), labels = FALSE, cex.axis = cex.yaxis)
+legend(legend = Legend14, x = min(Barplot14[, 6]), y = ymax, fill = HarvestColors, border = "black", bty = "n", cex = cex.leg, title="2014")
+abline(h = 0, xpd = FALSE)
+abline(v = mean(Barplot14[, 2:3]), lty = 2)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## 2015 Barplot Regional
+geomix15 <- grep(pattern = geomix, x = names(TempMix15), value = TRUE)
+par(mar = c(1, 1, 1, 0))
+Barplot15 <- barplot2(height = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {RegionalHarvestEstimates15[[tempmix]][, "median"]})), 
+                      beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
+                      ci.l = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {RegionalHarvestEstimates15[[tempmix]][, "5%"]})), 
+                      ci.u = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {RegionalHarvestEstimates15[[tempmix]][, "95%"]})), 
+                      ylim = c(0, ymax), col = HarvestColors, yaxt = "n", xaxt = 'n')
+axis(side = 2, at = seq(0, ymax, 125000), labels = formatC(x = seq(0, ymax, 125000) / 1000, big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+abline(h = 0, xpd = FALSE)
+#~~~~~~~~~~~~~~~~
+## 2015 Barplot SubRegional
+geomix15 <- grep(pattern = geomix, x = names(TempMix15), value = TRUE)
+par(mar = c(1, 1, 1, 0))
+Barplot15 <- barplot2(height = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {HarvestEstimates15[[tempmix]][SubRegGroups, "median"]})), 
+                      beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
+                      ci.l = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {HarvestEstimates15[[tempmix]][SubRegGroups, "5%"]})), 
+                      ci.u = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {HarvestEstimates15[[tempmix]][SubRegGroups, "95%"]})), 
+                      ylim = c(0, ymax), col = HarvestColors, yaxt = "n", xaxt = 'n')
+axis(side = 2, at = seq(0, ymax, 125000), labels = FALSE, cex.axis = cex.yaxis)
+legend(legend = Legend15, x = min(Barplot15[, 6]), y = ymax, fill = HarvestColors, border = "black", bty = "n", cex = cex.leg, title="2015")
+abline(h = 0, xpd = FALSE)
+abline(v = mean(Barplot15[, 2:3]), lty = 2)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## 2016 Barplot Regional
+geomix16 <- grep(pattern = geomix, x = names(TempMix16), value = TRUE)
+par(mar = c(1, 1, 1, 0))
+Barplot16 <- barplot2(height = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {RegionalHarvestEstimates16[[tempmix]][, "median"]})), 
+                      beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
+                      ci.l = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {RegionalHarvestEstimates16[[tempmix]][, "5%"]})), 
+                      ci.u = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {RegionalHarvestEstimates16[[tempmix]][, "95%"]})), 
+                      ylim = c(0, ymax), col = HarvestColors, yaxt = "n", xaxt = 'n')
+axis(side = 2, at = seq(0, ymax, 125000), labels = formatC(x = seq(0, ymax, 125000) / 1000, big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+abline(h = 0, xpd = FALSE)
+mtext(text = c(Groups2Rows[1], "Chignik\n", "Kodiak\n", Groups2Rows[12:14]), side = 1, line = 1, at = colMeans(Barplot16), adj = 0.5, cex = cex.xaxis)
+# text(x = colMeans(Barplot16), y = -6, labels = c(Groups2Rows[1], "Chignik\n", "Kodiak\n", Groups2Rows[12:14]), adj = 0.5, cex = cex.xaxis, srt = 45, xpd = TRUE)
+#~~~~~~~~~~~~~~~~
+## 2016 Barplot SubRegional
+geomix16 <- grep(pattern = geomix, x = names(TempMix16), value = TRUE)
+par(mar = c(1, 1, 1, 0))
+Barplot16 <- barplot2(height = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {HarvestEstimates16[[tempmix]][SubRegGroups, "median"]})), 
+                      beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
+                      ci.l = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {HarvestEstimates16[[tempmix]][SubRegGroups, "5%"]})), 
+                      ci.u = t(sapply(c("Early", "Middle", "Late"), function(tempmix) {HarvestEstimates16[[tempmix]][SubRegGroups, "95%"]})), 
+                      ylim = c(0, ymax), col = HarvestColors, yaxt = "n", xaxt = 'n')
+axis(side = 2, at = seq(0, ymax, 125000), labels = FALSE, cex.axis = cex.yaxis)
+legend(legend = Legend16, x = min(Barplot16[, 6]), y = ymax, fill = HarvestColors, border = "black", bty = "n", cex = cex.leg, title="2016")
+abline(h = 0, xpd = FALSE)
+abline(v = mean(Barplot16[, 2:3]), lty = 2)
+mtext(text = Groups2Rows[2:11], side = 1, line = 1, at = colMeans(Barplot16) + c(rep(0, 2), 0.25, 0.5, 0.25, -0.25, 0, 0.25, 0.25, 0), adj = 0.5, cex = cex.xaxis)
+# text(x = colMeans(Barplot16), y = -6, labels = Groups2Rows[2:11], adj = 0.5, cex = cex.xaxis, srt = 45, xpd = TRUE)
+# - c(rep(0.5, 3), rep(0, 2), rep(0.5, 2), rep(0, 3))
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Blank Corner
+par(mar = rep(0, 4))
+plot.new()
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## x-axis label
+par(mar = rep(0, 4))
+plot.new()
+text(x = 0.5, y = 0.25, labels = "Regional Reporting Group", cex = cex.lab)
+
+par(mar = rep(0, 4))
+plot.new()
+text(x = 0.5, y = 0.25, labels = "Subregional Reporting Group", cex = cex.lab)
+
+dev.off()
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
