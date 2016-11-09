@@ -8069,6 +8069,413 @@ cast(aggregate(Number ~ Geo + Date.Fishing.Began, data = subset(x = harvest16, s
 cast(aggregate(Number ~ Geo + Date.Fishing.Began, data = subset(x = harvest16, subset = Strata == "Middle"), sum), Date.Fishing.Began ~ Geo, value = "Number")
 cast(aggregate(Number ~ Geo + Date.Fishing.Began, data = subset(x = harvest16, subset = Strata == "Late"), sum), Date.Fishing.Began ~ Geo, value = "Number")
 
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Harvest Data Formula ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+KMA_Harvest.f <- function(file, name, yr) {
+  
+  harvest <- read.csv(file = file, as.is = TRUE)
+
+  # Convert Date
+  harvest$Date.Landed <- as.Date(harvest$Date.Landed, format = "%Y-%m-%d")
+  harvest$Date.Fishing.Began <- as.Date(harvest$Date.Fishing.Began, format = "%Y-%m-%d")
+  harvest$Date.Fishing.Ended <- as.Date(harvest$Date.Fishing.Ended, format = "%Y-%m-%d")
+  range(harvest$Date.Landed)
+  
+  # Create Temporal Strata
+  if(yr == 2014) {
+    harvest$Strata <- ifelse(harvest$Date.Fishing.Began < as.Date("2014-06-01"),
+                             "Pre",
+                             ifelse(harvest$Date.Fishing.Began >= as.Date("2014-06-01") & harvest$Date.Fishing.Began <= as.Date("2014-06-27"),
+                                    "Early",
+                                    ifelse(harvest$Date.Fishing.Began >= as.Date("2014-06-28") & harvest$Date.Fishing.Began <= as.Date("2014-07-25"),
+                                           "Middle",
+                                           ifelse(harvest$Date.Fishing.Began >= as.Date("2014-07-26") & harvest$Date.Fishing.Began <= as.Date("2014-08-29"),
+                                                  "Late",
+                                                  ifelse(harvest$Date.Fishing.Began > as.Date("2014-08-29"),
+                                                         "Post",
+                                                         NA)))))
+  }
+  
+  if(yr == 2015) {
+    harvest$Strata <- ifelse(harvest$Date.Fishing.Began < as.Date("2015-06-01"),
+                             "Pre",
+                             ifelse(harvest$Date.Fishing.Began >= as.Date("2015-06-01") & harvest$Date.Fishing.Began <= as.Date("2015-07-03"),
+                                    "Early",
+                                    ifelse(harvest$Date.Fishing.Began >= as.Date("2015-07-04") & harvest$Date.Fishing.Began <= as.Date("2015-08-01"),
+                                           "Middle",
+                                           ifelse(harvest$Date.Fishing.Began >= as.Date("2015-08-02") & harvest$Date.Fishing.Began <= as.Date("2015-08-29"),
+                                                  "Late",
+                                                  ifelse(harvest$Date.Fishing.Began > as.Date("2015-08-29"),
+                                                         "Post",
+                                                         NA)))))
+  }
+  
+  if(yr == 2016) {
+    harvest$Strata <- ifelse(harvest$Date.Fishing.Began < as.Date("2016-06-01"),
+                             "Pre",
+                             ifelse(harvest$Date.Fishing.Began >= as.Date("2016-06-01") & harvest$Date.Fishing.Began <= as.Date("2016-06-27"),
+                                    "Early",
+                                    ifelse(harvest$Date.Fishing.Began >= as.Date("2016-06-28") & harvest$Date.Fishing.Began <= as.Date("2016-07-25"),
+                                           "Middle",
+                                           ifelse(harvest$Date.Fishing.Began >= as.Date("2016-07-26") & harvest$Date.Fishing.Began <= as.Date("2016-08-29"),
+                                                  "Late",
+                                                  ifelse(harvest$Date.Fishing.Began > as.Date("2016-08-29"),
+                                                         "Post",
+                                                         NA)))))
+  }
+  
+  
+  harvest$Strata <- factor(harvest$Strata, levels = c("Pre", "Early", "Middle", "Late", "Post"))
+  
+  # Create Geographic Strata
+  stat.areas <- unique(harvest$Stat.Area)
+  
+  Stat.Area.Uganik <- stat.areas[which(stat.areas >= 25300 & stat.areas <= 25399)]
+  Stat.Area.Uyak <- stat.areas[which(stat.areas >= 25400 & stat.areas < 25450)]
+  Stat.Area.Spiridon <- stat.areas[which(stat.areas == 25450)]
+  Stat.Area.NorthCape <- stat.areas[which(stat.areas >= 25930 & stat.areas <= 25939)]
+  Stat.Area.SWNWAfognak <- stat.areas[which(stat.areas >= 25110 & stat.areas <= 25190)]
+  Stat.Area.NESEAfognak <- stat.areas[which(stat.areas >= 25210 & stat.areas <= 25239)]
+  Stat.Area.Sitkalidak <- stat.areas[which(stat.areas >= 25800 & stat.areas <= 25899)]
+  Stat.Area.NEKodiak <- stat.areas[c(which(stat.areas >= 25910 & stat.areas <= 25927), which(stat.areas >= 25940 & stat.areas <= 25946))]
+  Stat.Area.Alitak <- stat.areas[c(which(stat.areas >= 25710 & stat.areas <= 25720), which(stat.areas >= 25750 & stat.areas <= 25770))]
+  Stat.Area.MoserOlga <- stat.areas[which(stat.areas >= 25740 & stat.areas <= 25743)]
+  Stat.Area.Karluk <- stat.areas[c(which(stat.areas >= 25510 & stat.areas <= 25520), which(stat.areas ==25640))]
+  Stat.Area.Ayakulik <- stat.areas[which(stat.areas >= 25610 & stat.areas <= 25630)]
+  Stat.Area.NorthShelikof <- stat.areas[which(stat.areas >= 26210 & stat.areas <= 26255)]
+  Stat.Area.Katmai <- stat.areas[which(stat.areas >= 26260 & stat.areas <= 26270)]
+  Stat.Area.CapeIgvak <- stat.areas[which(stat.areas >= 26275 & stat.areas <= 26295)]
+  
+  length(unlist(sapply(objects(pattern = "Stat.Area"), function(x) {get(x)})))
+  length(stat.areas)
+  
+  unique(harvest$Stat.Area)[!stat.areas %in% unlist(sapply(objects(pattern = "Stat.Area"), function(x) {get(x)}))]
+  
+  
+  harvest$Geo <- ifelse(harvest$Stat.Area %in% Stat.Area.Uganik, "Uganik",
+                        ifelse(harvest$Stat.Area %in% Stat.Area.Uyak, "Uyak",
+                               ifelse(harvest$Stat.Area %in% Stat.Area.Spiridon, "Spiridon",
+                                      ifelse(harvest$Stat.Area %in% Stat.Area.Karluk, "Karluk",
+                                             ifelse(harvest$Stat.Area %in% Stat.Area.Ayakulik, "Ayakulik",
+                                                    ifelse(harvest$Stat.Area %in% Stat.Area.Alitak, "Alitak",
+                                                           ifelse(harvest$Stat.Area %in% Stat.Area.MoserOlga, "MoserOlga",
+                                                                  ifelse(harvest$Stat.Area %in% Stat.Area.Sitkalidak, "Sitkalidak",
+                                                                         ifelse(harvest$Stat.Area %in% Stat.Area.NEKodiak, "NEKodiak",
+                                                                                ifelse(harvest$Stat.Area %in% Stat.Area.NorthCape, "NorthCape",
+                                                                                       ifelse(harvest$Stat.Area %in% Stat.Area.NESEAfognak, "NESEAfognak",
+                                                                                              ifelse(harvest$Stat.Area %in% Stat.Area.SWNWAfognak, "SWNWAfognak",
+                                                                                                     ifelse(harvest$Stat.Area %in% Stat.Area.NorthShelikof, "NorthShelikof",
+                                                                                                            ifelse(harvest$Stat.Area %in% Stat.Area.Katmai, "Katmai",
+                                                                                                                   ifelse(harvest$Stat.Area %in% Stat.Area.CapeIgvak, "CapeIgvak", NA
+                                                                                                                   )))))))))))))))
+                        
+  harvest$Geo <- factor(harvest$Geo, levels = c("Uganik", "Uyak", "Spiridon", "Karluk", "Ayakulik", "Alitak", "MoserOlga", "Sitkalidak", "NEKodiak", "NorthCape", "NESEAfognak", "SWNWAfognak", "NorthShelikof", "Katmai", "CapeIgvak"))
+  
+  assign(x = name, value = harvest, pos = 1)
+}
+
+
+
+
+
+KMA_Harvest.f(file = "Harvest/Kodiak Sockeye Salmon Catch by Day and Stat Area 2014.csv", name = "KMASockeyeHarvest_2014", yr = 2014)
+KMA_Harvest.f(file = "Harvest/Kodiak Sockeye Salmon Catch by Day and Stat Area 2015.csv", name = "KMASockeyeHarvest_2015", yr = 2015)
+KMA_Harvest.f(file = "Harvest/Kodiak Sockeye Salmon Catch by Day and Stat Area 2016.csv", name = "KMASockeyeHarvest_2016", yr = 2016)
+
+KMA_Harvest.f(file = "Harvest/Kodiak Pink Salmon Catch by Day and Stat Area 2014.csv", name = "KMAPinkHarvest_2014", yr = 2014)
+KMA_Harvest.f(file = "Harvest/Kodiak Pink Salmon Catch by Day and Stat Area 2015.csv", name = "KMAPinkHarvest_2015", yr = 2015)
+KMA_Harvest.f(file = "Harvest/Kodiak Pink Salmon Catch by Day and Stat Area 2016.csv", name = "KMAPinkHarvest_2016", yr = 2016)
+
+
+require(reshape)
+s14 <- cast(melt(data = KMASockeyeHarvest_2014, id.vars = c("Strata", "Geo"), measure.vars = "Number", na.rm = TRUE), Geo~Strata, sum)
+s15 <- cast(melt(data = KMASockeyeHarvest_2015, id.vars = c("Strata", "Geo"), measure.vars = "Number", na.rm = TRUE), Geo~Strata, sum)
+s16 <- cast(melt(data = KMASockeyeHarvest_2016, id.vars = c("Strata", "Geo"), measure.vars = "Number", na.rm = TRUE), Geo~Strata, sum)
+
+p14 <- cast(melt(data = KMAPinkHarvest_2014, id.vars = c("Strata", "Geo"), measure.vars = "Number", na.rm = TRUE), Geo~Strata, sum)
+p15 <- cast(melt(data = KMAPinkHarvest_2015, id.vars = c("Strata", "Geo"), measure.vars = "Number", na.rm = TRUE), Geo~Strata, sum)
+p16 <- cast(melt(data = KMAPinkHarvest_2016, id.vars = c("Strata", "Geo"), measure.vars = "Number", na.rm = TRUE), Geo~Strata, sum)
+
+max(p14, p15, p16)
+max(s14, s15, s16)
+
+
+Plot_KMA_Harvest.f <- function(dat, species, yr, maxdat = NULL) {
+  if(is.null(maxdat)) {maxdat <- max(dat)}
+  require(lattice)
+  new.colors <- colorRampPalette(c("white", "black"))
+  levelplot(t(apply(t(dat), 1, rev)), col.regions = new.colors, xlab = "Temporal Strata", 
+            ylab = "Geographic Area", main = paste(species, yr), at = seq(0, maxdat, length.out = 100), 
+            scales = list(x = list(rot = 45)),
+            panel = function(...) {
+              panel.levelplot(...)
+            })
+}
+
+Plot_KMA_Harvest.f(dat = s14, species = "Sockeye", yr = 2014, maxdat = 5e5)
+Plot_KMA_Harvest.f(dat = s15, species = "Sockeye", yr = 2015, maxdat = 5e5)
+Plot_KMA_Harvest.f(dat = s16, species = "Sockeye", yr = 2016, maxdat = 5e5)
+
+Plot_KMA_Harvest.f(dat = p14, species = "Pink", yr = 2014, maxdat = 6e6)
+Plot_KMA_Harvest.f(dat = p15, species = "Pink", yr = 2015, maxdat = 6e6)
+Plot_KMA_Harvest.f(dat = p16, species = "Pink", yr = 2016, maxdat = 6e6)
+
+
+Plot_KMA_Harvest.f(dat = s14, species = "Sockeye", yr = 2014, maxdat = 5.2e5)
+Plot_KMA_Harvest.f(dat = p14, species = "Pink", yr = 2014, maxdat = 5.2e5)
+
+
+Plot_KMA_StatArea_Harvest.f <- function(species, yr, geos, maxdat = NULL){
+  dat <- cast(melt(data = subset(x = get(paste0("KMA", species, "Harvest_", yr)), subset = Geo %in% geos), id.vars = c("Strata", "Stat.Area"), measure.vars = "Number", na.rm = TRUE), Stat.Area~Strata, sum)
+  if(is.null(maxdat)) {maxdat <- max(dat)}
+  require(lattice)
+  new.colors <- colorRampPalette(c("white", "black"))
+  levelplot(t(apply(t(dat), 1, rev)), col.regions = new.colors, xlab = "Temporal Strata", 
+            ylab = "Geographic Area", main = paste(species, yr), at = seq(0, maxdat, length.out = 100), 
+            scales = list(x = list(rot = 45)),
+            panel = function(...) {
+              panel.levelplot(...)
+            })
+}
+
+
+
+Plot_KMA_StatArea_Harvest.f(species = "Sockeye", yr = 2014, geos = c("Uganik"), maxdat = 1.2e5)
+Plot_KMA_StatArea_Harvest.f(species = "Sockeye", yr = 2015, geos = c("Uganik"), maxdat = 1.2e5)
+Plot_KMA_StatArea_Harvest.f(species = "Sockeye", yr = 2016, geos = c("Uganik"), maxdat = 1.2e5)
+
+Plot_KMA_StatArea_Harvest.f(species = "Sockeye", yr = 2014, geos = c("Uyak", "Spiridon"), maxdat = 1.2e5)
+Plot_KMA_StatArea_Harvest.f(species = "Sockeye", yr = 2015, geos = c("Uyak", "Spiridon"), maxdat = 1.2e5)
+Plot_KMA_StatArea_Harvest.f(species = "Sockeye", yr = 2016, geos = c("Uyak", "Spiridon"), maxdat = 1.2e5)
+
+Plot_KMA_StatArea_Harvest.f(species = "Sockeye", yr = 2014, geos = c("Karluk"), maxdat = 3.5e5)
+Plot_KMA_StatArea_Harvest.f(species = "Sockeye", yr = 2015, geos = c("Karluk"), maxdat = 3.5e5)
+Plot_KMA_StatArea_Harvest.f(species = "Sockeye", yr = 2016, geos = c("Karluk"), maxdat = 3.5e5)
+
+Plot_KMA_StatArea_Harvest.f(species = "Sockeye", yr = 2014, geos = c("Ayakulik"), maxdat = 3.5e5)
+Plot_KMA_StatArea_Harvest.f(species = "Sockeye", yr = 2015, geos = c("Ayakulik"), maxdat = 3.5e5)
+Plot_KMA_StatArea_Harvest.f(species = "Sockeye", yr = 2016, geos = c("Ayakulik"), maxdat = 3.5e5)
+
+Plot_KMA_StatArea_Harvest.f(species = "Sockeye", yr = 2014, geos = c("Alitak", "MoserOlga"), maxdat = 1.2e5)
+Plot_KMA_StatArea_Harvest.f(species = "Sockeye", yr = 2015, geos = c("Alitak", "MoserOlga"), maxdat = 1.2e5)
+Plot_KMA_StatArea_Harvest.f(species = "Sockeye", yr = 2016, geos = c("Alitak", "MoserOlga"), maxdat = 1.2e5)
+
+Plot_KMA_StatArea_Harvest.f(species = "Sockeye", yr = 2014, geos = c("NorthShelikof", "Katmai", "CapeIgvak"), maxdat = 1.2e5)
+Plot_KMA_StatArea_Harvest.f(species = "Sockeye", yr = 2015, geos = c("NorthShelikof", "Katmai", "CapeIgvak"), maxdat = 1.2e5)
+Plot_KMA_StatArea_Harvest.f(species = "Sockeye", yr = 2016, geos = c("NorthShelikof", "Katmai", "CapeIgvak"), maxdat = 1.2e5)
+
+
+Plot_KMA_StatArea_Harvest.f(species = "Sockeye", yr = 2015, geos = c("Alitak", "MoserOlga"))
+Plot_KMA_StatArea_Harvest.f(species = "Pink", yr = 2015, geos = c("Alitak", "MoserOlga"))
+
+
+
+Table_KMA_StatArea_Harvest.f <- function(species, yr){
+  dat <- as.matrix(cast(melt(data = get(paste0("KMA", species, "Harvest_", yr)), id.vars = c("Strata", "Stat.Area"), measure.vars = "Number", na.rm = TRUE), Stat.Area~Strata, sum))
+  dat
+}
+
+
+s14stat <- Table_KMA_StatArea_Harvest.f(species = "Sockeye", yr = 2014)
+s15stat <- Table_KMA_StatArea_Harvest.f(species = "Sockeye", yr = 2015)
+s16stat <- Table_KMA_StatArea_Harvest.f(species = "Sockeye", yr = 2016)
+p14stat <- Table_KMA_StatArea_Harvest.f(species = "Pink", yr = 2014)
+p15stat <- Table_KMA_StatArea_Harvest.f(species = "Pink", yr = 2015)
+p16stat <- Table_KMA_StatArea_Harvest.f(species = "Pink", yr = 2016)
+
+sapply(list(s14stat, s15stat, s16stat, p14stat, p15stat, p16stat), function(x) {dim(x)[2]})
+
+KMA_StatAreas <- as.character(read.csv(file = "Figures/Maps/KMAStatAreas.csv")[,1])
+
+KMA_Sockeye_Pink_Harvest_Strata.mat <- matrix(data = NA, 
+                                              nrow = length(KMA_StatAreas), 
+                                              ncol = sum(sapply(list(s14stat, s15stat, s16stat, p14stat, p15stat, p16stat), function(x) {dim(x)[2]})), 
+                                              dimnames = list(KMA_StatAreas,
+                                                              unlist(sapply(c(paste0("s", 14:16), paste0("p", 14:16)), function(x) {
+                                                                y <- dimnames(get(paste0(x, "stat")))[2]
+                                                                sapply(y, function(i) {paste(x, i, sep = "_")})
+                                                              }))
+                                              ))
+
+
+KMA_Sockeye_Pink_Harvest_Strata.mat <- 
+  Reduce(f = cbind, x = 
+           sapply(list(s14stat, s15stat, s16stat, p14stat, p15stat, p16stat), function(y) {
+             apply(y, 2, function(strata) {
+               x <- rep(0, length(KMA_StatAreas))
+               x[which(KMA_StatAreas %in% names(strata))] <- strata
+               x
+             })
+           })
+  )
+
+dimnames(KMA_Sockeye_Pink_Harvest_Strata.mat) <- 
+  list(KMA_StatAreas,
+       unlist(sapply(c(paste0("s", 14:16), paste0("p", 14:16)), function(x) {
+         y <- dimnames(get(paste0(x, "stat")))[2]
+         sapply(y, function(i) {paste(x, i, sep = "_")})
+       })))
+
+str(KMA_Sockeye_Pink_Harvest_Strata.mat)
+
+write.csv(x = KMA_Sockeye_Pink_Harvest_Strata.mat,
+          file = "Figures/Maps/KMA_Sockeye_Pink_Harvest_Strata.csv")
+
+max(KMA_Sockeye_Pink_Harvest_Strata.mat)
+
+which.max(apply(KMA_Sockeye_Pink_Harvest_Strata.mat, 2, max))
+
+
+
+
+Alitak_Pink_Harvest.f <- function(yr) {
+  p <- cast(melt(data = subset(x = get(paste0("KMAPinkHarvest_", yr)), subset = Geo == "Alitak" | Geo == "MoserOlga"), id.vars = c("Strata", "Stat.Area"), measure.vars = "Number", na.rm = TRUE), Stat.Area~Strata, sum)
+  
+  require(lattice)
+  new.colors <- colorRampPalette(c("white", "black"))
+  levelplot(t(as.matrix(p)), col.regions = new.colors, xlab = "Temporal Strata", 
+            ylab = "Stat Area", main = paste0("Pink ", yr), at = seq(0, max(p), length.out = 100), 
+            scales = list(x = list(rot = 45)),
+            panel = function(...) {
+              panel.levelplot(...)
+            })
+}
+
+
+Alitak_Sockeye_Harvest.f <- function(yr) {
+  s <- cast(melt(data = subset(x = get(paste0("KMASockeyeHarvest_", yr)), subset = Geo == "Alitak" | Geo == "MoserOlga"), id.vars = c("Strata", "Stat.Area"), measure.vars = "Number", na.rm = TRUE), Stat.Area~Strata, sum)
+
+  require(lattice)
+  new.colors <- colorRampPalette(c("white", "black"))
+  levelplot(t(as.matrix(s)), col.regions = new.colors, xlab = "Temporal Strata", 
+            ylab = "Stat Area", main = paste0("Sockeye ", yr), at = seq(0, max(s), length.out = 100), 
+            scales = list(x = list(rot = 45)),
+            panel = function(...) {
+              panel.levelplot(...)
+            })
+}
+
+
+
+Alitak_Pink_Harvest.f(yr = 2014)
+Alitak_Sockeye_Harvest.f(yr = 2014)
+
+Alitak_Pink_Harvest.f(yr = 2015)
+Alitak_Sockeye_Harvest.f(yr = 2015)
+
+Alitak_Pink_Harvest.f(yr = 2016)
+Alitak_Sockeye_Harvest.f(yr = 2016)
+
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Maps ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+while(!require(maps)) {install.packages("maps")}
+while(!require(mapdata)) {install.packages("mapdata")}
+while(!require(maptools)) {install.packages("maptools")}
+StatAreas.shp <- readShapePoly("Figures/Maps/pvs_stat_KMA.shp")
+str(StatAreas.shp, max.level = 2)
+str(StatAreas.shp@data)
+
+str(StatAreas.shp[!is.na(StatAreas.shp@data$Statarea)], max.level = 2)  # fail
+
+KMAStatAreas.shp <- subset(StatAreas.shp, StatAreas.shp@data$Statarea %in% KMA_StatAreas)
+str(KMAStatAreas.shp)
+max(KMAStatAreas.shp@data[, 9:21])
+which.max(apply(KMAStatAreas.shp@data[, 9:21], 2, max))
+
+
+colorRampPalette(c("white", "black"))(100)
+colorRampPalette(c("white", "black"))(100)[round(StatAreas.shp@data$s14_Early / 3.3e3) + 1]
+
+map("worldHires", "usa", xlim = c(-156.6, -151.7), ylim = c(56.3, 59), col = "gray90", fill = TRUE)
+plot(KMAStatAreas.shp, add = TRUE, col = "white", border = TRUE)
+plot(KMAStatAreas.shp, add = TRUE, 
+     col = colorRampPalette(c("white", "black"))(100)[round(KMAStatAreas.shp@data$s15_Middle / 3.3e3) + 1],
+     border = TRUE)
+
+plot(KMAStatAreas.shp, add = TRUE, 
+     col = colorRampPalette(c("white", "black"))(100)[round(KMAStatAreas.shp@data[, "s14_Middle"] / 3.3e3) + 1],
+     border = TRUE)
+
+
+Plot_KMA_Harvest_Map.f <- function(area, max.col = NULL) {
+  if(is.null(max.col)) {max.col <- max(KMAStatAreas.shp@data[, area])}
+  
+  map("worldHires", "usa", xlim = c(-156.6, -151.7), ylim = c(56.3, 59), col = "gray90", fill = TRUE)
+  plot(KMAStatAreas.shp, add = TRUE, 
+       col = colorRampPalette(c("white", "black"))(101)[round(KMAStatAreas.shp@data[, area] / (max.col/100)) + 1],
+       border = TRUE)
+}
+
+
+
+
+Plot_KMA_Harvest_Map.f <- function(area, max.col = NULL) {
+  if(is.null(max.col)) {max.col <- max(KMAStatAreas.shp@data[, area])}
+  map("worldHires", "usa", xlim = c(-156.6, -151.7), ylim = c(56.3, 59), col = "gray90", fill = TRUE)
+  color.ramp <- colorRampPalette(c("white", "black"))(101)
+  plot(KMAStatAreas.shp, add = TRUE, 
+       col = color.ramp[round(KMAStatAreas.shp@data[, area] / (max.col/100)) + 1],
+       border = TRUE)
+  legend("bottomright", 
+         legend = c(max.col, rep("", 99), 0),
+         fill = rev(color.ramp), 
+         border = NA,
+         bty = 'n', x.intersp = 0.5, y.intersp = 0.07, lty = NULL)
+  text(x = -152.2, y = 57.1, labels = "Harvest", cex = 1.2)
+}
+
+
+
+
+
+
+
+# What is sockeye max?
+max(KMAStatAreas.shp@data[, 9:21])
+which.max(apply(KMAStatAreas.shp@data[, 9:21], 2, max))
+
+
+Plot_KMA_Harvest_Map.f(area = "s14_Early", max.col = 3.3e5)
+Plot_KMA_Harvest_Map.f(area = "s15_Early", max.col = 3.3e5)
+Plot_KMA_Harvest_Map.f(area = "s16_Early", max.col = 3.3e5)
+
+Plot_KMA_Harvest_Map.f(area = "s14_Middle", max.col = 3.3e5)
+Plot_KMA_Harvest_Map.f(area = "s15_Middle", max.col = 3.3e5)
+Plot_KMA_Harvest_Map.f(area = "s16_Middle", max.col = 3.3e5)
+
+Plot_KMA_Harvest_Map.f(area = "s14_Late", max.col = 3.3e5)
+Plot_KMA_Harvest_Map.f(area = "s15_Late", max.col = 3.3e5)
+Plot_KMA_Harvest_Map.f(area = "s16_Late", max.col = 3.3e5)
+
+# What is pink max?
+max(KMAStatAreas.shp@data[, 22:33])
+which.max(apply(KMAStatAreas.shp@data[, 22:33], 2, max))
+
+Plot_KMA_Harvest_Map.f(area = "p14_Early", max.col = 3.1e6)
+Plot_KMA_Harvest_Map.f(area = "p15_Early", max.col = 3.1e6)
+Plot_KMA_Harvest_Map.f(area = "p16_Early", max.col = 3.1e6)
+
+Plot_KMA_Harvest_Map.f(area = "p14_Middle", max.col = 3.1e6)
+Plot_KMA_Harvest_Map.f(area = "p15_Middle", max.col = 3.1e6)
+Plot_KMA_Harvest_Map.f(area = "p16_Middle", max.col = 3.1e6)
+
+Plot_KMA_Harvest_Map.f(area = "p14_Late", max.col = 3.1e6)
+Plot_KMA_Harvest_Map.f(area = "p15_Late", max.col = 3.1e6)
+Plot_KMA_Harvest_Map.f(area = "p16_Late", max.col = 3.1e6)
+
+
+# Compare sockeye and pink
+Plot_KMA_Harvest_Map.f(area = "s15_Middle")
+Plot_KMA_Harvest_Map.f(area = "p15_Middle")
+legend("bottomright", legend = c(0, 10000), fill = c("white", "black"), bty = 'n')
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Harvest for Table 1 ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
