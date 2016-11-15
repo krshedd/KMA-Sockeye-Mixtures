@@ -8378,6 +8378,7 @@ Alitak_Sockeye_Harvest.f(yr = 2016)
 while(!require(maps)) {install.packages("maps")}
 while(!require(mapdata)) {install.packages("mapdata")}
 while(!require(maptools)) {install.packages("maptools")}
+while(!require(GISTools)) {install.packages("GISTools")}
 StatAreas.shp <- readShapePoly("Figures/Maps/pvs_stat_KMA.shp")
 str(StatAreas.shp, max.level = 2)
 str(StatAreas.shp@data)
@@ -8423,13 +8424,15 @@ Plot_KMA_Harvest_Map.f <- function(area, max.col = NULL) {
   plot(KMAStatAreas.shp, add = TRUE, 
        col = color.ramp[round(KMAStatAreas.shp@data[, area] / (max.col/100)) + 1],
        border = TRUE)
-  legend("bottomright", 
+  legend("bottomleft", 
          legend = c(max.col, rep("", 99), 0),
          fill = rev(color.ramp), 
          border = NA,
          bty = 'n', x.intersp = 0.5, y.intersp = 0.07, lty = NULL)
-  text(x = -152.2, y = 57.1, labels = "Harvest", cex = 1.2)
-}
+  text(x = -156, y = 56.7, labels = "Harvest", cex = 1.2)
+  maps::map.scale(x = -153.6, y = 56.4, ratio = FALSE, relwidth = 0.2)
+  north.arrow(xb = -152, yb = 56.55, len = 0.05, lab = "N")  
+  }
 
 
 
