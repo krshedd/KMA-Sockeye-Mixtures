@@ -4536,6 +4536,10 @@ dput(x = KMA2016_Annual_HarvestEstimatesStats, file = "Estimates objects/Final/K
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Create a matrix of annual means
+
+KMA14GroupsPC2 <- c(KMA14GroupsPC[1:4], "Ayakulik / Frazer", KMA14GroupsPC[6:14])
+dput(x = KMA14GroupsPC2, file = "Objects/KMA14GroupsPC2.txt")
+
 #~~~~~~~~~~~~~~~~~~
 # 2014
 KMA2014_Annual_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2014_Annual_EstimatesStats.txt")
@@ -4550,7 +4554,8 @@ Annual2014_Stratified_HarvestEstimates <- sapply(KMA2014, function(geomix) {
   round(KMA2014_Annual_HarvestEstimatesStats[[geomix]][, "mean"])
 })
 Annual2014_Stratified_HarvestEstimates <- cbind(Annual2014_Stratified_HarvestEstimates[, 1:2], "SIGVAC14" = rep(0, 14), Annual2014_Stratified_HarvestEstimates[, 3:5])
-
+dimnames(Annual2014_Stratified_HarvestEstimates) <- list(KMA14GroupsPC2,
+                                                         c("Alitak", "Ayakulik", "Igvak", "Karluk", "Uganik", "Uyak"))
 
 
 #~~~~~~~~~~~~~~~~~~
@@ -4565,6 +4570,8 @@ KMA2015_Annual_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA
 Annual2015_Stratified_HarvestEstimates <- sapply(KMA2015, function(geomix) {
   round(KMA2015_Annual_HarvestEstimatesStats[[geomix]][, "mean"])
 })
+dimnames(Annual2015_Stratified_HarvestEstimates) <- list(KMA14GroupsPC2,
+                                                         c("Alitak", "Ayakulik", "Igvak", "Karluk", "Uganik", "Uyak"))
 
 
 
@@ -4580,6 +4587,8 @@ KMA2016_Annual_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA
 Annual2016_Stratified_HarvestEstimates <- sapply(KMA2016, function(geomix) {
   round(KMA2016_Annual_HarvestEstimatesStats[[geomix]][, "mean"])
 })
+dimnames(Annual2016_Stratified_HarvestEstimates) <- list(KMA14GroupsPC2,
+                                                         c("Alitak", "Ayakulik", "Igvak", "Karluk", "Uganik", "Uyak"))
 
 
 
@@ -4626,7 +4635,7 @@ Annual2015_Stratified_HarvestEstimates <- sapply(KMA2015, function(geomix) {
 
 
 require(lattice)
-max(Annual2015_Stratified_HarvestEstimates)
+zmax <- max(Annual2015_Stratified_HarvestEstimates)
 
 new.colors <- colorRampPalette(c("white", "black"))
 levelplot(t(Annual2016_Stratified_HarvestEstimates[14:1, c(3,5,6,4,2,1)]), col.regions = new.colors, xlab = "Reporting Group", 
@@ -4670,8 +4679,8 @@ apply(col2rgb(KMA14Colors), 2, function(col) {rgb(red = col[1], green = col[2], 
 # 2016
 Annual2016_Stratified_HarvestEstimates_df <- melt(Annual2016_Stratified_HarvestEstimates)
 names(Annual2016_Stratified_HarvestEstimates_df) <- c("RG", "Fishery", "Harvest")
-Annual2016_Stratified_HarvestEstimates_df$RG <- factor(Annual2016_Stratified_HarvestEstimates_df$RG, levels = rev(KMA14GroupsPC))
-Annual2016_Stratified_HarvestEstimates_df$Fishery <- factor(Annual2016_Stratified_HarvestEstimates_df$Fishery, levels = KMA2016[c(3,5,6,4,2,1)])
+Annual2016_Stratified_HarvestEstimates_df$RG <- factor(Annual2016_Stratified_HarvestEstimates_df$RG, levels = rev(KMA14GroupsPC2))
+Annual2016_Stratified_HarvestEstimates_df$Fishery <- factor(Annual2016_Stratified_HarvestEstimates_df$Fishery, levels = c("Uganik", "Uyak", "Karluk", "Ayakulik", "Alitak", "Igvak"))
 Annual2016_Stratified_HarvestEstimates_df$Color <- rep(rev(KMA14Colors), 5)
 str(Annual2016_Stratified_HarvestEstimates_df)
 
@@ -4681,15 +4690,15 @@ ggplot(data = Annual2016_Stratified_HarvestEstimates_df, aes(x = Fishery, y = RG
 
 ggplot(data = Annual2016_Stratified_HarvestEstimates_df, aes(x = Fishery, y = RG, size = Harvest, color = RG)) + 
   geom_point() + 
-  scale_size_continuous(limits = c(0, 250000), breaks = seq(50000, 250000, 50000), range = c(0, 25)) + 
+  scale_size_continuous(limits = c(0, zmax), breaks = seq(50000, 250000, 50000), range = c(0, 25)) + 
   scale_color_manual(values = rev(rep(KMA14Colors, 5))) +
   ggtitle("2016 Harvest")
 
 # 2015
 Annual2015_Stratified_HarvestEstimates_df <- melt(Annual2015_Stratified_HarvestEstimates)
 names(Annual2015_Stratified_HarvestEstimates_df) <- c("RG", "Fishery", "Harvest")
-Annual2015_Stratified_HarvestEstimates_df$RG <- factor(Annual2015_Stratified_HarvestEstimates_df$RG, levels = rev(KMA14GroupsPC))
-Annual2015_Stratified_HarvestEstimates_df$Fishery <- factor(Annual2015_Stratified_HarvestEstimates_df$Fishery, levels = KMA2015[c(3,5,6,4,2,1)])
+Annual2015_Stratified_HarvestEstimates_df$RG <- factor(Annual2015_Stratified_HarvestEstimates_df$RG, levels = rev(KMA14GroupsPC2))
+Annual2015_Stratified_HarvestEstimates_df$Fishery <- factor(Annual2015_Stratified_HarvestEstimates_df$Fishery, levels = c("Uganik", "Uyak", "Karluk", "Ayakulik", "Alitak", "Igvak"))
 Annual2015_Stratified_HarvestEstimates_df$Color <- rep(rev(KMA14Colors), 5)
 str(Annual2015_Stratified_HarvestEstimates_df)
 
@@ -4699,7 +4708,7 @@ ggplot(data = Annual2015_Stratified_HarvestEstimates_df, aes(x = Fishery, y = RG
 
 ggplot(data = Annual2015_Stratified_HarvestEstimates_df, aes(x = Fishery, y = RG, size = Harvest, color = RG)) + 
   geom_point() + 
-  scale_size_continuous(limits = c(0, 250000), breaks = seq(50000, 250000, 50000), range = c(0, 25)) + 
+  scale_size_continuous(limits = c(0, zmax), breaks = seq(50000, 250000, 50000), range = c(0, 25)) + 
   scale_color_manual(values = rev(rep(KMA14Colors, 5))) +
   ggtitle("2015 Harvest")
 
@@ -4707,8 +4716,8 @@ ggplot(data = Annual2015_Stratified_HarvestEstimates_df, aes(x = Fishery, y = RG
 # 2014
 Annual2014_Stratified_HarvestEstimates_df <- melt(Annual2014_Stratified_HarvestEstimates)
 names(Annual2014_Stratified_HarvestEstimates_df) <- c("RG", "Fishery", "Harvest")
-Annual2014_Stratified_HarvestEstimates_df$RG <- factor(Annual2014_Stratified_HarvestEstimates_df$RG, levels = rev(KMA14GroupsPC))
-Annual2014_Stratified_HarvestEstimates_df$Fishery <- factor(Annual2014_Stratified_HarvestEstimates_df$Fishery, levels = gsub(pattern = "15", replacement = "14", x = KMA2015)[c(3,5,6,4,2,1)])
+Annual2014_Stratified_HarvestEstimates_df$RG <- factor(Annual2014_Stratified_HarvestEstimates_df$RG, levels = rev(KMA14GroupsPC2))
+Annual2014_Stratified_HarvestEstimates_df$Fishery <- factor(Annual2014_Stratified_HarvestEstimates_df$Fishery, levels = c("Uganik", "Uyak", "Karluk", "Ayakulik", "Alitak", "Igvak"))
 Annual2014_Stratified_HarvestEstimates_df$Color <- rep(rev(KMA14Colors), 5)
 str(Annual2014_Stratified_HarvestEstimates_df)
 
@@ -4716,7 +4725,7 @@ ggplot(data = Annual2014_Stratified_HarvestEstimates_df, aes(x = Fishery, y = RG
 
 ggplot(data = Annual2014_Stratified_HarvestEstimates_df, aes(x = Fishery, y = RG, size = Harvest, color = RG)) + 
   geom_point() + 
-  scale_size_continuous(limits = c(0, 250000), breaks = seq(50000, 250000, 50000), range = c(0, 25)) + 
+  scale_size_continuous(limits = c(0, zmax), breaks = seq(50000, 250000, 50000), range = c(0, 25)) + 
   scale_color_manual(values = rev(rep(KMA14Colors, 5))) +
   ggtitle("2014 Harvest")
 
