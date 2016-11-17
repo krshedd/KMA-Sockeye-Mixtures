@@ -4534,8 +4534,11 @@ str(KMA2016_Annual_HarvestEstimatesStats)
 dput(x = KMA2016_Annual_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2016_Annual_HarvestEstimatesStats.txt")
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Create Bubble Plots ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Create a matrix of annual means
+# Create a matrix of annual medians
 
 KMA14GroupsPC2 <- c(KMA14GroupsPC[1:4], "Ayakulik / Frazer", KMA14GroupsPC[6:14])
 dput(x = KMA14GroupsPC2, file = "Objects/KMA14GroupsPC2.txt")
@@ -4551,11 +4554,25 @@ Annual2014_Stratified_Estimates <- cbind(Annual2014_Stratified_Estimates[, 1:2],
 
 KMA2014_Annual_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2014_Annual_HarvestEstimatesStats.txt")
 Annual2014_Stratified_HarvestEstimates <- sapply(KMA2014, function(geomix) {
-  round(KMA2014_Annual_HarvestEstimatesStats[[geomix]][, "mean"])
+  round(KMA2014_Annual_HarvestEstimatesStats[[geomix]][, "median"])
 })
 Annual2014_Stratified_HarvestEstimates <- cbind(Annual2014_Stratified_HarvestEstimates[, 1:2], "SIGVAC14" = rep(0, 14), Annual2014_Stratified_HarvestEstimates[, 3:5])
 dimnames(Annual2014_Stratified_HarvestEstimates) <- list(KMA14GroupsPC2,
                                                          c("Alitak", "Ayakulik", "Igvak", "Karluk", "Uganik", "Uyak"))
+
+
+
+
+
+KMA2014_Temporal_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2014Strata_HarvestEstimatesStats.txt")
+Early2014_Stratified_HarvestEstimates <- sapply(grep(pattern = "Early", x = KMA2014Strata, value = TRUE), function(geomix) {
+  round(KMA2014_Temporal_HarvestEstimatesStats[[geomix]][, "median"])
+})
+Early2014_Stratified_HarvestEstimates <- cbind("SALITC14_1_Early" = rep(0, 14), Early2014_Stratified_HarvestEstimates[, 1, drop = FALSE], "SIGVAC14" = rep(0, 14), Early2014_Stratified_HarvestEstimates[, 2:4])
+dimnames(Early2014_Stratified_HarvestEstimates) <- list(KMA14GroupsPC2,
+                                                         c("Alitak", "Ayakulik", "Igvak", "Karluk", "Uganik", "Uyak"))
+
+
 
 
 #~~~~~~~~~~~~~~~~~~
@@ -4568,7 +4585,7 @@ Annual2015_Stratified_Estimates <- sapply(KMA2015, function(geomix) {
 
 KMA2015_Annual_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2015_Annual_HarvestEstimatesStats.txt")
 Annual2015_Stratified_HarvestEstimates <- sapply(KMA2015, function(geomix) {
-  round(KMA2015_Annual_HarvestEstimatesStats[[geomix]][, "mean"])
+  round(KMA2015_Annual_HarvestEstimatesStats[[geomix]][, "median"])
 })
 dimnames(Annual2015_Stratified_HarvestEstimates) <- list(KMA14GroupsPC2,
                                                          c("Alitak", "Ayakulik", "Igvak", "Karluk", "Uganik", "Uyak"))
@@ -4585,11 +4602,14 @@ Annual2016_Stratified_Estimates <- sapply(KMA2016, function(geomix) {
 
 KMA2016_Annual_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2016_Annual_HarvestEstimatesStats.txt")
 Annual2016_Stratified_HarvestEstimates <- sapply(KMA2016, function(geomix) {
-  round(KMA2016_Annual_HarvestEstimatesStats[[geomix]][, "mean"])
+  round(KMA2016_Annual_HarvestEstimatesStats[[geomix]][, "median"])
 })
 dimnames(Annual2016_Stratified_HarvestEstimates) <- list(KMA14GroupsPC2,
                                                          c("Alitak", "Ayakulik", "Igvak", "Karluk", "Uganik", "Uyak"))
 
+zmax <- max(Annual2014_Stratified_HarvestEstimates, 
+            Annual2015_Stratified_HarvestEstimates,
+            Annual2016_Stratified_HarvestEstimates)
 
 
 require(lattice)
@@ -4623,6 +4643,7 @@ levelplot(t(Annual2014_Stratified_Estimates[14:1, c(3,5,6,4,2,1)]), col.regions 
 # Bubble chart
 require(ggplot2)
 require(reshape2)
+require(devEMF)
 Annual2015_Stratified_Estimates_df <- melt(Annual2015_Stratified_Estimates)
 names(Annual2015_Stratified_Estimates_df) <- c("RG", "Fishery", "Proportion")
 ggplot(data = Annual2015_Stratified_Estimates_df, aes(x = Fishery, y = RG, size = Proportion)) + geom_point()
@@ -4635,7 +4656,6 @@ Annual2015_Stratified_HarvestEstimates <- sapply(KMA2015, function(geomix) {
 
 
 require(lattice)
-zmax <- max(Annual2015_Stratified_HarvestEstimates)
 
 new.colors <- colorRampPalette(c("white", "black"))
 levelplot(t(Annual2016_Stratified_HarvestEstimates[14:1, c(3,5,6,4,2,1)]), col.regions = new.colors, xlab = "Reporting Group", 
@@ -4676,6 +4696,8 @@ apply(KMA_AnnualHarvest_14RG, 2, function(yr) {round(yr["Cook Inlet"] / sum(yr) 
 # Bubble chart example
 apply(col2rgb(KMA14Colors), 2, function(col) {rgb(red = col[1], green = col[2], blue = col[3], maxColorValue = 255)} )
 
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 2016
 Annual2016_Stratified_HarvestEstimates_df <- melt(Annual2016_Stratified_HarvestEstimates)
 names(Annual2016_Stratified_HarvestEstimates_df) <- c("RG", "Fishery", "Harvest")
@@ -4694,6 +4716,33 @@ ggplot(data = Annual2016_Stratified_HarvestEstimates_df, aes(x = Fishery, y = RG
   scale_color_manual(values = rev(rep(KMA14Colors, 5))) +
   ggtitle("2016 Harvest")
 
+
+
+# Figure for Report
+Annual2016_Stratified_HarvestEstimates_df <- melt(Annual2016_Stratified_HarvestEstimates)
+names(Annual2016_Stratified_HarvestEstimates_df) <- c("RG", "Fishery", "Harvest")
+Annual2016_Stratified_HarvestEstimates_df$RG <- factor(Annual2016_Stratified_HarvestEstimates_df$RG, levels = KMA14GroupsPC2)
+Annual2016_Stratified_HarvestEstimates_df$Fishery <- factor(Annual2016_Stratified_HarvestEstimates_df$Fishery, levels = rev(c("Uganik", "Uyak", "Karluk", "Ayakulik", "Alitak", "Igvak")))
+Annual2016_Stratified_HarvestEstimates_df$Color <- rep(KMA14Colors, 5)
+str(Annual2016_Stratified_HarvestEstimates_df)
+
+
+emf(file ="Figures/All Years/2016 Harvest Bubble Plot.emf", width = 9, height = 5.75, family = "serif", bg = "white")
+
+ggplot(data = Annual2016_Stratified_HarvestEstimates_df, aes(x = RG, y = Fishery, size = Harvest, color = RG)) + 
+  geom_point() + 
+  scale_size_continuous(limits = c(0, zmax), breaks = seq(50000, 250000, 50000), range = c(0, 20)) + 
+  scale_color_manual(values = rep(KMA14Colors, 5), guide = FALSE) +
+  xlab("Reporting Group") + ylab("Spatial Area") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.title.y = element_text(size = rel(1.8), angle = 90, margin = unit(c(0,0.2,0,0), "cm"))) +
+  theme(axis.title.x = element_text(size = rel(1.8), angle = 00, margin = unit(c(0.2,0,0,0), "cm"))) +
+  theme(legend.title = element_text(size = rel(1.8), angle = 00)) +
+  theme(text = element_text(family = "times"))
+
+dev.off()
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 2015
 Annual2015_Stratified_HarvestEstimates_df <- melt(Annual2015_Stratified_HarvestEstimates)
 names(Annual2015_Stratified_HarvestEstimates_df) <- c("RG", "Fishery", "Harvest")
@@ -4713,6 +4762,33 @@ ggplot(data = Annual2015_Stratified_HarvestEstimates_df, aes(x = Fishery, y = RG
   ggtitle("2015 Harvest")
 
 
+
+
+# Figure for Report
+Annual2015_Stratified_HarvestEstimates_df <- melt(Annual2015_Stratified_HarvestEstimates)
+names(Annual2015_Stratified_HarvestEstimates_df) <- c("RG", "Fishery", "Harvest")
+Annual2015_Stratified_HarvestEstimates_df$RG <- factor(Annual2015_Stratified_HarvestEstimates_df$RG, levels = KMA14GroupsPC2)
+Annual2015_Stratified_HarvestEstimates_df$Fishery <- factor(Annual2015_Stratified_HarvestEstimates_df$Fishery, levels = rev(c("Uganik", "Uyak", "Karluk", "Ayakulik", "Alitak", "Igvak")))
+Annual2015_Stratified_HarvestEstimates_df$Color <- rep(KMA14Colors, 5)
+str(Annual2015_Stratified_HarvestEstimates_df)
+
+
+emf(file ="Figures/All Years/2015 Harvest Bubble Plot.emf", width = 9, height = 5.75, family = "serif", bg = "white")
+
+ggplot(data = Annual2015_Stratified_HarvestEstimates_df, aes(x = RG, y = Fishery, size = Harvest, color = RG)) + 
+  geom_point() + 
+  scale_size_continuous(limits = c(0, zmax), breaks = seq(50000, 250000, 50000), range = c(0, 20)) + 
+  scale_color_manual(values = rep(KMA14Colors, 5), guide = FALSE) +
+  xlab("Reporting Group") + ylab("Spatial Area") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.title.y = element_text(size = rel(1.8), angle = 90, margin = unit(c(0,0.2,0,0), "cm"))) +
+  theme(axis.title.x = element_text(size = rel(1.8), angle = 00, margin = unit(c(0.2,0,0,0), "cm"))) +
+  theme(legend.title = element_text(size = rel(1.8), angle = 00)) +
+  theme(text = element_text(family = "times"))
+
+dev.off()
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 2014
 Annual2014_Stratified_HarvestEstimates_df <- melt(Annual2014_Stratified_HarvestEstimates)
 names(Annual2014_Stratified_HarvestEstimates_df) <- c("RG", "Fishery", "Harvest")
@@ -4734,6 +4810,29 @@ ggplot(data = Annual2014_Stratified_HarvestEstimates_df, aes(x = Fishery, y = RG
 
 
 
+# Figure for Report
+Annual2014_Stratified_HarvestEstimates_df <- melt(Annual2014_Stratified_HarvestEstimates)
+names(Annual2014_Stratified_HarvestEstimates_df) <- c("RG", "Fishery", "Harvest")
+Annual2014_Stratified_HarvestEstimates_df$RG <- factor(Annual2014_Stratified_HarvestEstimates_df$RG, levels = KMA14GroupsPC2)
+Annual2014_Stratified_HarvestEstimates_df$Fishery <- factor(Annual2014_Stratified_HarvestEstimates_df$Fishery, levels = rev(c("Uganik", "Uyak", "Karluk", "Ayakulik", "Alitak", "Igvak")))
+Annual2014_Stratified_HarvestEstimates_df$Color <- rep(KMA14Colors, 5)
+str(Annual2014_Stratified_HarvestEstimates_df)
+
+
+emf(file ="Figures/All Years/2014 Harvest Bubble Plot.emf", width = 9, height = 5.75, family = "serif", bg = "white")
+
+ggplot(data = Annual2014_Stratified_HarvestEstimates_df, aes(x = RG, y = Fishery, size = Harvest, color = RG)) + 
+  geom_point() + 
+  scale_size_continuous(limits = c(0, zmax), breaks = seq(50000, 250000, 50000), range = c(0, 20)) + 
+  scale_color_manual(values = rep(KMA14Colors, 5), guide = FALSE) +
+  xlab("Reporting Group") + ylab("Spatial Area") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.title.y = element_text(size = rel(1.8), angle = 90, margin = unit(c(0,0.2,0,0), "cm"))) +
+  theme(axis.title.x = element_text(size = rel(1.8), angle = 00, margin = unit(c(0.2,0,0,0), "cm"))) +
+  theme(legend.title = element_text(size = rel(1.8), angle = 00)) +
+  theme(text = element_text(family = "times"))
+
+dev.off()
 
 
 
