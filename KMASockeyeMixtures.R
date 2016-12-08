@@ -4734,7 +4734,7 @@ ggplot(data = Annual2016_Stratified_HarvestEstimates_df, aes(x = RG, y = Fishery
   geom_point() + 
   scale_size_continuous(limits = c(0, zmax), breaks = seq(50000, 250000, 50000), range = c(0, 20)) + 
   scale_color_manual(values = rep(KMA14Colors, 5), guide = FALSE) +
-  xlab("Reporting Group") + ylab("Spatial Area") +
+  xlab("Reporting Group") + ylab("Sampling Area") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   theme(axis.title.y = element_text(size = rel(1.8), angle = 90, margin = unit(c(0,0.2,0,0), "cm"))) +
   theme(axis.title.x = element_text(size = rel(1.8), angle = 00, margin = unit(c(0.2,0,0,0), "cm"))) +
@@ -4742,6 +4742,7 @@ ggplot(data = Annual2016_Stratified_HarvestEstimates_df, aes(x = RG, y = Fishery
   theme(text = element_text(family = "times"))
 
 dev.off()
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 2015
@@ -4781,7 +4782,7 @@ ggplot(data = Annual2015_Stratified_HarvestEstimates_df, aes(x = RG, y = Fishery
   geom_point() + 
   scale_size_continuous(limits = c(0, zmax), breaks = seq(50000, 250000, 50000), range = c(0, 20)) + 
   scale_color_manual(values = rep(KMA14Colors, 5), guide = FALSE) +
-  xlab("Reporting Group") + ylab("Spatial Area") +
+  xlab("Reporting Group") + ylab("Sampling Area") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   theme(axis.title.y = element_text(size = rel(1.8), angle = 90, margin = unit(c(0,0.2,0,0), "cm"))) +
   theme(axis.title.x = element_text(size = rel(1.8), angle = 00, margin = unit(c(0.2,0,0,0), "cm"))) +
@@ -4828,7 +4829,7 @@ ggplot(data = Annual2014_Stratified_HarvestEstimates_df, aes(x = RG, y = Fishery
   geom_point() + 
   scale_size_continuous(limits = c(0, zmax), breaks = seq(50000, 250000, 50000), range = c(0, 20)) + 
   scale_color_manual(values = rep(KMA14Colors, 5), guide = FALSE) +
-  xlab("Reporting Group") + ylab("Spatial Area") +
+  xlab("Reporting Group") + ylab("Sampling Area") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   theme(axis.title.y = element_text(size = rel(1.8), angle = 90, margin = unit(c(0,0.2,0,0), "cm"))) +
   theme(axis.title.x = element_text(size = rel(1.8), angle = 00, margin = unit(c(0.2,0,0,0), "cm"))) +
@@ -4849,7 +4850,7 @@ ggplot(data = Annual2016_Stratified_HarvestEstimates_df, aes(x = RG, y = Fishery
   geom_point() + 
   scale_size_continuous(limits = c(0, zmax), breaks = seq(50000, 250000, 50000), range = c(0, 20)) + 
   scale_color_manual(values = rep(KMA14Colors, 5), guide = FALSE) +
-  xlab("Reporting Group") + ylab("Spatial Area") +
+  xlab("Reporting Group") + ylab("Sampling Area") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   theme(axis.title.y = element_text(size = rel(1.8), angle = 90, margin = unit(c(0,0.2,0,0), "cm"))) +
   theme(axis.title.x = element_text(size = rel(1.8), angle = 00, margin = unit(c(0.2,0,0,0), "cm"))) +
@@ -6932,6 +6933,7 @@ filenames <- setNames(object = c("Uganik Harvest 2014-2016",
 # If showing proportions (percetages) use blue, otherwise green as "low"
 HarvestColors <- colorpanel(n = 3, low = "green", high = "white")
 
+HarvestColors <- c("darkgreen", "green", "white")
 
 #~~~~~~~~~~~~~~~~~~
 # 2014
@@ -7011,7 +7013,7 @@ require(gplots)
 
 sapply(GeoMix, function(geomix) {
   
-  emf(file = paste("Figures/All Years/", filenames[geomix], ".emf", sep = ''), width = 6, height = 5.75, family = "serif", bg = "white")
+  emf(file = paste("Figures/All Years/", filenames[geomix], "DarkGreen.emf", sep = ''), width = 6, height = 5.75, family = "serif", bg = "white")
   
   
   layout(mat = layoutmat, widths = c(0.075, 0.375, 0.625), heights = c(0.9, 0.9, 0.9, 0.15))
@@ -7261,6 +7263,73 @@ dev.off()
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
+emf(file = "Figures/All Years/KMA Proportions 2014-2016 Blank.emf", width = 6, height = 5.75, family = "serif", bg = "white")
+
+
+layout(mat = layoutmat, widths = c(0.075, 0.375, 0.6725), heights = c(2.7, 0.15))
+par(mar = rep(0, 4))
+par(family = "times")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Y-axis label
+plot.new()
+text(x = 0.25, y = 0.5, labels = "Percentage of KMA Harvest", srt = 90, cex = cex.lab)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Barplot Regional
+par(mar = c(1, 1, 1.5, 0))
+Barplot <- barplot2(height = t(cbind(rep(0, 6),
+                                     rep(0, 6),
+                                     rep(0, 6))) * 100, 
+                    beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
+                    ci.l = t(cbind(rep(0, 6),
+                                   rep(0, 6),
+                                   rep(0, 6))) * 100, 
+                    ci.u = t(cbind(rep(0, 6),
+                                   rep(0, 6),
+                                   rep(0, 6))) * 100, 
+                    ylim = c(0, 100), col = ProportionColors, yaxt = "n", xaxt = 'n')
+axis(side = 2, at = seq(0, 100, 25), labels = formatC(x = seq(0, 100, 25), big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+# legend(legend = 2014:2016, x = "topleft", fill = ProportionColors, border = "black", bty = "n", cex = cex.leg, title="")
+abline(h = 0, xpd = FALSE)
+mtext(text = c(Groups2Rows[1], "Chignik\n", "Kodiak\n", Groups2Rows[12:14]), side = 1, line = 1, at = colMeans(Barplot), adj = 0.5, cex = cex.xaxis)
+
+## Barplot Subregional
+par(mar = c(1, 1, 1.5, 0))
+Barplot <- barplot2(height = t(cbind(rep(0, 10),
+                                     rep(0, 10),
+                                     rep(0, 10))) * 100, 
+                    beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
+                    ci.l = t(cbind(rep(0, 10),
+                                   rep(0, 10),
+                                   rep(0, 10))) * 100, 
+                    ci.u = t(cbind(rep(0, 10),
+                                   rep(0, 10),
+                                   rep(0, 10))) * 100, 
+                    ylim = c(0, 100), col = ProportionColors, yaxt = "n", xaxt = 'n')
+axis(side = 2, at = seq(0, 100, 25), labels = FALSE, cex.axis = cex.yaxis)
+legend(legend = 2014:2016, x = min(Barplot[, 6]), y = 100, fill = ProportionColors, border = "black", bty = "n", cex = cex.leg, title="")
+abline(h = 0, xpd = FALSE)
+abline(v = mean(Barplot[, 2:3]), lty = 2)
+mtext(text = Groups2Rows[2:11], side = 1, line = 1, at = colMeans(Barplot) + c(rep(0, 2), 0.25, 0.5, 0.25, -0.25, 0, 0.25, 0.25, 0), adj = 0.5, cex = cex.xaxis)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Blank Corner
+par(mar = rep(0, 4))
+plot.new()
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## x-axis label
+par(mar = rep(0, 4))
+plot.new()
+text(x = 0.5, y = 0.25, labels = "Regional Reporting Group", cex = cex.lab)
+
+par(mar = rep(0, 4))
+plot.new()
+text(x = 0.5, y = 0.25, labels = "Subregional Reporting Group", cex = cex.lab)
+
+
+dev.off()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Plot Annual KMA Harvest ####
@@ -7280,6 +7349,8 @@ layoutmat <- matrix(data=c(  1, 2, 3,
                              4, 5, 6), nrow = 2, ncol = 3, byrow = TRUE)
 
 HarvestColors <- colorpanel(n = 3, low = "green", high = "white")
+
+HarvestColors <- c("darkgreen", "green", "white")
 
 #~~~~~~~~~~~~~~~~~~
 # Size Parameters
@@ -7303,7 +7374,7 @@ require(gplots)
 
 
 
-emf(file = "Figures/All Years/KMA Harvest 2014-2016.emf", width = 6, height = 5.75, family = "serif", bg = "white")
+emf(file = "Figures/All Years/KMA Harvest 2014-2016DarkGreen.emf", width = 6, height = 5.75, family = "serif", bg = "white")
 
 
 layout(mat = layoutmat, widths = c(0.075, 0.375, 0.6725), heights = c(2.7, 0.15))
