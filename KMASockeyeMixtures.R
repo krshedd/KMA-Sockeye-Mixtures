@@ -4732,17 +4732,17 @@ emf(file ="Figures/All Years/2016 Harvest Bubble Plot.emf", width = 9, height = 
 
 ggplot(data = Annual2016_Stratified_HarvestEstimates_df, aes(x = RG, y = Fishery, size = Harvest, color = RG)) + 
   geom_point() + 
-  scale_size_continuous(limits = c(0, zmax), breaks = seq(50000, 250000, 50000), range = c(0, 20)) + 
+  scale_size_continuous(name = "Harvest\n(Thousands)", limits = c(0, zmax), breaks = c(1000, 5000, 10000, 20000, seq(50000, 250000, 50000)), range = c(0, 20), labels = c(1, 5, 10, 20, 50, 100, 150, 200, 250)) + 
   scale_color_manual(values = rep(KMA14Colors, 5), guide = FALSE) +
-  xlab("Reporting Group") + ylab("Sampling Area") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  theme(axis.title.y = element_text(size = rel(1.8), angle = 90, margin = unit(c(0,0.2,0,0), "cm"))) +
-  theme(axis.title.x = element_text(size = rel(1.8), angle = 00, margin = unit(c(0.2,0,0,0), "cm"))) +
-  theme(legend.title = element_text(size = rel(1.8), angle = 00)) +
+  scale_x_discrete(name = "Reporting Group", labels = KMA14GroupsPC2Rows) +
+  scale_y_discrete(name = "Sampling Area", labels = c("Uganik\nKupreanof", "Uyak", "Karluk\nSturgeon", "Ayakulik\nHalibut Bay", "Alitak", "Igvak")) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  theme(axis.title.y = element_text(size = rel(1.7), angle = 90, margin = unit(c(0,0.2,0,0), "cm"))) +
+  theme(axis.title.x = element_text(size = rel(1.7), angle = 00, margin = unit(c(0,0,0,0), "cm"))) +
+  theme(legend.title = element_text(size = rel(1.7), angle = 00)) +
   theme(text = element_text(family = "times"))
 
 dev.off()
-
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 2015
@@ -4780,13 +4780,14 @@ emf(file ="Figures/All Years/2015 Harvest Bubble Plot.emf", width = 9, height = 
 
 ggplot(data = Annual2015_Stratified_HarvestEstimates_df, aes(x = RG, y = Fishery, size = Harvest, color = RG)) + 
   geom_point() + 
-  scale_size_continuous(limits = c(0, zmax), breaks = seq(50000, 250000, 50000), range = c(0, 20)) + 
+  scale_size_continuous(name = "Harvest\n(Thousands)", limits = c(0, zmax), breaks = c(1000, 5000, 10000, 20000, seq(50000, 250000, 50000)), range = c(0, 20), labels = c(1, 5, 10, 20, 50, 100, 150, 200, 250)) + 
   scale_color_manual(values = rep(KMA14Colors, 5), guide = FALSE) +
-  xlab("Reporting Group") + ylab("Sampling Area") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  theme(axis.title.y = element_text(size = rel(1.8), angle = 90, margin = unit(c(0,0.2,0,0), "cm"))) +
-  theme(axis.title.x = element_text(size = rel(1.8), angle = 00, margin = unit(c(0.2,0,0,0), "cm"))) +
-  theme(legend.title = element_text(size = rel(1.8), angle = 00)) +
+  scale_x_discrete(name = "Reporting Group", labels = KMA14GroupsPC2Rows) +
+  scale_y_discrete(name = "Sampling Area", labels = c("Uganik\nKupreanof", "Uyak", "Karluk\nSturgeon", "Ayakulik\nHalibut Bay", "Alitak", "Igvak")) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  theme(axis.title.y = element_text(size = rel(1.7), angle = 90, margin = unit(c(0,0.2,0,0), "cm"))) +
+  theme(axis.title.x = element_text(size = rel(1.7), angle = 00, margin = unit(c(0,0,0,0), "cm"))) +
+  theme(legend.title = element_text(size = rel(1.7), angle = 00)) +
   theme(text = element_text(family = "times"))
 
 dev.off()
@@ -4827,13 +4828,14 @@ emf(file ="Figures/All Years/2014 Harvest Bubble Plot.emf", width = 9, height = 
 
 ggplot(data = Annual2014_Stratified_HarvestEstimates_df, aes(x = RG, y = Fishery, size = Harvest, color = RG)) + 
   geom_point() + 
-  scale_size_continuous(limits = c(0, zmax), breaks = seq(50000, 250000, 50000), range = c(0, 20)) + 
+  scale_size_continuous(name = "Harvest\n(Thousands)", limits = c(0, zmax), breaks = c(1000, 5000, 10000, 20000, seq(50000, 250000, 50000)), range = c(0, 20), labels = c(1, 5, 10, 20, 50, 100, 150, 200, 250)) + 
   scale_color_manual(values = rep(KMA14Colors, 5), guide = FALSE) +
-  xlab("Reporting Group") + ylab("Sampling Area") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  theme(axis.title.y = element_text(size = rel(1.8), angle = 90, margin = unit(c(0,0.2,0,0), "cm"))) +
-  theme(axis.title.x = element_text(size = rel(1.8), angle = 00, margin = unit(c(0.2,0,0,0), "cm"))) +
-  theme(legend.title = element_text(size = rel(1.8), angle = 00)) +
+  scale_x_discrete(name = "Reporting Group", labels = KMA14GroupsPC2Rows) +
+  scale_y_discrete(name = "Sampling Area", labels = c("Uganik\nKupreanof", "Uyak", "Karluk\nSturgeon", "Ayakulik\nHalibut Bay", "Alitak", "Igvak")) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  theme(axis.title.y = element_text(size = rel(1.7), angle = 90, margin = unit(c(0,0.2,0,0), "cm"))) +
+  theme(axis.title.x = element_text(size = rel(1.7), angle = 00, margin = unit(c(0,0,0,0), "cm"))) +
+  theme(legend.title = element_text(size = rel(1.7), angle = 00)) +
   theme(text = element_text(family = "times"))
 
 dev.off()
@@ -4848,13 +4850,14 @@ emf(file ="Figures/All Years/Blank Harvest Bubble Plot.emf", width = 9, height =
 
 ggplot(data = Annual2016_Stratified_HarvestEstimates_df, aes(x = RG, y = Fishery, size = Harvest, color = RG)) + 
   geom_point() + 
-  scale_size_continuous(limits = c(0, zmax), breaks = seq(50000, 250000, 50000), range = c(0, 20)) + 
+  scale_size_continuous(name = "Harvest\n(Thousands)", limits = c(0, zmax), breaks = c(1000, 5000, 10000, 20000, seq(50000, 250000, 50000)), range = c(0, 20), labels = c(1, 5, 10, 20, 50, 100, 150, 200, 250)) + 
   scale_color_manual(values = rep(KMA14Colors, 5), guide = FALSE) +
-  xlab("Reporting Group") + ylab("Sampling Area") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  theme(axis.title.y = element_text(size = rel(1.8), angle = 90, margin = unit(c(0,0.2,0,0), "cm"))) +
-  theme(axis.title.x = element_text(size = rel(1.8), angle = 00, margin = unit(c(0.2,0,0,0), "cm"))) +
-  theme(legend.title = element_text(size = rel(1.8), angle = 00)) +
+  scale_x_discrete(name = "Reporting Group", labels = KMA14GroupsPC2Rows) +
+  scale_y_discrete(name = "Sampling Area", labels = c("Uganik\nKupreanof", "Uyak", "Karluk\nSturgeon", "Ayakulik\nHalibut Bay", "Alitak", "Igvak")) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  theme(axis.title.y = element_text(size = rel(1.7), angle = 90, margin = unit(c(0,0.2,0,0), "cm"))) +
+  theme(axis.title.x = element_text(size = rel(1.7), angle = 00, margin = unit(c(0,0,0,0), "cm"))) +
+  theme(legend.title = element_text(size = rel(1.7), angle = 00)) +
   theme(text = element_text(family = "times"))
 
 dev.off()
@@ -6884,6 +6887,72 @@ text(x = 0.5, y = 0.25, labels = "Subregional Reporting Group", cex = cex.lab)
 dev.off()
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Where were stocks caught? ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+KMA2014Strata_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2014Strata_EstimatesStats.txt")
+KMA2015Strata_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2015Strata_EstimatesStats.txt")
+KMA2016Strata_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2016Strata_EstimatesStats.txt")
+
+KMA2014Strata_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2014Strata_HarvestEstimatesStats.txt")
+KMA2015Strata_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2015Strata_HarvestEstimatesStats.txt")
+KMA2016Strata_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2016Strata_HarvestEstimatesStats.txt")
+
+KMA2014_Annual_Stratified_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2014_Annual_Stratified_EstimatesStats.txt")
+KMA2015_Annual_Stratified_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2015_Annual_Stratified_EstimatesStats.txt")
+KMA2016_Annual_Stratified_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2016_Annual_Stratified_EstimatesStats.txt")
+
+KMA2014_Annual_Stratified_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2014_Annual_Stratified_HarvestEstimatesStats.txt")
+KMA2015_Annual_Stratified_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2015_Annual_Stratified_HarvestEstimatesStats.txt")
+KMA2016_Annual_Stratified_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2016_Annual_Stratified_HarvestEstimatesStats.txt")
+
+
+EstimateStats <- c(KMA2014Strata_EstimatesStats, KMA2015Strata_EstimatesStats, KMA2016Strata_EstimatesStats)
+str(EstimateStats)
+length(EstimateStats)
+
+
+HarvestEstimatesStats <- c(KMA2014Strata_HarvestEstimatesStats, KMA2015Strata_HarvestEstimatesStats, KMA2016Strata_HarvestEstimatesStats)
+
+StrataMedians <- sapply(KMA14GroupsPC, function(RG) {
+  sapply(EstimateStats, function(strata) {
+    round(strata[RG, "median"], 3)
+  })
+})
+
+HarvestMedians <- sapply(KMA14GroupsPC, function(RG) {
+  sapply(HarvestEstimatesStats, function(strata) {
+    round(strata[RG, "median"])
+  })
+})
+
+# If >= 5% of mixture, where?
+sapply(KMA14GroupsPC, function(RG) {which(StrataMedians[, RG] >= 0.05)})
+
+# Plot histogram
+invisible(sapply(KMA14GroupsPC, function(RG) {
+  hist(StrataMedians[, RG], col = 8, main = RG, ylab = "Proportion", xlim = c(0, 1), breaks = seq(0, 1, 0.01))
+  abline(v = 0.05, lwd = 3, col = 2)}))
+
+# If >= 5% of mixtures, which ones and how much?
+sapply(KMA14GroupsPC, function(RG) {
+  list("n" = sum(StrataMedians[, RG] >= 0.05),
+       "Strata" = rbind("Percent" = StrataMedians[StrataMedians[, RG] >= 0.05, RG] * 100,
+                        "Harvest" = HarvestMedians[StrataMedians[, RG] >= 0.05, RG]),
+       "Annual" = round(rbind("2014" = c(KMA2014_Annual_Stratified_EstimatesStats[RG, "median"] * 100, KMA2014_Annual_Stratified_HarvestEstimatesStats[RG, "median"]),
+                              "2015" = c(KMA2015_Annual_Stratified_EstimatesStats[RG, "median"] * 100, KMA2015_Annual_Stratified_HarvestEstimatesStats[RG, "median"]),
+                              "2016" = c(KMA2016_Annual_Stratified_EstimatesStats[RG, "median"] * 100, KMA2016_Annual_Stratified_HarvestEstimatesStats[RG, "median"])), 1))}, simplify = FALSE )
+
+apply(StrataMedians, 2, function(x) {x>=0.05})
+
+
+
+
+z <- cbind(Annual2014_Stratified_HarvestEstimates,
+           Annual2015_Stratified_HarvestEstimates,
+           Annual2016_Stratified_HarvestEstimates)
+str(z)
+sum(z["Prince William Sound", c(5:6, 11:12, 17:18)]) / sum(z["Prince William Sound", ])
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
