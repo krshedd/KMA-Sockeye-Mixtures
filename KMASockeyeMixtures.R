@@ -4727,6 +4727,8 @@ Annual2016_Stratified_HarvestEstimates_df$Color <- rep(KMA14Colors, 5)
 Annual2016_Stratified_HarvestEstimates_df$Harvest[Annual2016_Stratified_HarvestEstimates_df$Harvest == 0] <- NA
 str(Annual2016_Stratified_HarvestEstimates_df)
 
+KMA14GroupsPC2RowsBubble <- KMA14GroupsPC2Rows
+KMA14GroupsPC2RowsBubble[c(6,7,9,11,13)] <- gsub(pattern = "\n", replacement = "", x = KMA14GroupsPC2RowsBubble[c(6,7,9,11,13)])
 
 emf(file ="Figures/All Years/2016 Harvest Bubble Plot.emf", width = 9, height = 5.75, family = "serif", bg = "white")
 
@@ -4734,8 +4736,8 @@ ggplot(data = Annual2016_Stratified_HarvestEstimates_df, aes(x = RG, y = Fishery
   geom_point() + 
   scale_size_continuous(name = "Harvest\n(Thousands)", limits = c(0, zmax), breaks = c(1000, 5000, 10000, 20000, seq(50000, 250000, 50000)), range = c(0, 20), labels = c(1, 5, 10, 20, 50, 100, 150, 200, 250)) + 
   scale_color_manual(values = rep(KMA14Colors, 5), guide = FALSE) +
-  scale_x_discrete(name = "Reporting Group", labels = KMA14GroupsPC2Rows) +
-  scale_y_discrete(name = "Sampling Area", labels = c("Uganik\nKupreanof", "Uyak", "Karluk\nSturgeon", "Ayakulik\nHalibut Bay", "Alitak", "Igvak")) +
+  scale_x_discrete(name = "Reporting Group", labels = KMA14GroupsPC2RowsBubble) +
+  scale_y_discrete(name = "Sampling Area", labels = rev(c("Uganik\nKupreanof", "Uyak", "Karluk\nSturgeon", "Ayakulik\nHalibut Bay", "Alitak", "Igvak"))) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
   theme(axis.title.y = element_text(size = rel(1.7), angle = 90, margin = unit(c(0,0.2,0,0), "cm"))) +
   theme(axis.title.x = element_text(size = rel(1.7), angle = 00, margin = unit(c(0,0,0,0), "cm"))) +
@@ -4782,8 +4784,8 @@ ggplot(data = Annual2015_Stratified_HarvestEstimates_df, aes(x = RG, y = Fishery
   geom_point() + 
   scale_size_continuous(name = "Harvest\n(Thousands)", limits = c(0, zmax), breaks = c(1000, 5000, 10000, 20000, seq(50000, 250000, 50000)), range = c(0, 20), labels = c(1, 5, 10, 20, 50, 100, 150, 200, 250)) + 
   scale_color_manual(values = rep(KMA14Colors, 5), guide = FALSE) +
-  scale_x_discrete(name = "Reporting Group", labels = KMA14GroupsPC2Rows) +
-  scale_y_discrete(name = "Sampling Area", labels = c("Uganik\nKupreanof", "Uyak", "Karluk\nSturgeon", "Ayakulik\nHalibut Bay", "Alitak", "Igvak")) +
+  scale_x_discrete(name = "Reporting Group", labels = KMA14GroupsPC2RowsBubble) +
+  scale_y_discrete(name = "Sampling Area", labels = rev(c("Uganik\nKupreanof", "Uyak", "Karluk\nSturgeon", "Ayakulik\nHalibut Bay", "Alitak", "Igvak"))) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
   theme(axis.title.y = element_text(size = rel(1.7), angle = 90, margin = unit(c(0,0.2,0,0), "cm"))) +
   theme(axis.title.x = element_text(size = rel(1.7), angle = 00, margin = unit(c(0,0,0,0), "cm"))) +
@@ -4830,8 +4832,8 @@ ggplot(data = Annual2014_Stratified_HarvestEstimates_df, aes(x = RG, y = Fishery
   geom_point() + 
   scale_size_continuous(name = "Harvest\n(Thousands)", limits = c(0, zmax), breaks = c(1000, 5000, 10000, 20000, seq(50000, 250000, 50000)), range = c(0, 20), labels = c(1, 5, 10, 20, 50, 100, 150, 200, 250)) + 
   scale_color_manual(values = rep(KMA14Colors, 5), guide = FALSE) +
-  scale_x_discrete(name = "Reporting Group", labels = KMA14GroupsPC2Rows) +
-  scale_y_discrete(name = "Sampling Area", labels = c("Uganik\nKupreanof", "Uyak", "Karluk\nSturgeon", "Ayakulik\nHalibut Bay", "Alitak", "Igvak")) +
+  scale_x_discrete(name = "Reporting Group", labels = KMA14GroupsPC2RowsBubble) +
+  scale_y_discrete(name = "Sampling Area", labels = rev(c("Uganik\nKupreanof", "Uyak", "Karluk\nSturgeon", "Ayakulik\nHalibut Bay", "Alitak", "Igvak"))) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
   theme(axis.title.y = element_text(size = rel(1.7), angle = 90, margin = unit(c(0,0.2,0,0), "cm"))) +
   theme(axis.title.x = element_text(size = rel(1.7), angle = 00, margin = unit(c(0,0,0,0), "cm"))) +
@@ -4852,8 +4854,8 @@ ggplot(data = Annual2016_Stratified_HarvestEstimates_df, aes(x = RG, y = Fishery
   geom_point() + 
   scale_size_continuous(name = "Harvest\n(Thousands)", limits = c(0, zmax), breaks = c(1000, 5000, 10000, 20000, seq(50000, 250000, 50000)), range = c(0, 20), labels = c(1, 5, 10, 20, 50, 100, 150, 200, 250)) + 
   scale_color_manual(values = rep(KMA14Colors, 5), guide = FALSE) +
-  scale_x_discrete(name = "Reporting Group", labels = KMA14GroupsPC2Rows) +
-  scale_y_discrete(name = "Sampling Area", labels = c("Uganik\nKupreanof", "Uyak", "Karluk\nSturgeon", "Ayakulik\nHalibut Bay", "Alitak", "Igvak")) +
+  scale_x_discrete(name = "Reporting Group", labels = KMA14GroupsPC2RowsBubble) +
+  scale_y_discrete(name = "Sampling Area", labels = rev(c("Uganik\nKupreanof", "Uyak", "Karluk\nSturgeon", "Ayakulik\nHalibut Bay", "Alitak", "Igvak"))) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
   theme(axis.title.y = element_text(size = rel(1.7), angle = 90, margin = unit(c(0,0.2,0,0), "cm"))) +
   theme(axis.title.x = element_text(size = rel(1.7), angle = 00, margin = unit(c(0,0,0,0), "cm"))) +
@@ -6709,7 +6711,7 @@ Barplot14 <- barplot2(height = matrix(data = 0, nrow = 3, ncol = 10),
                       ci.u = matrix(data = 0, nrow = 3, ncol = 10), 
                       ylim = c(0, 100), col = ProportionColors, yaxt = "n", xaxt = 'n')
 axis(side = 2, at = seq(0, 100, 25), labels = FALSE, cex.axis = cex.yaxis)
-legend(legend = paste("Temporal Stratum", 1:3), x = min(Barplot14[, 6]), y = 100, fill = ProportionColors, border = "black", bty = "n", cex = cex.leg, title="2014")
+legend(legend = c("Early", "Middle", "Late"), x = min(Barplot14[, 6]), y = 100, fill = ProportionColors, border = "black", bty = "n", cex = cex.leg, title="2014")
 abline(h = 0, xpd = FALSE)
 abline(v = mean(Barplot14[, 2:3]), lty = 2)
 
@@ -6733,7 +6735,7 @@ Barplot15 <- barplot2(height = matrix(data = 0, nrow = 3, ncol = 10),
                       ci.u = matrix(data = 0, nrow = 3, ncol = 10), 
                       ylim = c(0, 100), col = ProportionColors, yaxt = "n", xaxt = 'n')
 axis(side = 2, at = seq(0, 100, 25), labels = FALSE, cex.axis = cex.yaxis)
-legend(legend = paste("Temporal Stratum", 1:3), x = min(Barplot15[, 6]), y = 100, fill = ProportionColors, border = "black", bty = "n", cex = cex.leg, title="2015")
+legend(legend = c("Early", "Middle", "Late"), x = min(Barplot15[, 6]), y = 100, fill = ProportionColors, border = "black", bty = "n", cex = cex.leg, title="2015")
 abline(h = 0, xpd = FALSE)
 abline(v = mean(Barplot15[, 2:3]), lty = 2)
 
@@ -6758,7 +6760,7 @@ Barplot16 <- barplot2(height = matrix(data = 0, nrow = 3, ncol = 10),
                       ci.u = matrix(data = 0, nrow = 3, ncol = 10), 
                       ylim = c(0, 100), col = ProportionColors, yaxt = "n", xaxt = 'n')
 axis(side = 2, at = seq(0, 100, 25), labels = FALSE, cex.axis = cex.yaxis)
-legend(legend = paste("Temporal Stratum", 1:3), x = min(Barplot16[, 6]), y = 100, fill = ProportionColors, border = "black", bty = "n", cex = cex.leg, title="2016")
+legend(legend = c("Early", "Middle", "Late"), x = min(Barplot16[, 6]), y = 100, fill = ProportionColors, border = "black", bty = "n", cex = cex.leg, title="2016")
 abline(h = 0, xpd = FALSE)
 abline(v = mean(Barplot16[, 2:3]), lty = 2)
 mtext(text = Groups2Rows[2:11], side = 1, line = 1, at = colMeans(Barplot16) + c(rep(0, 2), 0.25, 0.5, 0.25, -0.25, 0, 0.25, 0.25, 0), adj = 0.5, cex = cex.xaxis)
@@ -6781,110 +6783,6 @@ dev.off()
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-emf(file = "Figures/All Years/Example.emf", width = 6, height = 5.75, family = "serif", bg = "white")
-
-
-layout(mat = layoutmat, widths = c(0.075, 0.375, 0.625), heights = c(0.9, 0.9, 0.9, 0.15))
-par(mar = rep(0, 4))
-par(family = "times")
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## Y-axis label
-plot.new()
-text(x = 0.25, y = 0.5, labels = "Percentage of Catch", srt = 90, cex = cex.lab)
-
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## 2014 Barplot Regional
-par(mar = c(1, 1, 1, 0))
-Barplot14 <- barplot2(height = matrix(data = 0, nrow = 3, ncol = 6), 
-                      beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
-                      ci.l = matrix(data = 0, nrow = 3, ncol = 6), 
-                      ci.u = matrix(data = 0, nrow = 3, ncol = 6), 
-                      ylim = c(0, 100), col = ProportionColors, yaxt = "n", xaxt = 'n')
-axis(side = 2, at = seq(0, 100, 25), labels = formatC(x = seq(0, 100, 25), big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
-abline(h = 0, xpd = FALSE)
-
-#~~~~~~~~~~~~~~~~
-## 2014 Barplot SubRegional
-par(mar = c(1, 1, 1, 0))
-Barplot14 <- barplot2(height = matrix(data = 0, nrow = 3, ncol = 10), 
-                      beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
-                      ci.l = matrix(data = 0, nrow = 3, ncol = 10), 
-                      ci.u = matrix(data = 0, nrow = 3, ncol = 10), 
-                      ylim = c(0, 100), col = ProportionColors, yaxt = "n", xaxt = 'n')
-axis(side = 2, at = seq(0, 100, 25), labels = FALSE, cex.axis = cex.yaxis)
-legend(legend = paste("Temporal Stratum", 1:3), x = min(Barplot14[, 6]), y = 100, fill = ProportionColors, border = "black", bty = "n", cex = cex.leg, title="2014")
-abline(h = 0, xpd = FALSE)
-abline(v = mean(Barplot14[, 2:3]), lty = 2)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## 2015 Barplot Regional
-par(mar = c(1, 1, 1, 0))
-Barplot15 <- barplot2(height = matrix(data = 0, nrow = 3, ncol = 6), 
-                      beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
-                      ci.l = matrix(data = 0, nrow = 3, ncol = 6), 
-                      ci.u = matrix(data = 0, nrow = 3, ncol = 6), 
-                      ylim = c(0, 100), col = ProportionColors, yaxt = "n", xaxt = 'n')
-axis(side = 2, at = seq(0, 100, 25), labels = formatC(x = seq(0, 100, 25), big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
-abline(h = 0, xpd = FALSE)
-
-#~~~~~~~~~~~~~~~~
-## 2015 Barplot SubRegional
-par(mar = c(1, 1, 1, 0))
-Barplot15 <- barplot2(height = matrix(data = 0, nrow = 3, ncol = 10), 
-                      beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
-                      ci.l = matrix(data = 0, nrow = 3, ncol = 10), 
-                      ci.u = matrix(data = 0, nrow = 3, ncol = 10), 
-                      ylim = c(0, 100), col = ProportionColors, yaxt = "n", xaxt = 'n')
-axis(side = 2, at = seq(0, 100, 25), labels = FALSE, cex.axis = cex.yaxis)
-legend(legend = paste("Temporal Stratum", 1:3), x = min(Barplot15[, 6]), y = 100, fill = ProportionColors, border = "black", bty = "n", cex = cex.leg, title="2015")
-abline(h = 0, xpd = FALSE)
-abline(v = mean(Barplot15[, 2:3]), lty = 2)
-
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## 2016 Barplot Regional
-par(mar = c(1, 1, 1, 0))
-Barplot16 <- barplot2(height = matrix(data = 0, nrow = 3, ncol = 6), 
-                      beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
-                      ci.l = matrix(data = 0, nrow = 3, ncol = 6), 
-                      ci.u = matrix(data = 0, nrow = 3, ncol = 6), 
-                      ylim = c(0, 100), col = ProportionColors, yaxt = "n", xaxt = 'n')
-axis(side = 2, at = seq(0, 100, 25), labels = formatC(x = seq(0, 100, 25), big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
-abline(h = 0, xpd = FALSE)
-mtext(text = c(Groups2Rows[1], "Chignik\n", "Kodiak\n", Groups2Rows[12:14]), side = 1, line = 1, at = colMeans(Barplot16), adj = 0.5, cex = cex.xaxis)
-#~~~~~~~~~~~~~~~~
-## 2016 Barplot SubRegional
-par(mar = c(1, 1, 1, 0))
-Barplot16 <- barplot2(height = matrix(data = 0, nrow = 3, ncol = 10), 
-                      beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
-                      ci.l = matrix(data = 0, nrow = 3, ncol = 10), 
-                      ci.u = matrix(data = 0, nrow = 3, ncol = 10), 
-                      ylim = c(0, 100), col = ProportionColors, yaxt = "n", xaxt = 'n')
-axis(side = 2, at = seq(0, 100, 25), labels = FALSE, cex.axis = cex.yaxis)
-legend(legend = paste("Temporal Stratum", 1:3), x = min(Barplot16[, 6]), y = 100, fill = ProportionColors, border = "black", bty = "n", cex = cex.leg, title="2016")
-abline(h = 0, xpd = FALSE)
-abline(v = mean(Barplot16[, 2:3]), lty = 2)
-mtext(text = Groups2Rows[2:11], side = 1, line = 1, at = colMeans(Barplot16) + c(rep(0, 2), 0.25, 0.5, 0.25, -0.25, 0, 0.25, 0.25, 0), adj = 0.5, cex = cex.xaxis)
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## Blank Corner
-par(mar = rep(0, 4))
-plot.new()
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## x-axis label
-par(mar = rep(0, 4))
-plot.new()
-text(x = 0.5, y = 0.25, labels = "Regional Reporting Group", cex = cex.lab)
-
-par(mar = rep(0, 4))
-plot.new()
-text(x = 0.5, y = 0.25, labels = "Subregional Reporting Group", cex = cex.lab)
-
-dev.off()
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -6953,6 +6851,8 @@ z <- cbind(Annual2014_Stratified_HarvestEstimates,
            Annual2016_Stratified_HarvestEstimates)
 str(z)
 sum(z["Prince William Sound", c(5:6, 11:12, 17:18)]) / sum(z["Prince William Sound", ])
+
+
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -7124,7 +7024,7 @@ sapply(GeoMix, function(geomix) {
                           ylim = c(0, ymax), col = 1, yaxt = "n", xaxt = 'n')
     axis(side = 2, at = seq(0, ymax, 50000), labels = FALSE, cex.axis = cex.yaxis)
     abline(h = 0, xpd = FALSE)
-    text(x = mean(Barplot14), y = 50, labels = "No estimates avaialable for 2014", cex = cex.leg)
+    text(x = mean(Barplot14), y = 100000, labels = "No estimates avaialable for 2014", cex = cex.leg)
   } else {
     geomix14 <- grep(pattern = geomix, x = names(TempMix14), value = TRUE)
     par(mar = c(1, 1, 1, 0))
@@ -7246,9 +7146,8 @@ SubRegGroups <- KMA14GroupsPC[2:11]
 cex.lab <- 1.5
 cex.xaxis <- 0.5  # 0.5
 cex.yaxis <- 1.3
-cex.leg <- 1.5  # 1.1
+cex.leg <- 1.8  # 1.1
 ci.lwd <- 2.5
-
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Make figures as .emf files
@@ -7305,7 +7204,8 @@ Barplot <- barplot2(height = t(cbind(KMA2014_Annual_Stratified_EstimatesStats[Su
                                    KMA2016_Annual_Stratified_EstimatesStats[SubRegGroups, "95%"])) * 100, 
                     ylim = c(0, 100), col = ProportionColors, yaxt = "n", xaxt = 'n')
 axis(side = 2, at = seq(0, 100, 25), labels = FALSE, cex.axis = cex.yaxis)
-legend(legend = 2014:2016, x = min(Barplot[, 6]), y = 100, fill = ProportionColors, border = "black", bty = "n", cex = cex.leg, title="")
+legend(legend = 2014:2016, x = min(Barplot[, 5]), y = 100, fill = ProportionColors, border = "black", bty = "n", cex = cex.leg, title="June 1-August 29")
+#legend(legend = rep("", 3), x = min(Barplot[, 6]), y = 100, border = "black", bty = "n", cex = cex.title, title="June 1-August 29")
 abline(h = 0, xpd = FALSE)
 abline(v = mean(Barplot[, 2:3]), lty = 2)
 mtext(text = Groups2Rows[2:11], side = 1, line = 1, at = colMeans(Barplot) + c(rep(0, 2), 0.25, 0.5, 0.25, -0.25, 0, 0.25, 0.25, 0), adj = 0.5, cex = cex.xaxis)
@@ -7378,7 +7278,7 @@ Barplot <- barplot2(height = t(cbind(rep(0, 10),
                                    rep(0, 10))) * 100, 
                     ylim = c(0, 100), col = ProportionColors, yaxt = "n", xaxt = 'n')
 axis(side = 2, at = seq(0, 100, 25), labels = FALSE, cex.axis = cex.yaxis)
-legend(legend = 2014:2016, x = min(Barplot[, 6]), y = 100, fill = ProportionColors, border = "black", bty = "n", cex = cex.leg, title="")
+legend(legend = 2014:2016, x = min(Barplot[, 5]), y = 100, fill = ProportionColors, border = "black", bty = "n", cex = cex.leg, title="June 1-August 29", adj = 0)
 abline(h = 0, xpd = FALSE)
 abline(v = mean(Barplot[, 2:3]), lty = 2)
 mtext(text = Groups2Rows[2:11], side = 1, line = 1, at = colMeans(Barplot) + c(rep(0, 2), 0.25, 0.5, 0.25, -0.25, 0, 0.25, 0.25, 0), adj = 0.5, cex = cex.xaxis)
@@ -7429,7 +7329,7 @@ SubRegGroups <- KMA14GroupsPC[2:11]
 cex.lab <- 1.5
 cex.xaxis <- 0.5
 cex.yaxis <- 1.3
-cex.leg <- 1.5  # 1.1
+cex.leg <- 1.8  # 1.1
 ci.lwd <- 2.5
 ymax <- 1400000  # max(sapply(list(KMA2014_Annual_Regional_Stratified_HarvestEstimatesStats, KMA2015_Annual_Regional_Stratified_HarvestEstimatesStats, KMA2016_Annual_Regional_Stratified_HarvestEstimatesStats), function(strata) {strata[, "95%"]}))
 
@@ -7490,7 +7390,7 @@ Barplot <- barplot2(height = t(cbind(KMA2014_Annual_Stratified_HarvestEstimatesS
                                    KMA2016_Annual_Stratified_HarvestEstimatesStats[SubRegGroups, "95%"])), 
                     ylim = c(0, ymax), col = HarvestColors, yaxt = "n", xaxt = 'n')
 axis(side = 2, at = seq(0, ymax, 200000), labels = FALSE, cex.axis = cex.yaxis)
-legend(legend = 2014:2016, x = min(Barplot[, 6]), y = ymax, fill = HarvestColors, border = "black", bty = "n", cex = cex.leg, title="")
+legend(legend = 2014:2016, x = min(Barplot[, 5]), y = ymax, fill = HarvestColors, border = "black", bty = "n", cex = cex.leg, title="June 1-August 29")
 abline(h = 0, xpd = FALSE)
 abline(v = mean(Barplot[, 2:3]), lty = 2)
 mtext(text = Groups2Rows[2:11], side = 1, line = 1, at = colMeans(Barplot) + c(rep(0, 2), 0.25, 0.5, 0.25, -0.25, 0, 0.25, 0.25, 0), adj = 0.5, cex = cex.xaxis)
