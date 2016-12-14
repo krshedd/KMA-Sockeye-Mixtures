@@ -4738,9 +4738,10 @@ ggplot(data = Annual2016_Stratified_HarvestEstimates_df, aes(x = RG, y = Fishery
   scale_color_manual(values = rep(KMA14Colors, 5), guide = FALSE) +
   scale_x_discrete(name = "Reporting Group", labels = KMA14GroupsPC2RowsBubble) +
   scale_y_discrete(name = "Sampling Area", labels = rev(c("Uganik\nKupreanof", "Uyak", "Karluk\nSturgeon", "Ayakulik\nHalibut Bay", "Alitak", "Igvak"))) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  theme(axis.text.x = element_text(size = rel(1.2), angle = 90, hjust = 1, vjust = 0.5)) +
+  theme(axis.text.y = element_text(size = rel(1.3))) +
   theme(axis.title.y = element_text(size = rel(1.7), angle = 90, margin = unit(c(0,0.2,0,0), "cm"))) +
-  theme(axis.title.x = element_text(size = rel(1.7), angle = 00, margin = unit(c(0,0,0,0), "cm"))) +
+  theme(axis.title.x = element_text(size = rel(1.7), angle = 00, margin = unit(c(-0.5,0,0,0), "cm"))) +
   theme(legend.title = element_text(size = rel(1.7), angle = 00)) +
   theme(text = element_text(family = "times"))
 
@@ -4786,9 +4787,10 @@ ggplot(data = Annual2015_Stratified_HarvestEstimates_df, aes(x = RG, y = Fishery
   scale_color_manual(values = rep(KMA14Colors, 5), guide = FALSE) +
   scale_x_discrete(name = "Reporting Group", labels = KMA14GroupsPC2RowsBubble) +
   scale_y_discrete(name = "Sampling Area", labels = rev(c("Uganik\nKupreanof", "Uyak", "Karluk\nSturgeon", "Ayakulik\nHalibut Bay", "Alitak", "Igvak"))) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  theme(axis.text.x = element_text(size = rel(1.2), angle = 90, hjust = 1, vjust = 0.5)) +
+  theme(axis.text.y = element_text(size = rel(1.3))) +
   theme(axis.title.y = element_text(size = rel(1.7), angle = 90, margin = unit(c(0,0.2,0,0), "cm"))) +
-  theme(axis.title.x = element_text(size = rel(1.7), angle = 00, margin = unit(c(0,0,0,0), "cm"))) +
+  theme(axis.title.x = element_text(size = rel(1.7), angle = 00, margin = unit(c(-0.5,0,0,0), "cm"))) +
   theme(legend.title = element_text(size = rel(1.7), angle = 00)) +
   theme(text = element_text(family = "times"))
 
@@ -4834,9 +4836,10 @@ ggplot(data = Annual2014_Stratified_HarvestEstimates_df, aes(x = RG, y = Fishery
   scale_color_manual(values = rep(KMA14Colors, 5), guide = FALSE) +
   scale_x_discrete(name = "Reporting Group", labels = KMA14GroupsPC2RowsBubble) +
   scale_y_discrete(name = "Sampling Area", labels = rev(c("Uganik\nKupreanof", "Uyak", "Karluk\nSturgeon", "Ayakulik\nHalibut Bay", "Alitak", "Igvak"))) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  theme(axis.text.x = element_text(size = rel(1.2), angle = 90, hjust = 1, vjust = 0.5)) +
+  theme(axis.text.y = element_text(size = rel(1.3))) +
   theme(axis.title.y = element_text(size = rel(1.7), angle = 90, margin = unit(c(0,0.2,0,0), "cm"))) +
-  theme(axis.title.x = element_text(size = rel(1.7), angle = 00, margin = unit(c(0,0,0,0), "cm"))) +
+  theme(axis.title.x = element_text(size = rel(1.7), angle = 00, margin = unit(c(-0.5,0,0,0), "cm"))) +
   theme(legend.title = element_text(size = rel(1.7), angle = 00)) +
   theme(text = element_text(family = "times"))
 
@@ -4856,9 +4859,10 @@ ggplot(data = Annual2016_Stratified_HarvestEstimates_df, aes(x = RG, y = Fishery
   scale_color_manual(values = rep(KMA14Colors, 5), guide = FALSE) +
   scale_x_discrete(name = "Reporting Group", labels = KMA14GroupsPC2RowsBubble) +
   scale_y_discrete(name = "Sampling Area", labels = rev(c("Uganik\nKupreanof", "Uyak", "Karluk\nSturgeon", "Ayakulik\nHalibut Bay", "Alitak", "Igvak"))) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  theme(axis.text.x = element_text(size = rel(1.2), angle = 90, hjust = 1, vjust = 0.5)) +
+  theme(axis.text.y = element_text(size = rel(1.3))) +
   theme(axis.title.y = element_text(size = rel(1.7), angle = 90, margin = unit(c(0,0.2,0,0), "cm"))) +
-  theme(axis.title.x = element_text(size = rel(1.7), angle = 00, margin = unit(c(0,0,0,0), "cm"))) +
+  theme(axis.title.x = element_text(size = rel(1.7), angle = 00, margin = unit(c(-0.5,0,0,0), "cm"))) +
   theme(legend.title = element_text(size = rel(1.7), angle = 00)) +
   theme(text = element_text(family = "times"))
 
