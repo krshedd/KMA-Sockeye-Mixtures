@@ -4871,6 +4871,26 @@ dev.off()
 
 
 
+Annual2016_Stratified_HarvestEstimates_df$Harvest <- 100000
+
+
+emf(file ="Figures/All Years/Color Harvest Bubble Plot.emf", width = 9, height = 5.75, family = "serif", bg = "white")
+
+ggplot(data = Annual2016_Stratified_HarvestEstimates_df, aes(x = RG, y = Fishery, size = Harvest, color = RG)) + 
+  geom_point() + 
+  scale_size_continuous(name = "Harvest\n(Thousands)", limits = c(0, zmax), breaks = c(1000, 5000, 10000, 20000, seq(50000, 250000, 50000)), range = c(0, 20), labels = c(1, 5, 10, 20, 50, 100, 150, 200, 250)) + 
+  scale_color_manual(values = rep(KMA14Colors, 5), guide = FALSE) +
+  scale_x_discrete(name = "Reporting Group", labels = KMA14GroupsPC2RowsBubble) +
+  scale_y_discrete(name = "Sampling Area", labels = rev(c("Uganik\nKupreanof", "Uyak", "Karluk\nSturgeon", "Ayakulik\nHalibut Bay", "Alitak", "Igvak"))) +
+  theme(axis.text.x = element_text(size = rel(1.2), angle = 90, hjust = 1, vjust = 0.5)) +
+  theme(axis.text.y = element_text(size = rel(1.3))) +
+  theme(axis.title.y = element_text(size = rel(1.7), angle = 90, margin = unit(c(0,0.2,0,0), "cm"))) +
+  theme(axis.title.x = element_text(size = rel(1.7), angle = 00, margin = unit(c(-0.5,0,0,0), "cm"))) +
+  theme(legend.title = element_text(size = rel(1.7), angle = 00)) +
+  theme(text = element_text(family = "times"))
+
+dev.off()
+
 
 
 
