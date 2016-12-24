@@ -1181,7 +1181,7 @@ QuickBarplot <- function(mixvec, estimatesstats, groups, groups2rows = NULL, hea
   }
   if("Stats" %in% names(estimatesstats)) {estimatesstats <- estimatesstats$Stats}
   
-  par(mfrow = c(1, 1), mar = c(3.1, 5.1, 4.1, 2.1), oma = rep(0, 4))
+  par(mfrow = c(1, 1), mar = c(7.1, 5.1, 4.1, 2.1), oma = rep(0, 4))
   sapply(mixvec, function(Mix) {
     Barplot <- barplot2(height = estimatesstats[[Mix]][, "median"] * 100,
                         beside = TRUE, plot.ci = TRUE, ci.lwd = 1,
@@ -1193,9 +1193,9 @@ QuickBarplot <- function(mixvec, estimatesstats, groups, groups2rows = NULL, hea
     abline(h = 0, xpd = FALSE)
     
     if(is.null(groups2rows)) {
-      text(x = Barplot[, 1], y = -1, labels = groups, srt = 90, adj =  1, xpd = TRUE, cex = 0.5)
+      text(x = Barplot[, 1], y = -1, labels = groups, srt = 90, adj =  1, xpd = TRUE, cex = 0.7)
     } else {
-      mtext(text = groups2rows, side = 1, line = 1, at = Barplot[, 1], adj = 0.5, cex = 0.6)
+      mtext(text = groups2rows, side = 1, line = 1, at = Barplot[, 1], adj = 0.5, cex = 0.7)
     }
   })
   par(mar = c(5.1, 4.1, 4.1, 2.1))
@@ -4896,8 +4896,155 @@ dev.off()
 
 
 
+# Data for Eric Dieters 12/20/16
+t(rbind("2014" = Annual2014_Stratified_HarvestEstimates["Upper Station / Akalura", c(5, 6, 4, 2, 1)],
+        "2015" = Annual2015_Stratified_HarvestEstimates["Upper Station / Akalura", c(5, 6, 4, 2, 1)],
+        "2016" = Annual2016_Stratified_HarvestEstimates["Upper Station / Akalura", c(5, 6, 4, 2, 1)]))
 
 
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Temporal Strata Bubble Plots
+require(ggplot2)
+require(reshape2)
+require(devEMF)
+
+# Get data
+KMA2014Strata_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2014Strata_HarvestEstimatesStats.txt")
+KMA2015Strata_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2015Strata_HarvestEstimatesStats.txt")
+KMA2016Strata_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2016Strata_HarvestEstimatesStats.txt")
+
+KMAStrata_HarvestEstimatesStats <- c(KMA2014Strata_HarvestEstimatesStats,
+                                     KMA2015Strata_HarvestEstimatesStats,
+                                     KMA2016Strata_HarvestEstimatesStats)
+max(sapply(KMAStrata_HarvestEstimatesStats, function(strata) {strata[, "median"]}))
+
+
+KMA14GroupsPC2RowsBubble <- KMA14GroupsPC2Rows
+KMA14GroupsPC2RowsBubble[c(6,7,9,11,13)] <- gsub(pattern = "\n", replacement = "", x = KMA14GroupsPC2RowsBubble[c(6,7,9,11,13)])
+
+
+str(KMA2016Strata_HarvestEstimatesStats)
+
+yr = 2014
+strata = "1_Early"
+zmax <- max(sapply(KMAStrata_HarvestEstimatesStats, function(strata) {strata[, "median"]}))
+
+Strata_Bubbleplot.f <- function(yr, strata, zmax = 252727, bubrange = 30) {
+  harvest_lst <- get(paste0("KMA", yr, "Strata_HarvestEstimatesStats"))
+  strata_nms <- grep(pattern = strata, x = names(harvest_lst), value = TRUE)
+  strata_silly <- c("SALIT", "SAYAK", "SIGVA", "SKARL", "SUGAN", "SUYAK")
+  
+  harvest_median_mat <- matrix(data = 0, nrow = 14, ncol = 6, dimnames = list(KMA14GroupsPC2, c("Alitak", "Ayakulik", "Igvak", "Karluk", "Uganik", "Uyak")))
+  harvest_median_mat.temp <- sapply(strata_nms, function(strat) {round(harvest_lst[[strat]][, "median"])})
+  harvest_col_index <- sapply(strata_nms, function(strat) {which(strata_silly == paste(unlist(strsplit(x = strat, split = ''))[1:5], collapse = ''))})
+  harvest_median_mat[, harvest_col_index] <- harvest_median_mat.temp
+  
+  Stratified_HarvestEstimates_df <- melt(harvest_median_mat)
+  names(Stratified_HarvestEstimates_df) <- c("RG", "Fishery", "Harvest")
+  Stratified_HarvestEstimates_df$RG <- factor(Stratified_HarvestEstimates_df$RG, levels = KMA14GroupsPC2)
+  Stratified_HarvestEstimates_df$Fishery <- factor(Stratified_HarvestEstimates_df$Fishery, levels = rev(c("Uganik", "Uyak", "Karluk", "Ayakulik", "Alitak", "Igvak")))
+  Stratified_HarvestEstimates_df$Color <- rep(KMA14Colors, 6)
+  Stratified_HarvestEstimates_df$Harvest[Stratified_HarvestEstimates_df$Harvest == 0] <- NA
+  # str(Stratified_HarvestEstimates_df)
+  
+  # emf(file = paste0("Figures/Harvest Maps/", yr, " ", strata," Color Harvest Bubble Plot.emf"), width = 9, height = 5.75, family = "serif", bg = "white")
+  ggplot(data = Stratified_HarvestEstimates_df, aes(x = RG, y = Fishery, size = Harvest, color = RG)) + 
+    geom_point() + 
+    scale_size_continuous(name = "Harvest\n(Thousands)", limits = c(0, zmax), breaks = c(1000, 5000, 10000, 20000, seq(50000, 200000, 50000)), range = c(0, bubrange), labels = c(1, 5, 10, 20, 50, 100, 150, 200)) + 
+    scale_color_manual(values = rep(KMA14Colors, 5), guide = FALSE) +
+    scale_x_discrete(name = "Reporting Group", labels = KMA14GroupsPC2RowsBubble) +
+    scale_y_discrete(name = "Sampling Area", labels = rev(c("Uganik\nKupreanof", "Uyak", "Karluk\nSturgeon", "Ayakulik\nHalibut Bay", "Alitak", "Igvak"))) +
+    theme(axis.text.x = element_text(size = rel(1.2), angle = 90, hjust = 1, vjust = 0.5)) +
+    theme(axis.text.y = element_text(size = rel(1.3))) +
+    theme(axis.title.y = element_text(size = rel(1.7), angle = 90, margin = unit(c(0,0.2,0,0), "cm"))) +
+    theme(axis.title.x = element_text(size = rel(1.7), angle = 00, margin = unit(c(-0.5,0,0,0), "cm"))) +
+    theme(legend.title = element_text(size = rel(1.7), angle = 00)) +
+    theme(text = element_text(family = "times"))
+  # dev.off()
+}
+
+Strata_Bubbleplot.f(yr = 2014, strata = "1_Early")
+Strata_Bubbleplot.f(yr = 2014, strata = "2_Middle")
+Strata_Bubbleplot.f(yr = 2014, strata = "3_Late")
+
+Strata_Bubbleplot.f(yr = 2015, strata = "1_Early")
+Strata_Bubbleplot.f(yr = 2015, strata = "2_Middle")
+Strata_Bubbleplot.f(yr = 2015, strata = "3_Late")
+
+Strata_Bubbleplot.f(yr = 2016, strata = "1_Early")
+Strata_Bubbleplot.f(yr = 2016, strata = "2_Middle")
+Strata_Bubbleplot.f(yr = 2016, strata = "3_Late")
+
+
+
+
+
+
+
+
+
+
+
+Strata_Bubbleplot.f <- function(yr, strata, zmax = 185118, bubrange = 30) {
+  harvest_lst <- get(paste0("KMA", yr, "Strata_HarvestEstimatesStats"))
+  strata_nms <- grep(pattern = strata, x = names(harvest_lst), value = TRUE)
+  strata_silly <- c("SALIT", "SAYAK", "SIGVA", "SKARL", "SUGAN", "SUYAK")
+  
+  harvest_median_mat <- matrix(data = 0, nrow = 14, ncol = 6, dimnames = list(KMA14GroupsPC2, c("Alitak", "Ayakulik", "Igvak", "Karluk", "Uganik", "Uyak")))
+  harvest_median_mat.temp <- sapply(strata_nms, function(strat) {round(harvest_lst[[strat]][, "median"])})
+  harvest_col_index <- sapply(strata_nms, function(strat) {which(strata_silly == paste(unlist(strsplit(x = strat, split = ''))[1:5], collapse = ''))})
+  harvest_median_mat[, harvest_col_index] <- harvest_median_mat.temp
+  
+  Stratified_HarvestEstimates_df <- melt(harvest_median_mat)
+  names(Stratified_HarvestEstimates_df) <- c("RG", "Fishery", "Harvest")
+  Stratified_HarvestEstimates_df$RG <- factor(Stratified_HarvestEstimates_df$RG, levels = rev(KMA14GroupsPC2))
+  Stratified_HarvestEstimates_df$Fishery <- factor(Stratified_HarvestEstimates_df$Fishery, levels = c("Uganik", "Uyak", "Karluk", "Ayakulik", "Alitak", "Igvak"))
+  Stratified_HarvestEstimates_df$Color <- rep(KMA14Colors, 6)
+  Stratified_HarvestEstimates_df$Harvest[Stratified_HarvestEstimates_df$Harvest == 0] <- NA
+  # str(Stratified_HarvestEstimates_df)
+  
+  ggplot(data = Stratified_HarvestEstimates_df, aes(x = Fishery, y = RG, size = Harvest, color = RG)) + 
+    geom_point() + 
+    scale_size_continuous(name = "Harvest\n(1,000s)", limits = c(0, zmax), breaks = c(1000, 5000, 10000, 20000, seq(50000, 200000, 50000)), range = c(0, bubrange), labels = c(1, 5, 10, 20, 50, 100, 150, 200)) + 
+    scale_color_manual(values = rev(KMA14Colors), guide = FALSE) +
+    scale_y_discrete(name = "Reporting Group", labels = rev(KMA14GroupsPC2RowsBubble)) +
+    scale_x_discrete(name = "Sampling Area", labels = c("Uganik\nKupreanof", "Uyak", "Karluk\nSturgeon", "Ayakulik\nHalibut Bay", "Alitak", "Igvak")) +
+    theme(axis.text.x = element_text(size = rel(1.2), angle = 90, hjust = 1, vjust = 0.5)) +
+    theme(axis.text.y = element_text(size = rel(1.3))) +
+    theme(axis.title.y = element_text(size = rel(1.7), angle = 90, margin = unit(c(0,-0.5,0,0), "cm"))) +
+    theme(axis.title.x = element_text(size = rel(1.7), angle = 00, margin = unit(c(0,0,0,0), "cm"))) +
+    theme(legend.title = element_text(size = rel(1.7), angle = 00)) +
+    theme(text = element_text(family = "times"))
+}
+
+
+emf(file ="Figures/Harvest Maps/2014 Early Color Harvest Bubble Plot.emf", width = 6, height = 6.75, family = "serif", bg = "white")
+Strata_Bubbleplot.f(yr = 2014, strata = "1_Early", zmax = 185118, bubrange = 20); dev.off()
+
+emf(file ="Figures/Harvest Maps/2014 Middle Color Harvest Bubble Plot.emf", width = 6, height = 6.75, family = "serif", bg = "white")
+Strata_Bubbleplot.f(yr = 2014, strata = "2_Middle", zmax = 185118, bubrange = 20); dev.off()
+
+emf(file ="Figures/Harvest Maps/2014 Late Color Harvest Bubble Plot.emf", width = 6, height = 6.75, family = "serif", bg = "white")
+Strata_Bubbleplot.f(yr = 2014, strata = "3_Late", zmax = 185118, bubrange = 20); dev.off()
+
+emf(file ="Figures/Harvest Maps/2015 Early Color Harvest Bubble Plot.emf", width = 6, height = 6.75, family = "serif", bg = "white")
+Strata_Bubbleplot.f(yr = 2015, strata = "1_Early", zmax = 185118, bubrange = 20); dev.off()
+
+emf(file ="Figures/Harvest Maps/2015 Middle Color Harvest Bubble Plot.emf", width = 6, height = 6.75, family = "serif", bg = "white")
+Strata_Bubbleplot.f(yr = 2015, strata = "2_Middle", zmax = 185118, bubrange = 20); dev.off()
+
+emf(file ="Figures/Harvest Maps/2015 Late Color Harvest Bubble Plot.emf", width = 6, height = 6.75, family = "serif", bg = "white")
+Strata_Bubbleplot.f(yr = 2015, strata = "3_Late", zmax = 185118, bubrange = 20); dev.off()
+
+emf(file ="Figures/Harvest Maps/2016 Early Color Harvest Bubble Plot.emf", width = 6, height = 6.75, family = "serif", bg = "white")
+Strata_Bubbleplot.f(yr = 2016, strata = "1_Early", zmax = 185118, bubrange = 20); dev.off()
+
+emf(file ="Figures/Harvest Maps/2016 Middle Color Harvest Bubble Plot.emf", width = 6, height = 6.75, family = "serif", bg = "white")
+Strata_Bubbleplot.f(yr = 2016, strata = "2_Middle", zmax = 185118, bubrange = 20); dev.off()
+
+emf(file ="Figures/Harvest Maps/2016 Late Color Harvest Bubble Plot.emf", width = 6, height = 6.75, family = "serif", bg = "white")
+Strata_Bubbleplot.f(yr = 2016, strata = "3_Late", zmax = 185118, bubrange = 20); dev.off()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Plot Percentages for KMA Mixtures ####
@@ -8170,7 +8317,76 @@ sapply(KMA2016Strata, function(mix) {
 
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Summarize to Frazer Reporting Group ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Ayakulik_Strata <- grep(pattern = "AYAKC", x = KMA2014_2016Strata, value = TRUE)
+
+
+Ayakulik_Strata_31RG_Estimates <- CustomCombineBAYESOutput.GCL(
+  groupvec = KMA473PopsGroupVec31, groupnames = KMA31GroupsPC, 
+  maindir = "BAYES/2014-2016 Mixtures 46loci 14RG/Output", 
+  mixvec = Ayakulik_Strata, prior = "",  
+  ext = "BOT", nchains = 5, burn = 0.5, alpha = 0.1, PosteriorOutput = TRUE); beep(4)
+
+str(Ayakulik_Strata_31RG_Estimates)
+
+
+# Dput 1) estimates stats + posterior output & 2) estimates stats
+dput(Ayakulik_Strata_31RG_Estimates, file = "Estimates objects/Ayakulik_Strata_31RG_Estimates.txt")
+dput(Ayakulik_Strata_31RG_Estimates$Stats, file = "Estimates objects/Ayakulik_Strata_31RG_EstimatesStats.txt")
+
+Ayakulik_Strata_31RG_Estimates <- dget(file = "Estimates objects/Ayakulik_Strata_31RG_Estimates.txt")
+Ayakulik_Strata_31RG_EstimatesStats <- dget(file = "Estimates objects/Ayakulik_Strata_31RG_EstimatesStats.txt")
+
+
+sapply(Ayakulik_Strata_31RG_EstimatesStats, function(Mix) {Mix[, "GR"]})
+sapply(Ayakulik_Strata_31RG_EstimatesStats, function(Mix) {table(Mix[, "GR"] > 1.2)})
+
+
+QuickBarplot(mixvec = Ayakulik_Strata, estimatesstats = Ayakulik_Strata_31RG_EstimatesStats, groups = KMA31GroupsPC, header = setNames(object = paste("Ayakulik", rep(c(2014:2016), each = 3), c("Early", "Middle", "Late")), nm = Ayakulik_Strata))
+
+
+
+
+
+
+
+Alitak_Strata <- grep(pattern = "ALITC", x = KMA2014_2016Strata, value = TRUE)
+
+
+Alitak_Strata_31RG_Estimates <- CustomCombineBAYESOutput.GCL(
+  groupvec = KMA473PopsGroupVec31, groupnames = KMA31GroupsPC, 
+  maindir = "BAYES/2014-2016 Mixtures 46loci 14RG/Output", 
+  mixvec = Alitak_Strata, prior = "",  
+  ext = "BOT", nchains = 5, burn = 0.5, alpha = 0.1, PosteriorOutput = TRUE); beep(4)
+
+str(Alitak_Strata_31RG_Estimates)
+
+
+# Dput 1) estimates stats + posterior output & 2) estimates stats
+dput(Alitak_Strata_31RG_Estimates, file = "Estimates objects/Alitak_Strata_31RG_Estimates.txt")
+dput(Alitak_Strata_31RG_Estimates$Stats, file = "Estimates objects/Alitak_Strata_31RG_EstimatesStats.txt")
+
+Alitak_Strata_31RG_Estimates <- dget(file = "Estimates objects/Alitak_Strata_31RG_Estimates.txt")
+Alitak_Strata_31RG_EstimatesStats <- dget(file = "Estimates objects/Alitak_Strata_31RG_EstimatesStats.txt")
+
+
+sapply(Alitak_Strata_31RG_EstimatesStats, function(Mix) {Mix[, "GR"]})
+sapply(Alitak_Strata_31RG_EstimatesStats, function(Mix) {table(Mix[, "GR"] > 1.2)})
+
+
+QuickBarplot(mixvec = Alitak_Strata, estimatesstats = Alitak_Strata_31RG_EstimatesStats, groups = KMA31GroupsPC, header = setNames(object = paste("Alitak", rep(c(2014:2016), each = 3), c("Early", "Middle", "Late"))[-1], nm = Alitak_Strata))
+
+
+
+PlotPosterior(mixvec = Alitak_Strata, output = Alitak_Strata_31RG_Estimates$Output, 
+              groups = KMA31GroupsPC, colors = rep("black", 31), 
+              header = setNames(
+                object = paste("Alitak", rep(c(2014:2016), each = 3), c("Early", "Middle", "Late"))[-1], 
+                nm = Alitak_Strata),
+              set.mfrow = c(7, 5), thin = 10)
 
 
 
@@ -8784,12 +9000,17 @@ while(!require(maps)) {install.packages("maps")}
 while(!require(mapdata)) {install.packages("mapdata")}
 while(!require(maptools)) {install.packages("maptools")}
 while(!require(GISTools)) {install.packages("GISTools")}
+while(!require(rgeos)) {install.packages("rgeos")}
+while(!require(sp)) {install.packages("sp")}
+require(devEMF)
+
 StatAreas.shp <- readShapePoly("Figures/Maps/pvs_stat_KMA.shp")
 str(StatAreas.shp, max.level = 2)
 str(StatAreas.shp@data)
 
 str(StatAreas.shp[!is.na(StatAreas.shp@data$Statarea)], max.level = 2)  # fail
 
+KMA_StatAreas <- as.character(read.csv(file = "Figures/Maps/KMAStatAreas.csv")[,1])
 KMAStatAreas.shp <- subset(StatAreas.shp, StatAreas.shp@data$Statarea %in% KMA_StatAreas)
 str(KMAStatAreas.shp)
 max(KMAStatAreas.shp@data[, 9:21])
@@ -8820,12 +9041,39 @@ Plot_KMA_Harvest_Map.f <- function(area, max.col = NULL) {
 }
 
 
+setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Mixtures/Figures")
+# dir.create("Harvest Maps")
+setwd("Harvest Maps")
 
 
-Plot_KMA_Harvest_Map.f <- function(area, max.col = NULL) {
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Uganik <- KMAStatAreas.shp[which(KMAStatAreas.shp@data$Statarea %in% seq(from = 25300, to = 25399, by = 1)), ]
+Uganik@data$SampArea <- "Uganik"
+Uganik.dis <- gUnaryUnion(Uganik, id = Uganik@data$SampArea)
+Uyak <- KMAStatAreas.shp[which(KMAStatAreas.shp@data$Statarea %in% seq(from = 25400, to = 25499, by = 1)), ]
+Uyak@data$SampArea <- "Uyak"
+Uyak.dis <- gUnaryUnion(Uyak, id = Uyak@data$SampArea)
+Karluk <- KMAStatAreas.shp[which(KMAStatAreas.shp@data$Statarea %in% c("25510", "25520", "25640")), ]
+Karluk@data$SampArea <- "Karluk"
+Karluk.dis <- gUnaryUnion(Karluk, id = Karluk@data$SampArea)
+Ayakulik <- KMAStatAreas.shp[which(KMAStatAreas.shp@data$Statarea %in% seq(from = 25610, to = 25630, by = 1)), ]
+Ayakulik@data$SampArea <- "Ayakulik"
+Ayakulik.dis <- gUnaryUnion(Ayakulik, id = Ayakulik@data$SampArea)
+Alitak <- KMAStatAreas.shp[which(KMAStatAreas.shp@data$Statarea %in% c("25710", "25720", "25750", "25760", "25770")), ]
+Alitak@data$SampArea <- "Alitak"
+Alitak.dis <- gUnaryUnion(Alitak, id = Alitak@data$SampArea)
+Igvak <- KMAStatAreas.shp[which(KMAStatAreas.shp@data$Statarea %in% c("26275", "26280", "26290", "26295")), ]
+Igvak@data$SampArea <- "Igvak"
+Igvak.dis <- gUnaryUnion(Igvak, id = Igvak@data$SampArea)
+
+
+Plot_KMA_Harvest_Map.f <- function(area, max.col = NULL, cex.lab = 0.9) {
+  # emf(file = paste0("KMA Harvest by Stat Area ", area, ".emf"), width = 5.75, height = 5.75, family = "serif", bg = "white")
   if(is.null(max.col)) {max.col <- max(KMAStatAreas.shp@data[, area])}
-  map("worldHires", "usa", xlim = c(-156.6, -151.7), ylim = c(56.3, 59), col = "gray90", fill = TRUE)
-  color.ramp <- colorRampPalette(c("white", "black"))(101)
+  map("worldHires", "usa", xlim = c(-156.55, -151.71), ylim = c(56.36, 58.85), col = "gray90", fill = TRUE)
+  color.ramp <- colorRampPalette(c("white", "green", "darkgreen", "black"))(101)
   plot(KMAStatAreas.shp, add = TRUE, 
        col = color.ramp[round(KMAStatAreas.shp@data[, area] / (max.col/100)) + 1],
        border = TRUE)
@@ -8834,16 +9082,29 @@ Plot_KMA_Harvest_Map.f <- function(area, max.col = NULL) {
          fill = rev(color.ramp), 
          border = NA,
          bty = 'n', x.intersp = 0.5, y.intersp = 0.07, lty = NULL)
-  text(x = -156, y = 56.7, labels = "Harvest", cex = 1.2)
-  maps::map.scale(x = -153.6, y = 56.4, ratio = FALSE, relwidth = 0.2)
-  north.arrow(xb = -152, yb = 56.55, len = 0.05, lab = "N")  
+  text(x = -156, y = 56.7, labels = "Harvest", cex = 1.3)
+  
+  yr <- paste0("20", paste0(unlist(strsplit(x = area, split = ""))[2:3], collapse = ""), collapse = "")
+  strata <- unlist(strsplit(x = area, split = "_"))[2]
+  
+  text(x = -152.8, y = 56.70, labels = paste(yr, strata), cex = 1.3)
+  maps::map.scale(x = -153.6, y = 56.46, ratio = FALSE, relwidth = 0.2)
+  north.arrow(xb = -152, yb = 56.6, len = 0.05, lab = "N")
+  
+  plot(Uganik.dis, add = TRUE, border = "black", lwd = 3)
+  text(x = -153.7, y = 58.04, labels = "Uganik\nKupreanof", cex = cex.lab, adj = c(1, 0.5))
+  plot(Uyak.dis, add = TRUE, border = "black", lwd = 3)
+  text(x = -154.15, y = 57.8, labels = "Uyak", cex = cex.lab, adj = c(1, 0.5))
+  plot(Karluk.dis, add = TRUE, border = "black", lwd = 3)
+  text(x = -154.72, y = 57.62, labels = "Karluk\nSturgeon", cex = cex.lab, adj = c(1, 0.5))
+  plot(Ayakulik.dis, add = TRUE, border = "black", lwd = 3)
+  text(x = -154.95, y = 57.3, labels = "Ayakulik\nHalibut Bay", cex = cex.lab, adj = c(1, 0.5))
+  plot(Alitak.dis, add = TRUE, border = "black", lwd = 3)
+  text(x = -154.43, y = 56.84, labels = "Alitak", cex = cex.lab, adj = c(1, 0.5))
+  plot(Igvak.dis, add = TRUE, border = "black", lwd = 3)
+  text(x = -155.85, y = 57.45, labels = "Igvak", cex = cex.lab, adj = c(0, 0.5))
+    # dev.off()
   }
-
-
-
-
-
-
 
 # What is sockeye max?
 max(KMAStatAreas.shp@data[, 9:21])
@@ -8861,6 +9122,50 @@ Plot_KMA_Harvest_Map.f(area = "s16_Middle", max.col = 3.3e5)
 Plot_KMA_Harvest_Map.f(area = "s14_Late", max.col = 3.3e5)
 Plot_KMA_Harvest_Map.f(area = "s15_Late", max.col = 3.3e5)
 Plot_KMA_Harvest_Map.f(area = "s16_Late", max.col = 3.3e5)
+
+
+
+# Lattice Plot
+Plot_KMA_Harvest.f(dat = s14, species = "Sockeye", yr = 2014, maxdat = 5e5)
+Plot_KMA_Harvest.f(dat = p14, species = "Pink", yr = 2014)
+Plot_KMA_Harvest.f(dat = p14, species = "Pink", yr = 2014, maxdat = 1e6)
+Plot_KMA_Harvest_Map.f(area = "s14_Early")
+Plot_KMA_Harvest_Map.f(area = "p14_Early")
+Plot_KMA_Harvest_Map.f(area = "s14_Middle")
+Plot_KMA_Harvest_Map.f(area = "p14_Middle")
+Plot_KMA_Harvest_Map.f(area = "s14_Late")
+Plot_KMA_Harvest_Map.f(area = "p14_Late")
+
+Plot_KMA_Harvest.f(dat = s15, species = "Sockeye", yr = 2015, maxdat = 5e5)
+Plot_KMA_Harvest.f(dat = p15, species = "Pink", yr = 2015)
+Plot_KMA_Harvest.f(dat = p15, species = "Pink", yr = 2015, maxdat = 1e6)
+Plot_KMA_Harvest_Map.f(area = "s15_Early")
+Plot_KMA_Harvest_Map.f(area = "p15_Early")
+Plot_KMA_Harvest_Map.f(area = "s15_Middle")
+Plot_KMA_Harvest_Map.f(area = "p15_Middle")
+Plot_KMA_Harvest_Map.f(area = "s15_Late")
+Plot_KMA_Harvest_Map.f(area = "p15_Late")
+
+
+Plot_KMA_Harvest.f(dat = s16, species = "Sockeye", yr = 2016, maxdat = 5e5)
+Plot_KMA_Harvest.f(dat = p16, species = "Pink", yr = 2016)
+Plot_KMA_Harvest.f(dat = p16, species = "Pink", yr = 2016, maxdat = 1e6)
+Plot_KMA_Harvest_Map.f(area = "s16_Early")
+Plot_KMA_Harvest_Map.f(area = "p16_Early")
+Plot_KMA_Harvest_Map.f(area = "s16_Middle")
+Plot_KMA_Harvest_Map.f(area = "p16_Middle")
+Plot_KMA_Harvest_Map.f(area = "s16_Late")
+Plot_KMA_Harvest_Map.f(area = "p16_Late")
+
+
+
+Plot_KMA_Harvest.f(dat = p14, species = "Pink", yr = 2014, maxdat = 6e6)
+Plot_KMA_Harvest.f(dat = p15, species = "Pink", yr = 2015, maxdat = 6e6)
+Plot_KMA_Harvest.f(dat = p16, species = "Pink", yr = 2016, maxdat = 6e6)
+
+
+
+
 
 # What is pink max?
 max(KMAStatAreas.shp@data[, 22:33])
