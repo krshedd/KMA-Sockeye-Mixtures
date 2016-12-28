@@ -9013,7 +9013,9 @@ str(StatAreas.shp[!is.na(StatAreas.shp@data$Statarea)], max.level = 2)  # fail
 KMA_StatAreas <- as.character(read.csv(file = "Figures/Maps/KMAStatAreas.csv")[,1])
 KMAStatAreas.shp <- subset(StatAreas.shp, StatAreas.shp@data$Statarea %in% KMA_StatAreas)
 str(KMAStatAreas.shp)
-max(KMAStatAreas.shp@data[, 9:21])
+max(KMAStatAreas.shp@data[, 9:21])  # Sockeye max stat area
+max(KMAStatAreas.shp@data[, 22:33])  # Sockeye max stat area
+
 which.max(apply(KMAStatAreas.shp@data[, 9:21], 2, max))
 
 
@@ -9110,7 +9112,6 @@ Plot_KMA_Harvest_Map.f <- function(area, max.col = NULL, cex.lab = 0.9) {
 max(KMAStatAreas.shp@data[, 9:21])
 which.max(apply(KMAStatAreas.shp@data[, 9:21], 2, max))
 
-
 Plot_KMA_Harvest_Map.f(area = "s14_Early", max.col = 3.3e5)
 Plot_KMA_Harvest_Map.f(area = "s15_Early", max.col = 3.3e5)
 Plot_KMA_Harvest_Map.f(area = "s16_Early", max.col = 3.3e5)
@@ -9122,6 +9123,68 @@ Plot_KMA_Harvest_Map.f(area = "s16_Middle", max.col = 3.3e5)
 Plot_KMA_Harvest_Map.f(area = "s14_Late", max.col = 3.3e5)
 Plot_KMA_Harvest_Map.f(area = "s15_Late", max.col = 3.3e5)
 Plot_KMA_Harvest_Map.f(area = "s16_Late", max.col = 3.3e5)
+
+Plot_KMA_Harvest_Map.f(area = "s14_Post", max.col = 3.3e5)
+Plot_KMA_Harvest_Map.f(area = "s15_Post", max.col = 3.3e5)
+Plot_KMA_Harvest_Map.f(area = "s16_Post", max.col = 3.3e5)
+
+
+# What is pink max?
+Plot_KMA_Harvest_Map.f <- function(area, max.col = NULL, cex.lab = 0.9) {
+  # emf(file = paste0("KMA Harvest by Stat Area ", area, ".emf"), width = 5.75, height = 5.75, family = "serif", bg = "white")
+  if(is.null(max.col)) {max.col <- max(KMAStatAreas.shp@data[, area])}
+  map("worldHires", "usa", xlim = c(-156.55, -151.71), ylim = c(56.36, 58.85), col = "gray90", fill = TRUE)
+  color.ramp <- c(colorRampPalette(c("white", "green", "darkgreen", "black"))(11), colorRampPalette(c("lightpink", "red", "darkred", "purple", "purple4"))(90))
+  plot(KMAStatAreas.shp, add = TRUE, 
+       col = color.ramp[round(KMAStatAreas.shp@data[, area] / (max.col/100)) + 1],
+       border = TRUE)
+  legend("bottomleft", 
+         legend = c(max.col, rep("", 89), 3.3e5, rep("", 9), 0),
+         fill = rev(color.ramp), 
+         border = NA,
+         bty = 'n', x.intersp = 0.5, y.intersp = 0.07, lty = NULL)
+  text(x = -156, y = 56.7, labels = "Harvest", cex = 1.3)
+  
+  yr <- paste0("20", paste0(unlist(strsplit(x = area, split = ""))[2:3], collapse = ""), collapse = "")
+  strata <- unlist(strsplit(x = area, split = "_"))[2]
+  
+  text(x = -152.8, y = 56.70, labels = paste(yr, strata), cex = 1.3)
+  maps::map.scale(x = -153.6, y = 56.46, ratio = FALSE, relwidth = 0.2)
+  north.arrow(xb = -152, yb = 56.6, len = 0.05, lab = "N")
+  
+  plot(Uganik.dis, add = TRUE, border = "black", lwd = 3)
+  text(x = -153.7, y = 58.04, labels = "Uganik\nKupreanof", cex = cex.lab, adj = c(1, 0.5))
+  plot(Uyak.dis, add = TRUE, border = "black", lwd = 3)
+  text(x = -154.15, y = 57.8, labels = "Uyak", cex = cex.lab, adj = c(1, 0.5))
+  plot(Karluk.dis, add = TRUE, border = "black", lwd = 3)
+  text(x = -154.72, y = 57.62, labels = "Karluk\nSturgeon", cex = cex.lab, adj = c(1, 0.5))
+  plot(Ayakulik.dis, add = TRUE, border = "black", lwd = 3)
+  text(x = -154.95, y = 57.3, labels = "Ayakulik\nHalibut Bay", cex = cex.lab, adj = c(1, 0.5))
+  plot(Alitak.dis, add = TRUE, border = "black", lwd = 3)
+  text(x = -154.43, y = 56.84, labels = "Alitak", cex = cex.lab, adj = c(1, 0.5))
+  plot(Igvak.dis, add = TRUE, border = "black", lwd = 3)
+  text(x = -155.85, y = 57.45, labels = "Igvak", cex = cex.lab, adj = c(0, 0.5))
+  # dev.off()
+}
+
+max(KMAStatAreas.shp@data[, 22:33])
+which.max(apply(KMAStatAreas.shp@data[, 22:33], 2, max))
+
+Plot_KMA_Harvest_Map.f(area = "p14_Early", max.col = 3.3e6)
+Plot_KMA_Harvest_Map.f(area = "p15_Early", max.col = 3.3e6)
+Plot_KMA_Harvest_Map.f(area = "p16_Early", max.col = 3.3e6)
+
+Plot_KMA_Harvest_Map.f(area = "p14_Middle", max.col = 3.3e6)
+Plot_KMA_Harvest_Map.f(area = "p15_Middle", max.col = 3.3e6)
+Plot_KMA_Harvest_Map.f(area = "p16_Middle", max.col = 3.3e6)
+
+Plot_KMA_Harvest_Map.f(area = "p14_Late", max.col = 3.3e6)
+Plot_KMA_Harvest_Map.f(area = "p15_Late", max.col = 3.3e6)
+Plot_KMA_Harvest_Map.f(area = "p16_Late", max.col = 3.3e6)
+
+Plot_KMA_Harvest_Map.f(area = "p14_Post", max.col = 3.3e6)
+Plot_KMA_Harvest_Map.f(area = "p15_Post", max.col = 3.3e6)
+Plot_KMA_Harvest_Map.f(area = "p16_Post", max.col = 3.3e6)
 
 
 
