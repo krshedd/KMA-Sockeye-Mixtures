@@ -5235,6 +5235,21 @@ Strata_Marginal_Credibility_Bubbleplot.f(yr = 2016, strata = "3_Late"); dev.off(
 # grid.draw(legend_topright)
 
 
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Credibility intervals + marginal totals as bars, including unsampled areas and post-sampling? Try plotting the 5%, median, and 95% all at once with alpha = 0.33 for transparency.
+# Need to run KMA_Harvest_Simple.f first to get s14, s15, and s16 objects.
+
+
+
+
+
+
+
+
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## Credibility intervals + marginal totals as bubbles? Try plotting the 5%, median, and 95% all at once with alpha = 0.33 for transparency.
 yr = 2015; strata = "2_Middle"; zmax = 202725; bubrange = 20
@@ -8803,15 +8818,17 @@ harvest14$Strata <- ifelse(harvest14$Date.Fishing.Began >= as.Date("2014-06-01")
                                   "Middle",
                                   ifelse(harvest14$Date.Fishing.Began >= as.Date("2014-07-26") & harvest14$Date.Fishing.Began <= as.Date("2014-08-29"),
                                          "Late",
-                                         NA)))
+                                         ifelse(harvest14$Date.Fishing.Began > as.Date("2014-08-29"),
+                                                "Post",NA))))
 
-harvest14$Strata <- factor(harvest14$Strata, levels = c("Early", "Middle", "Late"))
+harvest14$Strata <- factor(harvest14$Strata, levels = c("Early", "Middle", "Late", "Post"))
 
 # Create Geographic Strata
 stat.areas <- unique(harvest14$Stat.Area)
 
 Stat.Area.Uganik <- stat.areas[which(stat.areas >= 25300 & stat.areas <= 25399)]
 Stat.Area.Uyak <- stat.areas[which(stat.areas >= 25400 & stat.areas <= 25441)]
+Stat.Area.Spiridon <- stat.areas[which(stat.areas == 25450)]
 Stat.Area.NorthCape <- stat.areas[which(stat.areas >= 25930 & stat.areas <= 25939)]
 Stat.Area.SWNWAfognak <- stat.areas[which(stat.areas >= 25110 & stat.areas <= 25190)]
 Stat.Area.NESEAfognak <- stat.areas[which(stat.areas >= 25210 & stat.areas <= 25239)]
@@ -8831,7 +8848,8 @@ length(stat.areas)
 unique(harvest14$Stat.Area)[!stat.areas %in% unlist(sapply(objects(pattern = "Stat.Area"), function(x) {get(x)}))]
 
 
-harvest14$Geo <- ifelse(harvest14$Stat.Area %in% Stat.Area.Uganik, "Uganik",
+harvest14$Geo <- ifelse(harvest14$Stat.Area %in% Stat.Area.Spiridon, "Spiridon",
+                        ifelse(harvest14$Stat.Area %in% Stat.Area.Uganik, "Uganik",
                         ifelse(harvest14$Stat.Area %in% Stat.Area.Uyak, "Uyak",
                                ifelse(harvest14$Stat.Area %in% Stat.Area.NorthCape, "NorthCape",
                                       ifelse(harvest14$Stat.Area %in% Stat.Area.SWNWAfognak, "SWNWAfognak",
@@ -8845,9 +8863,9 @@ harvest14$Geo <- ifelse(harvest14$Stat.Area %in% Stat.Area.Uganik, "Uganik",
                                                                                               ifelse(harvest14$Stat.Area %in% Stat.Area.NorthShelikof, "NorthShelikof",
                                                                                                      ifelse(harvest14$Stat.Area %in% Stat.Area.Katmai, "Katmai",
                                                                                                             ifelse(harvest14$Stat.Area %in% Stat.Area.CapeIgvak, "CapeIgvak", NA
-                                                                                                            ))))))))))))))
+                                                                                                            )))))))))))))))
 
-harvest14$Geo <- factor(harvest14$Geo, levels = c("Uganik", "Uyak", "NorthCape", "SWNWAfognak", "NESEAfognak", "Sitkalidak", "NEKodiak", "Alitak", "MoserOlga", "Karluk", "Ayakulik", "NorthShelikof", "Katmai", "CapeIgvak"))
+harvest14$Geo <- factor(harvest14$Geo, levels = c("Spiridon", "Uganik", "Uyak", "NorthCape", "SWNWAfognak", "NESEAfognak", "Sitkalidak", "NEKodiak", "Alitak", "MoserOlga", "Karluk", "Ayakulik", "NorthShelikof", "Katmai", "CapeIgvak"))
 
 table(harvest14$Strata, harvest14$Geo)
 
@@ -9188,6 +9206,105 @@ p16 <- cast(melt(data = KMAPinkHarvest_2016, id.vars = c("Strata", "Geo"), measu
 max(p14, p15, p16)
 max(s14, s15, s16)
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+KMA_Harvest_Simple.f <- function(file, name, yr) {
+  
+  harvest <- read.csv(file = file, as.is = TRUE)
+  
+  # Convert Date
+  harvest$Date.Landed <- as.Date(harvest$Date.Landed, format = "%Y-%m-%d")
+  harvest$Date.Fishing.Began <- as.Date(harvest$Date.Fishing.Began, format = "%Y-%m-%d")
+  harvest$Date.Fishing.Ended <- as.Date(harvest$Date.Fishing.Ended, format = "%Y-%m-%d")
+  range(harvest$Date.Landed)
+  
+  # Create Temporal Strata
+  if(yr == 2014) {
+    harvest$Strata <- ifelse(harvest$Date.Fishing.Began < as.Date("2014-06-01"),
+                             "Pre",
+                             ifelse(harvest$Date.Fishing.Began >= as.Date("2014-06-01") & harvest$Date.Fishing.Began <= as.Date("2014-06-27"),
+                                    "Early",
+                                    ifelse(harvest$Date.Fishing.Began >= as.Date("2014-06-28") & harvest$Date.Fishing.Began <= as.Date("2014-07-25"),
+                                           "Middle",
+                                           ifelse(harvest$Date.Fishing.Began >= as.Date("2014-07-26") & harvest$Date.Fishing.Began <= as.Date("2014-08-29"),
+                                                  "Late",
+                                                  ifelse(harvest$Date.Fishing.Began > as.Date("2014-08-29"),
+                                                         "Post",
+                                                         NA)))))
+  }
+  
+  if(yr == 2015) {
+    harvest$Strata <- ifelse(harvest$Date.Fishing.Began < as.Date("2015-06-01"),
+                             "Pre",
+                             ifelse(harvest$Date.Fishing.Began >= as.Date("2015-06-01") & harvest$Date.Fishing.Began <= as.Date("2015-07-03"),
+                                    "Early",
+                                    ifelse(harvest$Date.Fishing.Began >= as.Date("2015-07-04") & harvest$Date.Fishing.Began <= as.Date("2015-08-01"),
+                                           "Middle",
+                                           ifelse(harvest$Date.Fishing.Began >= as.Date("2015-08-02") & harvest$Date.Fishing.Began <= as.Date("2015-08-29"),
+                                                  "Late",
+                                                  ifelse(harvest$Date.Fishing.Began > as.Date("2015-08-29"),
+                                                         "Post",
+                                                         NA)))))
+  }
+  
+  if(yr == 2016) {
+    harvest$Strata <- ifelse(harvest$Date.Fishing.Began < as.Date("2016-06-01"),
+                             "Pre",
+                             ifelse(harvest$Date.Fishing.Began >= as.Date("2016-06-01") & harvest$Date.Fishing.Began <= as.Date("2016-06-27"),
+                                    "Early",
+                                    ifelse(harvest$Date.Fishing.Began >= as.Date("2016-06-28") & harvest$Date.Fishing.Began <= as.Date("2016-07-25"),
+                                           "Middle",
+                                           ifelse(harvest$Date.Fishing.Began >= as.Date("2016-07-26") & harvest$Date.Fishing.Began <= as.Date("2016-08-29"),
+                                                  "Late",
+                                                  ifelse(harvest$Date.Fishing.Began > as.Date("2016-08-29"),
+                                                         "Post",
+                                                         NA)))))
+  }
+  
+  
+  harvest$Strata <- factor(harvest$Strata, levels = c("Pre", "Early", "Middle", "Late", "Post"))
+  
+  # Create Geographic Strata
+  stat.areas <- unique(harvest$Stat.Area)
+  
+  Stat.Area.Uganik <- stat.areas[which(stat.areas >= 25300 & stat.areas <= 25399)]
+  Stat.Area.Uyak <- stat.areas[which(stat.areas >= 25400 & stat.areas < 25450)]
+  Stat.Area.Alitak <- stat.areas[c(which(stat.areas >= 25710 & stat.areas <= 25720), which(stat.areas >= 25750 & stat.areas <= 25770))]
+  Stat.Area.Karluk <- stat.areas[c(which(stat.areas >= 25510 & stat.areas <= 25520), which(stat.areas ==25640))]
+  Stat.Area.Ayakulik <- stat.areas[which(stat.areas >= 25610 & stat.areas <= 25630)]
+  Stat.Area.CapeIgvak <- stat.areas[which(stat.areas >= 26275 & stat.areas <= 26295)]
+  
+  length(unlist(sapply(objects(pattern = "Stat.Area"), function(x) {get(x)})))
+  length(stat.areas)
+  
+  unique(harvest$Stat.Area)[!stat.areas %in% unlist(sapply(objects(pattern = "Stat.Area"), function(x) {get(x)}))]
+  
+  
+  harvest$Geo <- ifelse(harvest$Stat.Area %in% Stat.Area.Uganik, "Uganik",
+                        ifelse(harvest$Stat.Area %in% Stat.Area.Uyak, "Uyak",
+                               ifelse(harvest$Stat.Area %in% Stat.Area.Karluk, "Karluk",
+                                      ifelse(harvest$Stat.Area %in% Stat.Area.Ayakulik, "Ayakulik",
+                                             ifelse(harvest$Stat.Area %in% Stat.Area.Alitak, "Alitak",
+                                                    ifelse(harvest$Stat.Area %in% Stat.Area.CapeIgvak, "Igvak", "Unsampled"
+                                                    ))))))
+  
+  harvest$Geo <- factor(harvest$Geo, levels = c("Unsampled", "Uganik", "Uyak", "Karluk", "Ayakulik", "Alitak", "Igvak"))
+  
+  assign(x = name, value = harvest, pos = 1)
+}
+
+KMA_Harvest_Simple.f(file = "Harvest/Kodiak Sockeye Salmon Catch by Day and Stat Area 2014.csv", name = "KMASockeyeHarvestSimple_2014", yr = 2014)
+KMA_Harvest_Simple.f(file = "Harvest/Kodiak Sockeye Salmon Catch by Day and Stat Area 2015.csv", name = "KMASockeyeHarvestSimple_2015", yr = 2015)
+KMA_Harvest_Simple.f(file = "Harvest/Kodiak Sockeye Salmon Catch by Day and Stat Area 2016.csv", name = "KMASockeyeHarvestSimple_2016", yr = 2016)
+
+require(reshape)
+s14 <- cast(melt(data = KMASockeyeHarvestSimple_2014, id.vars = c("Strata", "Geo"), measure.vars = "Number", na.rm = TRUE), Geo~Strata, sum)
+s15 <- cast(melt(data = KMASockeyeHarvestSimple_2015, id.vars = c("Strata", "Geo"), measure.vars = "Number", na.rm = TRUE), Geo~Strata, sum)
+s16 <- cast(melt(data = KMASockeyeHarvestSimple_2016, id.vars = c("Strata", "Geo"), measure.vars = "Number", na.rm = TRUE), Geo~Strata, sum)
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Plot_KMA_Harvest.f <- function(dat, species, yr, maxdat = NULL) {
   if(is.null(maxdat)) {maxdat <- max(dat)}
