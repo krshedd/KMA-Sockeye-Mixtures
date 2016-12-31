@@ -5127,7 +5127,7 @@ Strata_Marginal_Credibility_Bubbleplot.f <- function(yr, strata, zmax = 202725, 
   
   bar_top <- ggplot(data = Total_HarvestEstimates_df, aes(x = Fishery, y = Harvest)) + 
     geom_bar(stat = "identity") +
-    scale_y_continuous(name = "Harvest (1000's of fish)", breaks = seq(0, 400000, by = 100000), labels = c(seq(0, 400, by = 100)), limits = c(0, 400000)) +
+    scale_y_continuous(name = "Harvest (1,000s of fish)", breaks = seq(0, 400000, by = 100000), labels = c(seq(0, 400, by = 100)), limits = c(0, 400000)) +
     theme(axis.text.x = element_blank(), axis.title.x = element_blank()) +
     theme(axis.text.y = element_text(size = rel(1)), axis.title.y = element_text(size = rel(1.3), margin = unit(c(0,-3,0,0), "cm")))
   
@@ -5154,7 +5154,7 @@ Strata_Marginal_Credibility_Bubbleplot.f <- function(yr, strata, zmax = 202725, 
   bar_right <- ggplot(data = Temporal_HarvestEstimates_df, aes(x = RG, y = Median, ymin = Lower5, ymax = Upper95)) + 
     geom_bar(stat = "identity", show.legend = FALSE, fill = rev(KMA14Colors)) +
     geom_errorbar(width = 0.5) +
-    scale_y_continuous(name = "Harvest (1,000's of fish)", breaks = seq(0, 500000, by = 100000), labels = c(seq(0, 500, by = 100)), limits = c(0, 500000)) +
+    scale_y_continuous(name = "Harvest (1,000s of fish)", breaks = seq(0, 500000, by = 100000), labels = c(seq(0, 500, by = 100)), limits = c(0, 500000)) +
     theme(axis.text.y = element_blank(), axis.title.y = element_blank()) +
     theme(axis.text.x = element_text(size = rel(1)), axis.title.x = element_text(size = rel(1.3), vjust = 20)) +
     coord_flip()
@@ -5242,11 +5242,187 @@ Strata_Marginal_Credibility_Bubbleplot.f(yr = 2016, strata = "3_Late"); dev.off(
 ## Credibility intervals + marginal totals as bars, including unsampled areas and post-sampling? Try plotting the 5%, median, and 95% all at once with alpha = 0.33 for transparency.
 # Need to run KMA_Harvest_Simple.f first to get s14, s15, and s16 objects.
 
+topmax <- max(s14, s15, s16)
 
+yr = 2015; strata = "2_Middle"; zmax = 202725; bubrange = 20
 
+Strata_Marginal_Credibility_Unsamp_Bubbleplot.f <- function(yr, strata, zmax = 202725, bubrange = 20) {
+  
+  if(strata == "4_Post") {
+    # Get harvest data
+    Total_HarvestEstimates_df <- get(paste0("s", yr - 2000))[, c("Geo", unlist(strsplit(x = strata, split = "_"))[2])]
+    names(Total_HarvestEstimates_df) <- c("Fishery", "Harvest")
+    levels(Total_HarvestEstimates_df$Fishery)
+    Total_HarvestEstimates_df$Harvest[Total_HarvestEstimates_df$Harvest == 0] <- NA
+    
+    # Create blank bubble plot
+    harvest_array <- array(data = c(0, rep(NA, 293)), dim = c(14, 7, 3), dimnames = list(KMA14GroupsPC2, 
+                                                                        rev(c("Uganik", "Uyak", "Karluk", "Ayakulik", "Alitak", "Igvak", "Unsampled")),
+                                                                        c("lower", "median", "upper")))
+    Stratified_HarvestEstimates_df <- melt(harvest_array)
+    names(Stratified_HarvestEstimates_df) <- c("RG", "Fishery", "Estimator", "Harvest")
+    Stratified_HarvestEstimates_df$RG <- factor(Stratified_HarvestEstimates_df$RG, levels = rev(KMA14GroupsPC2))
+    Stratified_HarvestEstimates_df$Fishery <- factor(Stratified_HarvestEstimates_df$Fishery, levels = rev(c("Uganik", "Uyak", "Karluk", "Ayakulik", "Alitak", "Igvak", "Unsampled")))
 
+    # Create blank right plot
+    Temporal_HarvestEstimates_df <- data.frame("RG" = factor(x = KMA14GroupsPC2, levels = KMA14GroupsPC2),
+                                               "Median" = rep(0, 14),
+                                               "Lower5" = rep(0, 14),
+                                               "Upper95" = rep(0, 14))
+  } else {
+    # Read in stock-specific harvest data
+    harvest_lst <- get(paste0("KMA", yr, "Strata_HarvestEstimatesStats"))
+    strata_nms <- grep(pattern = strata, x = names(harvest_lst), value = TRUE)
+    strata_silly <- c("SALIT", "SAYAK", "SIGVA", "SKARL", "SUGAN", "SUYAK")
+    
+    # Matrix of medians
+    harvest_median_mat <- matrix(data = 0, nrow = 14, ncol = 6, dimnames = list(KMA14GroupsPC2, c("Alitak", "Ayakulik", "Igvak", "Karluk", "Uganik", "Uyak")))
+    harvest_median_mat.temp <- sapply(strata_nms, function(strat) {round(harvest_lst[[strat]][, "median"])})
+    harvest_col_index <- sapply(strata_nms, function(strat) {which(strata_silly == paste(unlist(strsplit(x = strat, split = ''))[1:5], collapse = ''))})
+    harvest_median_mat[, harvest_col_index] <- harvest_median_mat.temp
+    harvest_median_mat <- cbind("Unsampled" = rep(0, 14), harvest_median_mat)
+    
+    # Matrix of 5%
+    harvest_5_mat <- matrix(data = 0, nrow = 14, ncol = 6, dimnames = list(KMA14GroupsPC2, c("Alitak", "Ayakulik", "Igvak", "Karluk", "Uganik", "Uyak")))
+    harvest_5_mat.temp <- sapply(strata_nms, function(strat) {round(harvest_lst[[strat]][, "5%"])})
+    harvest_col_index <- sapply(strata_nms, function(strat) {which(strata_silly == paste(unlist(strsplit(x = strat, split = ''))[1:5], collapse = ''))})
+    harvest_5_mat[, harvest_col_index] <- harvest_5_mat.temp
+    harvest_5_mat <- cbind("Unsampled" = rep(0, 14), harvest_5_mat)
+    
+    # Matrix of 95%
+    harvest_95_mat <- matrix(data = 0, nrow = 14, ncol = 6, dimnames = list(KMA14GroupsPC2, c("Alitak", "Ayakulik", "Igvak", "Karluk", "Uganik", "Uyak")))
+    harvest_95_mat.temp <- sapply(strata_nms, function(strat) {round(harvest_lst[[strat]][, "95%"])})
+    harvest_col_index <- sapply(strata_nms, function(strat) {which(strata_silly == paste(unlist(strsplit(x = strat, split = ''))[1:5], collapse = ''))})
+    harvest_95_mat[, harvest_col_index] <- harvest_95_mat.temp
+    harvest_95_mat <- cbind("Unsampled" = rep(0, 14), harvest_95_mat)
+    
+    # Create array of 5%, median, and 95% estimates
+    harvest_array <- abind("lower" = harvest_5_mat, "median" = harvest_median_mat, "upper" = harvest_95_mat, along = 3)
+    
+    # Melt array into a dataframe for ggplot
+    Stratified_HarvestEstimates_df <- melt(harvest_array)
+    names(Stratified_HarvestEstimates_df) <- c("RG", "Fishery", "Estimator", "Harvest")
+    Stratified_HarvestEstimates_df$RG <- factor(Stratified_HarvestEstimates_df$RG, levels = rev(KMA14GroupsPC2))
+    Stratified_HarvestEstimates_df$Fishery <- factor(Stratified_HarvestEstimates_df$Fishery, levels = rev(c("Uganik", "Uyak", "Karluk", "Ayakulik", "Alitak", "Igvak", "Unsampled")))
+    Stratified_HarvestEstimates_df$Harvest[Stratified_HarvestEstimates_df$Harvest == 0] <- NA
+    # str(Stratified_HarvestEstimates_df)
+    
+    # Get harvest data
+    Total_HarvestEstimates_df <- get(paste0("s", yr - 2000))[, c("Geo", unlist(strsplit(x = strata, split = "_"))[2])]
+    names(Total_HarvestEstimates_df) <- c("Fishery", "Harvest")
+    levels(Total_HarvestEstimates_df$Fishery)
+    Total_HarvestEstimates_df$Harvest[Total_HarvestEstimates_df$Harvest == 0] <- NA
+    
+    # Matrix of temporal medians
+    temporal_harvest_mat <- get(paste0("KMA", yr, "_Temporal_Stratified_HarvestEstimatesStats"))[[strata]]
+    Temporal_HarvestEstimates_df <- data.frame("RG" = KMA14GroupsPC2, temporal_harvest_mat)[, c(1, 4:6)]
+    names(Temporal_HarvestEstimates_df) <- c("RG", "Median", "Lower5", "Upper95")
+    Temporal_HarvestEstimates_df$RG <- factor(Temporal_HarvestEstimates_df$RG, levels = rev(KMA14GroupsPC2))
+  }
+  
+  bar_top <- ggplot(data = Total_HarvestEstimates_df, aes(x = Fishery, y = Harvest)) + 
+    geom_bar(stat = "identity") +
+    scale_y_continuous(name = "Harvest (1,000s of fish)", breaks = seq(0, 500000, by = 100000), labels = c(seq(0, 500, by = 100)), limits = c(0, topmax)) +
+    theme(axis.text.x = element_blank(), axis.title.x = element_blank()) +
+    theme(axis.text.y = element_text(size = rel(1)), axis.title.y = element_text(size = rel(1.3), margin = unit(c(0,-3,0,0), "cm")))
+  
+  # empty <- ggplot()+geom_point(aes(1,1), colour="white")+
+  #   theme(axis.ticks=element_blank(), 
+  #         panel.background=element_blank(), 
+  #         axis.text.x=element_blank(), axis.text.y=element_blank(),           
+  #         axis.title.x=element_blank(), axis.title.y=element_blank())
+  
+  bubble_chart <- ggplot(data = Stratified_HarvestEstimates_df, aes(x = Fishery, y = RG, size = Harvest, color = RG)) + 
+    geom_point(alpha = 0.33) + 
+    scale_size_area(name = "Harvest\n(1,000s)", limits = c(0, max(Stratified_HarvestEstimates_df$Harvest)), breaks = c(1000, 5000, 10000, 20000, seq(50000, 200000, 50000)), max_size = bubrange, labels = c(1, 5, 10, 20, 50, 100, 150, 200), guide = "legend") + 
+    scale_color_manual(values = rev(KMA14Colors), guide = FALSE) +
+    scale_y_discrete(name = "Reporting Group", labels = rev(KMA14GroupsPC2RowsBubble)) +
+    scale_x_discrete(name = "Sampling Area", labels = rev(c("Uganik\nKupreanof", "Uyak", "Karluk\nSturgeon", "Ayakulik\nHalibut Bay", "Alitak", "Igvak", "Unsampled\nAreas"))) +
+    theme(axis.text.x = element_text(size = rel(1.2), angle = 90, hjust = 1, vjust = 0.5)) +
+    theme(axis.text.y = element_text(size = rel(1.3))) +
+    theme(axis.title.y = element_text(size = rel(1.7), angle = 90, margin = unit(c(0,-0.5,0,0), "cm"))) +
+    theme(axis.title.x = element_text(size = rel(1.7), angle = 00, margin = unit(c(0,0,0,0), "cm"))) +
+    theme(legend.title = element_text(size = rel(1.7), angle = 00), legend.position = "none") +
+    guides(size = guide_legend(ncol = 2, byrow = TRUE)) +
+    theme(text = element_text(family = "times"))
+  
+  bar_right <- ggplot(data = Temporal_HarvestEstimates_df, aes(x = RG, y = Median, ymin = Lower5, ymax = Upper95)) + 
+    geom_bar(stat = "identity", show.legend = FALSE, fill = rev(KMA14Colors)) +
+    geom_errorbar(width = 0.5) +
+    scale_y_continuous(name = "Harvest (1,000s of fish)", breaks = seq(0, 500000, by = 100000), labels = c(seq(0, 500, by = 100)), limits = c(0, 500000)) +
+    theme(axis.text.y = element_blank(), axis.title.y = element_blank()) +
+    theme(axis.text.x = element_text(size = rel(1)), axis.title.x = element_text(size = rel(1.3), vjust = 20)) +
+    coord_flip()
+  
+  legend_topright_feeder <- ggplot(data = Stratified_HarvestEstimates_df, aes(x = Fishery, y = RG, size = Harvest, color = RG)) + 
+    geom_point(alpha = 0.33) + 
+    scale_size_area(name = "Harvest\n(1,000s)", limits = c(0, zmax), breaks = c(1000, 5000, 10000, 20000, seq(50000, 200000, 50000)), max_size = bubrange, labels = c(1, 5, 10, 20, 50, 100, 150, 200), guide = "legend") + 
+    scale_color_manual(values = rev(KMA14Colors), guide = FALSE) +
+    scale_y_discrete(name = "Reporting Group", labels = rev(KMA14GroupsPC2RowsBubble)) +
+    scale_x_discrete(name = "Sampling Area", labels = rev(c("Uganik\nKupreanof", "Uyak", "Karluk\nSturgeon", "Ayakulik\nHalibut Bay", "Alitak", "Igvak", "Unsampled\nAreas"))) +
+    theme(axis.text.x = element_text(size = rel(1.2), angle = 90, hjust = 1, vjust = 0.5)) +
+    theme(axis.text.y = element_text(size = rel(1.3))) +
+    theme(axis.title.y = element_text(size = rel(1.7), angle = 90, margin = unit(c(0,-0.5,0,0), "cm"))) +
+    theme(axis.title.x = element_text(size = rel(1.7), angle = 00, margin = unit(c(0,0,0,0), "cm"))) +
+    theme(legend.title = element_text(size = rel(1.7), angle = 00), legend.position = "right") +
+    guides(size = guide_legend(ncol = 2, byrow = TRUE)) +
+    theme(text = element_text(family = "times"))
+  
+  g_legend<-function(a.gplot){ 
+    tmp <- ggplot_gtable(ggplot_build(a.gplot)) 
+    leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box") 
+    legend <- tmp$grobs[[leg]] 
+    return(legend)} 
+  
+  legend_topright <- g_legend(legend_topright_feeder)
+  
+  # Plot all four, but not aligned
+  # grid.arrange(bar_top, legend_topright, bubble_chart, bar_right, ncol=2, nrow=2, widths=c(4, 1.5), heights=c(1.5, 4))
+  
+  #~~~~~~~~~~~~~~~~~~
+  # Convert to tables and then 
+  p1 <- ggplot_gtable(ggplot_build(bar_top))
+  # p2 <- ggplot_gtable(ggplot_build(legend_topright))
+  p3 <- ggplot_gtable(ggplot_build(bubble_chart))
+  p4 <- ggplot_gtable(ggplot_build(bar_right))
+  
+  maxWidth <- unit.pmax(p1$widths[2:3], p3$widths[2:3])
+  p1$widths[2:3] <- maxWidth
+  p3$widths[2:3] <- maxWidth
+  
+  maxHeight <- unit.pmax(p3$heights[7], p4$heights[7])
+  p3$heights[7] <- maxHeight
+  p4$heights[7] <- maxHeight
+  
+  grid.arrange(p1, legend_topright, p3, p4, ncol=2, nrow=2, widths=c(4, 1.35), heights=c(1.35, 4))
+}
 
+png(file ="Figures/Harvest Maps/2014 1_Early Marginal Unsamp Bubble.png", width = 811, height = 957, units = "px", res = 96, family = "serif", bg = "white")
+Strata_Marginal_Credibility_Unsamp_Bubbleplot.f(yr = 2014, strata = "1_Early"); dev.off()
+png(file ="Figures/Harvest Maps/2014 2_Middle Marginal Unsamp Bubble.png", width = 811, height = 957, units = "px", res = 96, family = "serif", bg = "white")
+Strata_Marginal_Credibility_Unsamp_Bubbleplot.f(yr = 2014, strata = "2_Middle"); dev.off()
+png(file ="Figures/Harvest Maps/2014 3_Late Marginal Unsamp Bubble.png", width = 811, height = 957, units = "px", res = 96, family = "serif", bg = "white")
+Strata_Marginal_Credibility_Unsamp_Bubbleplot.f(yr = 2014, strata = "3_Late"); dev.off()
+png(file ="Figures/Harvest Maps/2014 4_Post Marginal Unsamp Bubble.png", width = 811, height = 957, units = "px", res = 96, family = "serif", bg = "white")
+Strata_Marginal_Credibility_Unsamp_Bubbleplot.f(yr = 2014, strata = "4_Post"); dev.off()
 
+png(file ="Figures/Harvest Maps/2015 1_Early Marginal Unsamp Bubble.png", width = 811, height = 957, units = "px", res = 96, family = "serif", bg = "white")
+Strata_Marginal_Credibility_Unsamp_Bubbleplot.f(yr = 2015, strata = "1_Early"); dev.off()
+png(file ="Figures/Harvest Maps/2015 2_Middle Marginal Unsamp Bubble.png", width = 811, height = 957, units = "px", res = 96, family = "serif", bg = "white")
+Strata_Marginal_Credibility_Unsamp_Bubbleplot.f(yr = 2015, strata = "2_Middle"); dev.off()
+png(file ="Figures/Harvest Maps/2015 3_Late Marginal Unsamp Bubble.png", width = 811, height = 957, units = "px", res = 96, family = "serif", bg = "white")
+Strata_Marginal_Credibility_Unsamp_Bubbleplot.f(yr = 2015, strata = "3_Late"); dev.off()
+png(file ="Figures/Harvest Maps/2015 4_Post Marginal Unsamp Bubble.png", width = 811, height = 957, units = "px", res = 96, family = "serif", bg = "white")
+Strata_Marginal_Credibility_Unsamp_Bubbleplot.f(yr = 2015, strata = "4_Post"); dev.off()
+
+png(file ="Figures/Harvest Maps/2016 1_Early Marginal Unsamp Bubble.png", width = 811, height = 957, units = "px", res = 96, family = "serif", bg = "white")
+Strata_Marginal_Credibility_Unsamp_Bubbleplot.f(yr = 2016, strata = "1_Early"); dev.off()
+png(file ="Figures/Harvest Maps/2016 2_Middle Marginal Unsamp Bubble.png", width = 811, height = 957, units = "px", res = 96, family = "serif", bg = "white")
+Strata_Marginal_Credibility_Unsamp_Bubbleplot.f(yr = 2016, strata = "2_Middle"); dev.off()
+png(file ="Figures/Harvest Maps/2016 3_Late Marginal Unsamp Bubble.png", width = 811, height = 957, units = "px", res = 96, family = "serif", bg = "white")
+Strata_Marginal_Credibility_Unsamp_Bubbleplot.f(yr = 2016, strata = "3_Late"); dev.off()
+png(file ="Figures/Harvest Maps/2016 4_Post Marginal Unsamp Bubble.png", width = 811, height = 957, units = "px", res = 96, family = "serif", bg = "white")
+Strata_Marginal_Credibility_Unsamp_Bubbleplot.f(yr = 2016, strata = "4_Post"); dev.off()
 
 
 
@@ -9288,7 +9464,7 @@ KMA_Harvest_Simple.f <- function(file, name, yr) {
                                                     ifelse(harvest$Stat.Area %in% Stat.Area.CapeIgvak, "Igvak", "Unsampled"
                                                     ))))))
   
-  harvest$Geo <- factor(harvest$Geo, levels = c("Unsampled", "Uganik", "Uyak", "Karluk", "Ayakulik", "Alitak", "Igvak"))
+  harvest$Geo <- factor(harvest$Geo, levels = rev(c("Uganik", "Uyak", "Karluk", "Ayakulik", "Alitak", "Igvak", "Unsampled")))
   
   assign(x = name, value = harvest, pos = 1)
 }
