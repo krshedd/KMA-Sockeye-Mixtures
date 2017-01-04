@@ -8903,12 +8903,19 @@ sapply(Ayakulik_Strata_31RG_EstimatesStats, function(Mix) {table(Mix[, "GR"] > 1
 
 QuickBarplot(mixvec = Ayakulik_Strata, estimatesstats = Ayakulik_Strata_31RG_EstimatesStats, groups = KMA31GroupsPC, header = setNames(object = paste("Ayakulik", rep(c(2014:2016), each = 3), c("Early", "Middle", "Late")), nm = Ayakulik_Strata))
 
+# Extrapolate to harvest
+HarvestByStrata2014_2016_Final <- rbind(HarvestByStrata2014_Final, HarvestByStrata2015_Final, HarvestByStrata2016_Final)
+
+Ayakulik_Strata_31RG_Harvest_Medians <- sapply(Ayakulik_Strata, function(silly) {
+  geo <- unlist(strsplit(x = Ayakulik_Strata[1], split = "_"))[1]
+  temp <- paste(unlist(strsplit(x = Ayakulik_Strata[1], split = "_"))[2:3], collapse = "_")
+  round(Ayakulik_Strata_31RG_EstimatesStats[[silly]][, "median"] * HarvestByStrata2014_2016_Final[geo, temp])
+})
+Ayakulik_Strata_31RG_Harvest_Medians["Susitna Yetna", ]
 
 
 
-
-
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Alitak_Strata <- grep(pattern = "ALITC", x = KMA2014_2016Strata, value = TRUE)
 
 
@@ -8945,19 +8952,90 @@ PlotPosterior(mixvec = Alitak_Strata, output = Alitak_Strata_31RG_Estimates$Outp
               set.mfrow = c(7, 5), thin = 10)
 
 
+# Extrapolate to harvest
+HarvestByStrata2014_2016_Final <- rbind(HarvestByStrata2014_Final, HarvestByStrata2015_Final, HarvestByStrata2016_Final)
+
+Alitak_Strata_31RG_Harvest_Medians <- sapply(Alitak_Strata, function(silly) {
+  geo <- unlist(strsplit(x = Alitak_Strata[1], split = "_"))[1]
+  temp <- paste(unlist(strsplit(x = Alitak_Strata[1], split = "_"))[2:3], collapse = "_")
+  round(Alitak_Strata_31RG_EstimatesStats[[silly]][, "median"] * HarvestByStrata2014_2016_Final[geo, temp])
+})
+Alitak_Strata_31RG_Harvest_Medians["Susitna Yetna", ]
 
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+KMA_Strata_31RG_Estimates <- CustomCombineBAYESOutput.GCL(
+  groupvec = KMA473PopsGroupVec31, groupnames = KMA31GroupsPC, 
+  maindir = "BAYES/2014-2016 Mixtures 46loci 14RG/Output", 
+  mixvec = KMA2014_2016Strata, prior = "",  
+  ext = "BOT", nchains = 5, burn = 0.5, alpha = 0.1, PosteriorOutput = TRUE); beep(4)
+
+
+dput(KMA_Strata_31RG_Estimates, file = "Estimates objects/KMA_Strata_31RG_Estimates.txt")
+dput(KMA_Strata_31RG_Estimates$Stats, file = "Estimates objects/KMA_Strata_31RG_EstimatesStats.txt")
+
+KMA_Strata_31RG_Estimates <- dget(file = "Estimates objects/KMA_Strata_31RG_Estimates.txt")
+KMA_Strata_31RG_EstimatesStats <- dget(file = "Estimates objects/KMA_Strata_31RG_EstimatesStats.txt")
+
+# Extrapolate to harvest
+HarvestByStrata2014_2016 <- rbind(HarvestByStrata2014, 
+                                  cbind(HarvestByStrata2015, "4_LateLate" = rep(NA, 6)), 
+                                  cbind(HarvestByStrata2016, "4_LateLate" = rep(NA, 6)))
+
+KMA_Strata_31RG_Harvest_Medians <- sapply(KMA2014_2016Strata, function(silly) {
+  geo <- unlist(strsplit(x = silly, split = "_"))[1]
+  temp <- paste(unlist(strsplit(x = silly, split = "_"))[2:3], collapse = "_")
+  round(KMA_Strata_31RG_EstimatesStats[[silly]][, "median"] * HarvestByStrata2014_2016[geo, temp])
+})
+
+KMA_Strata_31RG_Harvest_Means <- sapply(KMA2014_2016Strata, function(silly) {
+  geo <- unlist(strsplit(x = silly, split = "_"))[1]
+  temp <- paste(unlist(strsplit(x = silly, split = "_"))[2:3], collapse = "_")
+  round(KMA_Strata_31RG_EstimatesStats[[silly]][, "mean"] * HarvestByStrata2014_2016[geo, temp])
+})
+
+
+sum(KMA_Strata_31RG_Harvest_Medians["Susitna Yetna", KMA2014Strata])
+sum(KMA_Strata_31RG_Harvest_Medians["Susitna Yetna", KMA2015Strata])
+sum(KMA_Strata_31RG_Harvest_Medians["Susitna Yetna", KMA2016Strata])
+
+
+sum(KMA_Strata_31RG_Harvest_Means["Chignik Lake", KMA2014Strata])
+sum(KMA_Strata_31RG_Harvest_Means["Chignik Lake", KMA2015Strata])
+sum(KMA_Strata_31RG_Harvest_Means["Chignik Lake", KMA2016Strata])
+
+
+t(sapply(KMA31GroupsPC, function(RG) {
+  c("2014" = sum(KMA_Strata_31RG_Harvest_Medians[RG, KMA2014Strata]),
+    "2015" = sum(KMA_Strata_31RG_Harvest_Medians[RG, KMA2015Strata]),
+    "2016" = sum(KMA_Strata_31RG_Harvest_Medians[RG, KMA2016Strata]))
+} ))
+
+
+t(sapply(KMA31GroupsPC, function(RG) {
+  c("2014" = sum(KMA_Strata_31RG_Harvest_Means[RG, KMA2014Strata]),
+    "2015" = sum(KMA_Strata_31RG_Harvest_Means[RG, KMA2015Strata]),
+    "2016" = sum(KMA_Strata_31RG_Harvest_Means[RG, KMA2016Strata]))
+} ))
 
 
 
-
-
-
-
-
-
-
+require(ggplot2)
+par(mar = c(6.6, 4.1, 1.1, 1.1))
+KMA31Groups_Annual_Barplot <- barplot2(height = sapply(KMA31GroupsPC, function(RG) {
+  c("2014" = sum(KMA_Strata_31RG_Harvest_Means[RG, KMA2014Strata]),
+    "2015" = sum(KMA_Strata_31RG_Harvest_Means[RG, KMA2015Strata]),
+    "2016" = sum(KMA_Strata_31RG_Harvest_Means[RG, KMA2016Strata]))
+} ), 
+         beside = TRUE, plot.ci = FALSE,
+         ylim = c(0, 400000), col = c("darkgreen", "green", "white"), yaxt = "n", xaxt = 'n')
+axis(side = 2, at = seq(0, 400000, 50000), labels = formatC(x = seq(0, 400000, 50000) / 1000, big.mark = "," , digits = 0, format = "f"), cex.axis = 1)
+legend(legend = 2014:2016, x = "topleft", fill = c("darkgreen", "green", "white"), border = "black", bty = "n", cex = 1.5, title="")
+abline(h = 0, xpd = FALSE)
+mtext(side = 2, line = 2.5, text = "Number of Fish Harvested (Thousands)", cex = 1.5)
+mtext(side = 1, line = 5.5, text = "Reporting Group", cex = 1.5)
+text(x = colMeans(KMA31Groups_Annual_Barplot), y = -5000, labels = KMA31GroupsPC, srt = 90, cex = 0.7, xpd = TRUE, adj = 1)
 
 
 
