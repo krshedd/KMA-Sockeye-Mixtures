@@ -9630,6 +9630,7 @@ Plot_KMA_StatArea_Harvest.f(species = "Pink", yr = 2015, geos = c("Alitak", "Mos
 
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Table_KMA_StatArea_Harvest.f <- function(species, yr){
   dat <- as.matrix(cast(melt(data = get(paste0("KMA", species, "Harvest_", yr)), id.vars = c("Strata", "Stat.Area"), measure.vars = "Number", na.rm = TRUE), Stat.Area~Strata, sum))
   dat
@@ -9686,8 +9687,132 @@ max(KMA_Sockeye_Pink_Harvest_Strata.mat)
 which.max(apply(KMA_Sockeye_Pink_Harvest_Strata.mat, 2, max))
 
 
+colSums(KMA_Sockeye_Pink_Harvest_Strata.mat)
+
+KMA_Sockeye_Pink_Harvest_Strata.df <- 
+  data.frame(Value = round(colSums(KMA_Sockeye_Pink_Harvest_Strata.mat)/1000)[-5],
+             Species = c(rep("Sockeye", 12), rep("Pink", 12)),
+             Year = rep(rep(2014:2016, each = 4), 2),
+             Strata = factor(x = rep(c("Early", "Middle", "Late", "Post"), 6), levels = c("Early", "Middle", "Late", "Post")))
+str(KMA_Sockeye_Pink_Harvest_Strata.df)
+
+cast(data = KMA_Sockeye_Pink_Harvest_Strata.df, formula = Species ~ Year, value = "Value", fun.aggregate = sum)
+cast(data = KMA_Sockeye_Pink_Harvest_Strata.df, formula = Species ~ Strata ~ Year, value = "Value", fun.aggregate = sum)
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Table_KMA_StatArea_HarvestPounds.f <- function(species, yr){
+  dat <- as.matrix(cast(melt(data = get(paste0("KMA", species, "Harvest_", yr)), id.vars = c("Strata", "Stat.Area"), measure.vars = "Pounds", na.rm = TRUE), Stat.Area~Strata, sum))
+  dat
+}
+
+
+s14statpounds <- Table_KMA_StatArea_HarvestPounds.f(species = "Sockeye", yr = 2014)
+s15statpounds <- Table_KMA_StatArea_HarvestPounds.f(species = "Sockeye", yr = 2015)
+s16statpounds <- Table_KMA_StatArea_HarvestPounds.f(species = "Sockeye", yr = 2016)
+p14statpounds <- Table_KMA_StatArea_HarvestPounds.f(species = "Pink", yr = 2014)
+p15statpounds <- Table_KMA_StatArea_HarvestPounds.f(species = "Pink", yr = 2015)
+p16statpounds <- Table_KMA_StatArea_HarvestPounds.f(species = "Pink", yr = 2016)
+
+
+KMA_Sockeye_Pink_HarvestPounds_Strata.mat <- 
+  Reduce(f = cbind, x = 
+           sapply(list(s14statpounds, s15statpounds, s16statpounds, p14statpounds, p15statpounds, p16statpounds), function(y) {
+             apply(y, 2, function(strata) {
+               x <- rep(0, length(KMA_StatAreas))
+               x[which(KMA_StatAreas %in% names(strata))] <- strata
+               x
+             })
+           })
+  )
+
+dimnames(KMA_Sockeye_Pink_HarvestPounds_Strata.mat) <- 
+  list(KMA_StatAreas,
+       unlist(sapply(c(paste0("s", 14:16), paste0("p", 14:16)), function(x) {
+         y <- dimnames(get(paste0(x, "statpounds")))[2]
+         sapply(y, function(i) {paste(x, i, sep = "_")})
+       })))
+
+str(KMA_Sockeye_Pink_HarvestPounds_Strata.mat)
+dimnames(KMA_Sockeye_Pink_HarvestPounds_Strata.mat)
+
+
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+s14price <- 1.83
+s15price <- 0.93
+s16price <- 1.02
+
+p14price <- 0.33
+p15price <- 0.25
+p16price <- 0.21
+  
+
+s14statprice <- Table_KMA_StatArea_HarvestPounds.f(species = "Sockeye", yr = 2014) * s14price
+s15statprice <- Table_KMA_StatArea_HarvestPounds.f(species = "Sockeye", yr = 2015) * s15price
+s16statprice <- Table_KMA_StatArea_HarvestPounds.f(species = "Sockeye", yr = 2016) * s16price
+p14statprice <- Table_KMA_StatArea_HarvestPounds.f(species = "Pink", yr = 2014) * p14price
+p15statprice <- Table_KMA_StatArea_HarvestPounds.f(species = "Pink", yr = 2015) * p15price
+p16statprice <- Table_KMA_StatArea_HarvestPounds.f(species = "Pink", yr = 2016) * p16price
+
+
+KMA_Sockeye_Pink_HarvestPrice_Strata.mat <- 
+  Reduce(f = cbind, x = 
+           sapply(list(s14statprice, s15statprice, s16statprice, p14statprice, p15statprice, p16statprice), function(y) {
+             apply(y, 2, function(strata) {
+               x <- rep(0, length(KMA_StatAreas))
+               x[which(KMA_StatAreas %in% names(strata))] <- strata
+               x
+             })
+           })
+  )
+
+dimnames(KMA_Sockeye_Pink_HarvestPrice_Strata.mat) <- 
+  list(KMA_StatAreas,
+       unlist(sapply(c(paste0("s", 14:16), paste0("p", 14:16)), function(x) {
+         y <- dimnames(get(paste0(x, "statprice")))[2]
+         sapply(y, function(i) {paste(x, i, sep = "_")})
+       })))
+
+str(KMA_Sockeye_Pink_HarvestPrice_Strata.mat)
+dimnames(KMA_Sockeye_Pink_HarvestPrice_Strata.mat)  
+  
+  
+colSums(KMA_Sockeye_Pink_HarvestPrice_Strata.mat)
+
+KMA_Sockeye_Pink_HarvestPrice_Strata.df <- 
+  data.frame(Value = round(colSums(KMA_Sockeye_Pink_HarvestPrice_Strata.mat)/1000)[-5],
+             Species = c(rep("Sockeye", 12), rep("Pink", 12)),
+             Year = rep(rep(2014:2016, each = 4), 2),
+             Strata = factor(x = rep(c("Early", "Middle", "Late", "Post"), 6), levels = c("Early", "Middle", "Late", "Post")))
+str(KMA_Sockeye_Pink_HarvestPrice_Strata.df)
+
+aggregate(Value ~ Year, data = KMA_Sockeye_Pink_HarvestPrice_Strata.df, sum)
+cast(data = KMA_Sockeye_Pink_HarvestPrice_Strata.df, formula = Species ~ Year, value = "Value", fun.aggregate = sum)
+cast(data = KMA_Sockeye_Pink_HarvestPrice_Strata.df, formula = Species ~ Strata ~ Year, value = "Value", fun.aggregate = sum)
+
+
+KMA_Sockeye_Pink_HarvestPrice.df <- 
+  data.frame(Value = c(s14price, s15price, s16price, p14price, p15price, p16price),
+             Species = c(rep("Sockeye", 3), rep("Pink", 3)),
+             Year = rep(2014:2016, 2))
+cast(data = KMA_Sockeye_Pink_HarvestPrice.df, formula = Species ~ Year, value = "Value", fun.aggregate = sum)
+
+
+
+write.csv(x = KMA_Sockeye_Pink_HarvestPrice_Strata.mat,
+          file = "Figures/Maps/KMA_Sockeye_Pink_HarvestPrice_Strata.csv")
+
+max(KMA_Sockeye_Pink_HarvestPrice_Strata.mat)
+
+
+
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Alitak_Pink_Harvest.f <- function(yr) {
   p <- cast(melt(data = subset(x = get(paste0("KMAPinkHarvest_", yr)), subset = Geo == "Alitak" | Geo == "MoserOlga"), id.vars = c("Strata", "Stat.Area"), measure.vars = "Number", na.rm = TRUE), Stat.Area~Strata, sum)
   
@@ -9750,10 +9875,34 @@ KMA_StatAreas <- as.character(read.csv(file = "Figures/Maps/KMAStatAreas.csv")[,
 KMAStatAreas.shp <- subset(StatAreas.shp, StatAreas.shp@data$Statarea %in% KMA_StatAreas)
 str(KMAStatAreas.shp)
 max(KMAStatAreas.shp@data[, 9:21])  # Sockeye max stat area
-max(KMAStatAreas.shp@data[, 22:33])  # Sockeye max stat area
+max(KMAStatAreas.shp@data[, 22:33])  # Pink max stat area
 
 which.max(apply(KMAStatAreas.shp@data[, 9:21], 2, max))
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Only run this if you want to do price instead of number of fish
+KMAStatAreas.shp@data[, 9:33] <- 0
+KMAStatAreas.shp@data[, 9:33] <- KMA_Sockeye_Pink_HarvestPrice_Strata.mat[as.character(KMAStatAreas.shp@data$Statarea), ]
+
+max(KMAStatAreas.shp@data[, 9:21])  # Sockeye max stat area
+max(KMAStatAreas.shp@data[, 22:33])  # Pink max stat area
+
+Plot_KMA_Harvest_Map.f(area = "s14_Early", max.col = 3.6e6); Plot_KMA_Harvest_Map.f(area = "p14_Early", max.col = 3.6e6)
+Plot_KMA_Harvest_Map.f(area = "s15_Early", max.col = 3.6e6); Plot_KMA_Harvest_Map.f(area = "p15_Early", max.col = 3.6e6)
+Plot_KMA_Harvest_Map.f(area = "s16_Early", max.col = 3.6e6); Plot_KMA_Harvest_Map.f(area = "p16_Early", max.col = 3.6e6)
+
+Plot_KMA_Harvest_Map.f(area = "s14_Middle", max.col = 3.6e6); Plot_KMA_Harvest_Map.f(area = "p14_Middle", max.col = 3.6e6)
+Plot_KMA_Harvest_Map.f(area = "s15_Middle", max.col = 3.6e6); Plot_KMA_Harvest_Map.f(area = "p15_Middle", max.col = 3.6e6)
+Plot_KMA_Harvest_Map.f(area = "s16_Middle", max.col = 3.6e6); Plot_KMA_Harvest_Map.f(area = "p16_Middle", max.col = 3.6e6)
+
+Plot_KMA_Harvest_Map.f(area = "s14_Late", max.col = 3.6e6); Plot_KMA_Harvest_Map.f(area = "p14_Late", max.col = 3.6e6)
+Plot_KMA_Harvest_Map.f(area = "s15_Late", max.col = 3.6e6); Plot_KMA_Harvest_Map.f(area = "p15_Late", max.col = 3.6e6)
+Plot_KMA_Harvest_Map.f(area = "s16_Late", max.col = 3.6e6); Plot_KMA_Harvest_Map.f(area = "p16_Late", max.col = 3.6e6)
+
+Plot_KMA_Harvest_Map.f(area = "s14_Post", max.col = 3.6e6); Plot_KMA_Harvest_Map.f(area = "p14_Post", max.col = 3.6e6)
+Plot_KMA_Harvest_Map.f(area = "s15_Post", max.col = 3.6e6); Plot_KMA_Harvest_Map.f(area = "p15_Post", max.col = 3.6e6)
+Plot_KMA_Harvest_Map.f(area = "s16_Post", max.col = 3.6e6); Plot_KMA_Harvest_Map.f(area = "p16_Post", max.col = 3.6e6)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 colorRampPalette(c("white", "black"))(100)
 colorRampPalette(c("white", "black"))(100)[round(StatAreas.shp@data$s14_Early / 3.3e3) + 1]
@@ -9824,8 +9973,12 @@ Plot_KMA_Harvest_Map.f <- function(area, max.col = NULL, cex.lab = 0.9) {
   
   yr <- paste0("20", paste0(unlist(strsplit(x = area, split = ""))[2:3], collapse = ""), collapse = "")
   strata <- unlist(strsplit(x = area, split = "_"))[2]
+  species <- ifelse(unlist(strsplit(x = area, split = ""))[1] == "s",
+                    "Sockeye",
+                    "Pink")
   
   text(x = -152.8, y = 56.70, labels = paste(yr, strata), cex = 1.3)
+  text(x = -152.8, y = 56.80, labels = species, cex = 1.3)
   maps::map.scale(x = -153.6, y = 56.46, ratio = FALSE, relwidth = 0.2)
   north.arrow(xb = -152, yb = 56.6, len = 0.05, lab = "N")
   
@@ -9842,7 +9995,7 @@ Plot_KMA_Harvest_Map.f <- function(area, max.col = NULL, cex.lab = 0.9) {
   plot(Igvak.dis, add = TRUE, border = "black", lwd = 3)
   text(x = -155.85, y = 57.45, labels = "Igvak", cex = cex.lab, adj = c(0, 0.5))
     # dev.off()
-  }
+}
 
 # What is sockeye max?
 max(KMAStatAreas.shp@data[, 9:21])
@@ -9883,8 +10036,12 @@ Plot_KMA_Harvest_Map.f <- function(area, max.col = NULL, cex.lab = 0.9) {
   
   yr <- paste0("20", paste0(unlist(strsplit(x = area, split = ""))[2:3], collapse = ""), collapse = "")
   strata <- unlist(strsplit(x = area, split = "_"))[2]
+  species <- ifelse(unlist(strsplit(x = area, split = ""))[1] == "s",
+                    "Sockeye",
+                    "Pink")
   
   text(x = -152.8, y = 56.70, labels = paste(yr, strata), cex = 1.3)
+  text(x = -152.8, y = 56.80, labels = species, cex = 1.3)
   maps::map.scale(x = -153.6, y = 56.46, ratio = FALSE, relwidth = 0.2)
   north.arrow(xb = -152, yb = 56.6, len = 0.05, lab = "N")
   
