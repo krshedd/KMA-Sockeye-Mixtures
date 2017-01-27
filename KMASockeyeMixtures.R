@@ -9039,9 +9039,83 @@ text(x = colMeans(KMA31Groups_Annual_Barplot), y = -5000, labels = KMA31GroupsPC
 
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+KMA_Strata_17UCIRG_Estimates <- CustomCombineBAYESOutput.GCL(
+  groupvec = KMA473PopsGroupVec17UCI, groupnames = KMA17UCIGroups, 
+  maindir = "BAYES/2014-2016 Mixtures 46loci 14RG/Output", 
+  mixvec = KMA2014_2016Strata, prior = "",  
+  ext = "BOT", nchains = 5, burn = 0.5, alpha = 0.1, PosteriorOutput = TRUE);# beep(4)
+
+
+dput(KMA_Strata_17UCIRG_Estimates, file = "Estimates objects/KMA_Strata_17UCIRG_Estimates.txt")
+dput(KMA_Strata_17UCIRG_Estimates$Stats, file = "Estimates objects/KMA_Strata_17UCIRG_EstimatesStats.txt")
+
+KMA_Strata_17UCIRG_Estimates <- dget(file = "Estimates objects/KMA_Strata_17UCIRG_Estimates.txt")
+KMA_Strata_17UCIRG_EstimatesStats <- dget(file = "Estimates objects/KMA_Strata_17UCIRG_EstimatesStats.txt")
+
+# Extrapolate to harvest
+HarvestByStrata2014_2016 <- rbind(HarvestByStrata2014, 
+                                  cbind(HarvestByStrata2015, "4_LateLate" = rep(NA, 6)), 
+                                  cbind(HarvestByStrata2016, "4_LateLate" = rep(NA, 6)))
+
+KMA_Strata_17UCIRG_Harvest_Medians <- sapply(KMA2014_2016Strata, function(silly) {
+  geo <- unlist(strsplit(x = silly, split = "_"))[1]
+  temp <- paste(unlist(strsplit(x = silly, split = "_"))[2:3], collapse = "_")
+  round(KMA_Strata_17UCIRG_EstimatesStats[[silly]][, "median"] * HarvestByStrata2014_2016[geo, temp])
+})
+
+KMA_Strata_17UCIRG_Harvest_Means <- sapply(KMA2014_2016Strata, function(silly) {
+  geo <- unlist(strsplit(x = silly, split = "_"))[1]
+  temp <- paste(unlist(strsplit(x = silly, split = "_"))[2:3], collapse = "_")
+  round(KMA_Strata_17UCIRG_EstimatesStats[[silly]][, "mean"] * HarvestByStrata2014_2016[geo, temp])
+})
+
+
+sum(KMA_Strata_17UCIRG_Harvest_Medians["Susitna", KMA2014Strata])
+sum(KMA_Strata_17UCIRG_Harvest_Medians["Susitna", KMA2015Strata])
+sum(KMA_Strata_17UCIRG_Harvest_Medians["Susitna", KMA2016Strata])
+
+
+sum(KMA_Strata_17UCIRG_Harvest_Means["Chignik Lake", KMA2014Strata])
+sum(KMA_Strata_17UCIRG_Harvest_Means["Chignik Lake", KMA2015Strata])
+sum(KMA_Strata_17UCIRG_Harvest_Means["Chignik Lake", KMA2016Strata])
+
+
+t(sapply(KMA17UCIGroups, function(RG) {
+  c("2014" = sum(KMA_Strata_17UCIRG_Harvest_Medians[RG, KMA2014Strata]),
+    "2015" = sum(KMA_Strata_17UCIRG_Harvest_Medians[RG, KMA2015Strata]),
+    "2016" = sum(KMA_Strata_17UCIRG_Harvest_Medians[RG, KMA2016Strata]))
+} ))
+
+
+t(sapply(KMA17UCIGroups, function(RG) {
+  c("2014" = sum(KMA_Strata_17UCIRG_Harvest_Means[RG, KMA2014Strata]),
+    "2015" = sum(KMA_Strata_17UCIRG_Harvest_Means[RG, KMA2015Strata]),
+    "2016" = sum(KMA_Strata_17UCIRG_Harvest_Means[RG, KMA2016Strata]))
+} ))
 
 
 
+require(ggplot2)
+par(mar = c(6.6, 4.1, 1.1, 1.1))
+KMA17UCIGroups_Annual_Barplot <- barplot2(height = sapply(KMA17UCIGroups, function(RG) {
+  c("2014" = sum(KMA_Strata_17UCIRG_Harvest_Means[RG, KMA2014Strata]),
+    "2015" = sum(KMA_Strata_17UCIRG_Harvest_Means[RG, KMA2015Strata]),
+    "2016" = sum(KMA_Strata_17UCIRG_Harvest_Means[RG, KMA2016Strata]))
+} ), 
+beside = TRUE, plot.ci = FALSE,
+ylim = c(0, 400000), col = c("darkgreen", "green", "white"), yaxt = "n", xaxt = 'n')
+axis(side = 2, at = seq(0, 400000, 50000), labels = formatC(x = seq(0, 400000, 50000) / 1000, big.mark = "," , digits = 0, format = "f"), cex.axis = 1)
+legend(legend = 2014:2016, x = "topleft", fill = c("darkgreen", "green", "white"), border = "black", bty = "n", cex = 1.5, title="")
+abline(h = 0, xpd = FALSE)
+mtext(side = 2, line = 2.5, text = "Number of Fish Harvested (Thousands)", cex = 1.5)
+mtext(side = 1, line = 5.5, text = "Reporting Group", cex = 1.5)
+text(x = colMeans(KMA17UCIGroups_Annual_Barplot), y = -5000, labels = KMA17UCIGroups, srt = 90, cex = 0.7, xpd = TRUE, adj = 1)
+
+
+t(t(sort(KMA_Strata_17UCIRG_Harvest_Medians["Susitna", ])))
+t(t(sort(KMA_Strata_17UCIRG_Harvest_Medians["Kenai", ])))
+t(t(sort(KMA_Strata_17UCIRG_Harvest_Medians["Kasilof", ])))
 
 
 
