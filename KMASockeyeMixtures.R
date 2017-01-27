@@ -5397,6 +5397,9 @@ Strata_Marginal_Credibility_Unsamp_Bubbleplot.f <- function(yr, strata, zmax = 2
   grid.arrange(p1, legend_topright, p3, p4, ncol=2, nrow=2, widths=c(4, 1.35), heights=c(1.35, 4))
 }
 
+ggsave(filename = "test.png", plot = Strata_Marginal_Credibility_Unsamp_Bubbleplot.f(yr = 2014, strata = "1_Early"))
+
+
 png(file ="Figures/Harvest Maps/2014 1_Early Marginal Unsamp Bubble.png", width = 811, height = 957, units = "px", res = 96, family = "serif", bg = "white")
 Strata_Marginal_Credibility_Unsamp_Bubbleplot.f(yr = 2014, strata = "1_Early"); dev.off()
 png(file ="Figures/Harvest Maps/2014 2_Middle Marginal Unsamp Bubble.png", width = 811, height = 957, units = "px", res = 96, family = "serif", bg = "white")
