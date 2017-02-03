@@ -5549,6 +5549,40 @@ sort(sapply(OtherUCI, function(pop) {mean(KMA473Pops_17UCIGroups_46loci_Likeliho
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Clean workspace and dget Population .gcls, LocusControl, and necessary objects ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+rm(list = ls(all = TRUE))
+setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Baseline")
+# source("V:\\Analysis\\R files\\Scripts\\PROD\\Functions.GCL.r")
+source("H:/R Source Scripts/Functions.GCL_KS.R")
+source("C:/Users/krshedd/Documents/R/Functions.GCL.R")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### 103 Loci
+## Locus Control
+LocusControl <- dget(file = "Objects/LocusControl103.txt")
+loci103 <- dget(file = "Objects/loci103.txt")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## Get Populations
+KMA473Pops <- dget(file = "Objects/KMA473Pops.txt")
+
+require(beepr)
+invisible(sapply(KMA473Pops, function(silly) {assign(x = paste(silly, ".gcl", sep = ""), value = dget(file = paste(getwd(), "/Raw genotypes/PostQCPopsloci103/", silly, ".txt", sep = "")), pos = 1)} )); beep(2)
+length(objects(pattern = "\\.gcl"))
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## Get objects
+KMAobjects <- list.files(path = "Objects", recursive = FALSE)
+KMAobjects <- KMAobjects[!KMAobjects %in% c("OLD", "Likelihood Profiles", "OriginalLocusControl.txt")]
+KMAobjects
+
+invisible(sapply(KMAobjects, function(objct) {assign(x = unlist(strsplit(x = objct, split = ".txt")), value = dget(file = paste(getwd(), "Objects", objct, sep = "/")), pos = 1) })); beep(2)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Repeated mixture tests with genetic_msa ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -5617,7 +5651,6 @@ for(group in IncludedGroups){
   }  # silly
   
 }  # group
-#~~~~~~~~~~~~~~~~~~
 
 mixsillyvec
 baselinesillyvec
@@ -5625,41 +5658,155 @@ baselinesillyvec
 sum(sapply(mixsillyvec, function(silly) {get(paste0(silly, ".gcl"))$n}))
 sum(sapply(baselinesillyvec, function(silly) {get(paste0(silly, ".gcl"))$n}))
 
-
-source("C:/Users/krshedd/Documents/R/GCL-R-Scripts/genetic_msa.R")
-# dir.create("genetic_msa")
-
-# Create initial starting values matrix
-group_inits <- matrix(data = rep(c(rep(0.3, 3), rep(0.1/12, 15)), 5), nrow = 15, ncol = 5, byrow = FALSE)  # had to define since nchains does not == ngroups
-
 # Pool all mixture sillys into one silly
 PoolCollections.GCL(collections = mixsillyvec, loci = loci89, newname = "collection_mix")  # create one mixture silly object (.gcl)
 str(collection_mix.gcl)
 
-#~~~~~~~~
-collection_mix = "collection_mix"
-collections_base = baselinesillyvec
-loci = loci89
-groupnames = Groups15Short
-groups = KMA473PopsGroupVec15
-nchains = 5
-nits = 4e4
-nburn = 2e4
-thin = 1
-group_prior = rep(1 / max(groups), max(groups))
-group_inits = group_inits
-out_dir = "genetic_msa"
-level = 0.1
-#~~~~~~~~
+#~~~~~~~~~~~~~~~~~~
+# Create baseline and mixture files
+source("C:/Users/krshedd/Documents/R/GCL-R-Scripts/write_data4msa.R")
+# dir.create("genetic_msa")
+setwd("genetic_msa")
+write_data4msa(mix_silly = "collection_mix", base_sillys = baselinesillyvec, loci = loci89)
 
-early.Ayakulik1Proof_genetic_msa_Estimates <- genetic_msa(collection_mix = "collection_mix", collections_base = baselinesillyvec, loci = loci89, groupnames = Groups15Short, groups = KMA473PopsGroupVec15, nchains = 5, nits = 4e4, nburn = 2e4, thin = 1, group_prior = rep(1 / max(groups), max(groups)), group_inits = group_inits, out_dir = "genetic_msa", level = 0.1)
-# 6.89 hours
+
+# Create initial starting values matrix
+group_inits <- matrix(data = rep(c(rep(0.3, 3), rep(0.1/12, 15)), 5), nrow = 15, ncol = 5, byrow = FALSE)  # had to define since nchains does not == ngroups
+groups = KMA473PopsGroupVec15
+
+source("C:/Users/krshedd/Documents/R/GCL-R-Scripts/genetic_msa.R")
+
+early.Ayakulik1Proof_genetic_msa_Estimates <- 
+  genetic_msa(nalleles = as.vector(LocusControl$nalleles[loci89]), 
+              groupnames = Groups15Short,
+              groups = KMA473PopsGroupVec15,
+              group_prior = rep(1 / max(groups), max(groups)),
+              group_inits = group_inits,
+              nchains = 5,
+              nits = 4e4,
+              nburn = 2e4,
+              thin = 1,
+              q_out = FALSE,
+              level = 0.1
+  )
+# Time difference of 5.471352 hours
 
 str(early.Ayakulik1Proof_genetic_msa_Estimates)
-colnames(early.Ayakulik1Proof_genetic_msa_Estimates)[6] <- "GR"
 
-dput(x = early.Ayakulik1Proof_genetic_msa_Estimates, file = "early.Ayakulik1Proof_genetic_msa_Estimates.txt")
+setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Baseline")
+dput(x = early.Ayakulik1Proof_genetic_msa_Estimates, file = "genetic_msa/early.Ayakulik1Proof_genetic_msa_Estimates.txt")
 early.Ayakulik1Proof_genetic_msa_Estimates <- dget(file = "genetic_msa/early.Ayakulik1Proof_genetic_msa_Estimates.txt")
 
 early.Ayakulik1Proof_BAYES_Estimates <- dget(file = "Estimates objects/loci89/KMA473PopsGroups15loci89RepeatedMixProofTestsEstimatesStats.txt")[["early.Ayakulik1"]]
 str(early.Ayakulik1Proof_BAYES_Estimates)
+
+
+require(gplots)
+
+genetic_msa_estimate <- early.Ayakulik1Proof_genetic_msa_Estimates
+BAYES_estimates <- early.Ayakulik1Proof_BAYES_Estimates
+
+comp_plot <- barplot2(height = rbind(genetic_msa_estimate[, "median"], BAYES_estimates[, "median"]),
+                      beside = TRUE, plot.ci = TRUE, ci.lwd = 1,
+                      ci.l = rbind(genetic_msa_estimate[, "ci0.05"], BAYES_estimates[, "5%"]), 
+                      ci.u = rbind(genetic_msa_estimate[, "ci0.95"], BAYES_estimates[, "95%"]), 
+                      ylim = c(0, 1), col = c("blue", "cyan"), yaxt = "n", xaxt = 'n')
+axis(side = 2, at = seq(0, 1, 0.1), labels = TRUE, cex.axis = 1)
+str(comp_plot)
+text(y = rep(-0.03, 15), x = colMeans(comp_plot), labels = Groups15Short, adj = c(1, 0.5), srt = 90, xpd = TRUE)
+legend("topright", legend = c("genetics_msa", "BAYES"), fill = c("blue", "cyan"), cex = 1.5, bty = "n")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+ReProofTest_genetic_msa.GCL <- function(ProofTestIDs.char = "early.Ayakulik1Proof", sillyvec = KMA473Pops, loci = loci89, groupvec = KMA473PopsGroupVec15, groupnames = Groups15Short, out_dir = "V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Baseline/genetic_msa") {
+  
+  ProofTestIDs <- get(ProofTestIDs.char, pos = 1)
+  sapply(ProofTestIDs, function(RG) {sum(sapply(RG, function(pop) {length(pop)}))})  # Confirm mixture proportions
+  
+  # Create baseline and mixture sillyvecs
+  # Code from ReProofTest.GCL
+  IncludedGroups <- names(ProofTestIDs)
+  baselinesillyvec <- sillyvec
+  names(baselinesillyvec) <- sillyvec
+  mixsillyvec <- NULL
+  baselineSillysIncluded <- NULL
+  
+  for(group in IncludedGroups){
+    
+    g <- match(group,groupnames)
+    groupsillys <- sillyvec[groupvec == g]
+    newnames <- paste(group, groupsillys, sep = ".")
+    names(newnames) <- groupsillys
+    names(ProofTestIDs[[group]]) <- groupsillys
+    IND <- sapply(groupsillys, function(silly) {!is.null(ProofTestIDs[[group]][[silly]])} )
+    newnames <- newnames[IND]
+    
+    for(silly in groupsillys[IND]){
+      newname <- newnames[silly]
+      gclname <- paste(silly, "gcl", sep = ".")
+      silly.gcl <- get(gclname, pos = 1)
+      baselineSillysIncluded <- c(newname, baselineSillysIncluded)
+      baselinesillyvec[silly] <- newname
+      newgclname <- paste(newname, "gcl", sep = ".")
+      newmixname <- paste("mix", newname, sep = ".")
+      mixsillyvec <- c(newmixname, mixsillyvec)
+      newmixgclname <- paste(newmixname, "gcl", sep = ".")
+      
+      assign(newgclname, silly.gcl, pos = 1)
+      assign(newmixgclname, silly.gcl, pos = 1)
+      
+      AllIDs <- dimnames(silly.gcl$scores)[[1]]
+      baselineIDs2remove <- as.character(sort(as.numeric(ProofTestIDs[[group]][[silly]])))
+      mixIDs2remove <- AllIDs[is.na(match(AllIDs,baselineIDs2remove))]
+      
+      invisible(RemoveIDs.GCL(silly = newname, IDs = list(baselineIDs2remove)))
+      invisible(RemoveIDs.GCL(silly = newmixname, IDs = list(mixIDs2remove)))
+      
+    }  # silly
+    
+  }  # group
+
+  # Pool mixture
+  PoolCollections.GCL(collections = mixsillyvec, loci = loci89, newname = "collection_mix")  # create one mixture silly object (.gcl)
+  
+  
+  
+  #~~~~~~~~~~~~~~~~~~
+  # Create baseline and mixture files
+  source("C:/Users/krshedd/Documents/R/GCL-R-Scripts/write_data4msa.R")
+  # dir.create("genetic_msa")
+  setwd(out_dir)
+  dir.create(ProofTestIDs.char); setwd(ProofTestIDs.char)
+  write_data4msa(mix_silly = "collection_mix", base_sillys = baselinesillyvec, loci = loci89)
+  
+  
+  # Create initial starting values matrix
+  group_inits <- matrix(data = rep(c(rep(0.3, 3), rep(0.1/12, 15)), 5), nrow = 15, ncol = 5, byrow = FALSE)  # had to define since nchains does not == ngroups
+  groups = KMA473PopsGroupVec15
+  
+  source("C:/Users/krshedd/Documents/R/GCL-R-Scripts/genetic_msa.R")
+  
+  genetic_msa_Estimates <- 
+    genetic_msa(nalleles = as.vector(LocusControl$nalleles[loci89]), 
+                groupnames = Groups15Short,
+                groups = KMA473PopsGroupVec15,
+                group_prior = rep(1 / max(groups), max(groups)),
+                group_inits = group_inits,
+                nchains = 5,
+                nits = 4e4,
+                nburn = 2e4,
+                thin = 1,
+                q_out = FALSE,
+                level = 0.1
+    )
+  
+  dput(x = genetic_msa_Estimates, file = paste0(ProofTestIDs.char, "_genetic_msa_Estimates.txt"))
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ReProofTest_genetic_msa.GCL(ProofTestIDs = "early.Ayakulik2Proof")
+
+## Save .RData with mixture proof objects, sillys
+
