@@ -4699,28 +4699,6 @@ lapply(StatsObject[which(sapply(Groups15.nospace, function(RG) {sapply(1:5, func
 ## Fishery Scenario Tests
 # Bias and Root Mean Square Error
 
-# Get Fishery Scenario Stats for loci89
-MixtureProofTestProportions <- read.table(file = "FisheryProofTestScenarios.txt", header = TRUE, sep = "\t", as.is = TRUE, row.names = NULL)
-
-KMA473PopsGroups15RepeatedMixProofTestsEstimatesStats <- dget(file = "Estimates objects/loci89/KMA473PopsGroups15loci89RepeatedMixProofTestsEstimatesStats.txt"); beep(4)
-str(KMA473PopsGroups15RepeatedMixProofTestsEstimatesStats, max.level = 1)
-
-# View median
-KMA473PopsGroups15RepeatedMixProofTestsEstimatesStats$flat1[, "median"]
-
-# Extract median values from all flat mixtures
-medians.loci89.flat <- sapply(KMA473PopsGroups15RepeatedMixProofTestsEstimatesStats[31:35], function(proof) {proof[, "median"]})
-
-# Calculate RMSE for flat mixtures
-sqrt(rowSums((medians.loci89.flat - MixtureProofTestProportions[, "flat"])^2) / 5)
-
-## Need to create function
-# Inputs
-stats = KMA473PopsGroups15RepeatedMixProofTestsEstimatesStats
-scenario = "flat"
-proportions = t(dget(file = "Objects/MixtureProofTestProportions"))
-estimator = "median"
-
 #~~~~~~~~~~~~~~~~~~
 # Creating a function for Bias and RMSE (percent not proportions)
 BiasRMSE.GCL <- function(stats, scenario, proportions, estimator = "median", percent = TRUE) {
@@ -5775,7 +5753,7 @@ ReProofTest_genetic_msa.GCL <- function(ProofTestIDs.char = "early.Ayakulik1Proo
   
   #~~~~~~~~~~~~~~~~~~
   # Create baseline and mixture files
-  source("C:/Users/krshedd/Documents/R/GCL-R-Scripts/write_data4msa.R")
+  # source("C:/Users/krshedd/Documents/R/GCL-R-Scripts/write_data4msa.R")
   # dir.create("genetic_msa")
   setwd(out_dir)
   dir.create(ProofTestIDs.char); setwd(ProofTestIDs.char)
@@ -5786,7 +5764,7 @@ ReProofTest_genetic_msa.GCL <- function(ProofTestIDs.char = "early.Ayakulik1Proo
   group_inits <- matrix(data = rep(c(rep(0.3, 3), rep(0.1/12, 15)), 5), nrow = 15, ncol = 5, byrow = FALSE)  # had to define since nchains does not == ngroups
   groups = KMA473PopsGroupVec15
   
-  source("C:/Users/krshedd/Documents/R/GCL-R-Scripts/genetic_msa.R")
+  # source("C:/Users/krshedd/Documents/R/GCL-R-Scripts/genetic_msa.R")
   
   genetic_msa_Estimates <- 
     genetic_msa(nalleles = as.vector(LocusControl$nalleles[loci89]), 
@@ -5809,4 +5787,217 @@ ReProofTest_genetic_msa.GCL <- function(ProofTestIDs.char = "early.Ayakulik1Proo
 ReProofTest_genetic_msa.GCL(ProofTestIDs = "early.Ayakulik2Proof")
 
 ## Save .RData with mixture proof objects, sillys
+save.image(file = "genetic_msa/ReProofTest_genetic_msa.RData")
 
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Plot genetic_msa vs. BAYES mixture test results ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#~~~~~~~~~~~~~~~~~~
+## Inputs
+BAYES_estimates <- dget(file = "Estimates objects/loci89/KMA473PopsGroups15loci89RepeatedMixProofTestsEstimatesStats.txt")
+str(BAYES_estimates)
+
+
+genetic_msa_estimates <- sapply(KMA473PopsGroups15RepeatedMixProofTests, function(scenario) {
+  data.matrix(dget(file = paste0("genetic_msa/", scenario, "Proof/", scenario, "Proof_genetic_msa_Estimates.txt")))
+}, simplify = FALSE)
+str(genetic_msa_estimates)
+
+FisheryProofTestScenarioNames
+
+scenario <- FisheryProofTestScenarioNames[1]
+groups <- Groups15Short
+
+
+#~~~~~~~~~~~~~~~~~~
+## Define layout structure
+FiveByThreeMatrix <- matrix(data=c(1,2,3,4,
+                                   1,5,6,7,
+                                   1,8,9,10,
+                                   1,11,12,13,
+                                   1,14,15,16,
+                                   17,18,18,18),nrow=6,ncol=4,byrow=TRUE)
+FiveByThreeLayout <- layout(mat=FiveByThreeMatrix,widths=c(0.2,rep(1,3)),heights=c(1,1,1,1,1,0.2))
+layout.show(n=18)
+
+#~~~~~~~~~~~~~~~~~~
+# Create 5%, median, 95% extractor function
+plot.ci.extract <- function(x, scenario, group, stat.col) {
+  list.index <- grep(pattern = scenario, x = names(x))  
+  sapply(list.index, function(i) {x[[i]][group, stat.col]} )
+}
+
+# Inputs for extractor function
+# str(KMA473PopsGroups15loci22RepeatedMixProofTestsEstimatesStats)
+# FisheryProofTestScenarioNames
+# Groups15.nospace
+# c("5%", "median", "95%")
+
+#~~~~~~~~~~~~~~~~~~
+# Create a figure wrapup funtion
+setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Baseline")
+
+library('gplots')
+library('devEMF')
+
+percent = TRUE
+
+col = c("black", "grey70")
+cex.pch = 1.5
+ci.lwd = 2
+sfrac = 0.02
+
+
+for(scenario in FisheryProofTestScenarioNames) {
+  
+  BAYES_estimates <- dget(file = "Estimates objects/loci89/KMA473PopsGroups15loci89RepeatedMixProofTestsEstimatesStats.txt")
+  
+  genetic_msa_estimates <- sapply(KMA473PopsGroups15RepeatedMixProofTests, function(scenario) {
+    data.matrix(dget(file = paste0("genetic_msa/", scenario, "Proof/", scenario, "Proof_genetic_msa_Estimates.txt")))
+  }, simplify = FALSE)
+  
+  i <- which(scenario == FisheryProofTestScenarioNames)
+  
+  if(percent){
+    percent.multiplier <- 100
+    BAYES_estimates <- sapply(BAYES_estimates, function(rpt) {rpt[, 1:5] * percent.multiplier}, simplify = FALSE)
+    genetic_msa_estimates <- sapply(genetic_msa_estimates, function(rpt) {rpt[, 1:5] * percent.multiplier}, simplify = FALSE)
+    file = paste("genetic_msa/Master.", i, scenario, ".Percent.emf", sep = '')
+    y.label = "Percent"
+  } else {
+    percent.multiplier <- 1
+    file = paste("genetic_msa/Master.", i, scenario, ".emf", sep = '')
+    y.label = "Proportion"
+  }
+  
+  MixtureProofTestProportions <- t(dget(file = "Objects/MixtureProofTestProportions.txt")) * percent.multiplier
+  
+  emf(file = file, width = 6.5, height = 8, family = "Times")
+  #png(file = paste(filedir, "/", scenario, ".png", sep = ""), width = 6.5, height = 7.5, units = "in", res = 1200, pointsize = 4, family = "Times")
+  layout(mat = FiveByThreeMatrix, widths = c(0.3, rep(1, 3)), heights = c(1, 1, 1, 1, 1, 0.4))
+  
+  # Plot 1 - y-axis title
+  par(mar = c(0, 0, 0, 0))
+  par(srt = 90)
+  plot.new()
+  text(labels = y.label, x = 0.2, y = 0.5, adj = c(0.5, 0.5), font = 1, cex = 2)
+  
+  # Plot 2-16 - Groups
+  sapply(seq(groups), function(j) {
+    
+    y <- c(t(matrix(data = c(plot.ci.extract(x = BAYES_estimates, scenario = scenario, group = groups[j], stat.col = "median"),
+                             plot.ci.extract(x = genetic_msa_estimates, scenario = scenario, group = groups[j], stat.col = "median")),
+                    nrow = 5)))
+    ui <- c(t(matrix(data = c(plot.ci.extract(x = BAYES_estimates, scenario = scenario, group = groups[j], stat.col = "95%"),
+                              plot.ci.extract(x = genetic_msa_estimates, scenario = scenario, group = groups[j], stat.col = "ci0.95")),
+                     nrow = 5)))
+    li <- c(t(matrix(data = c(plot.ci.extract(x = BAYES_estimates, scenario = scenario, group = groups[j], stat.col = "5%"),
+                              plot.ci.extract(x = genetic_msa_estimates, scenario = scenario, group = groups[j], stat.col = "ci0.05")),
+                     nrow = 5)))
+    
+    par(mar = c(0, 0, 0, 0))
+    par(srt = 0)
+    if(j == 1) {
+      plotCI(x = c(1:2, 4:5, 7:8, 10:11, 13:14), y = y, ui = ui, li = li, xlim = c(0.5, 14.5), ylim = c(0, 0.65 * percent.multiplier), gap = 0, pch = 16, ylab = '', xlab = '', xaxt = "n", cex = cex.pch, col = col, lwd = ci.lwd, sfrac = sfrac)
+      legend("topleft", legend = c("BAYES", "genetic_msa"), fill = col, bty = 'n', cex = 1.2)
+    }
+    
+    if(j %in% c(4, 7, 10)) {
+      plotCI(x = c(1:2, 4:5, 7:8, 10:11, 13:14), y = y, ui = ui, li = li, xlim = c(0.5, 14.5), ylim = c(0, 0.65 * percent.multiplier), gap = 0, pch = 16, ylab = '', xlab = '', xaxt = "n", cex = cex.pch, col = col, lwd = ci.lwd, sfrac = sfrac)
+    }
+    
+    if(j == 13) {
+      plotCI(x = c(1:2, 4:5, 7:8, 10:11, 13:14), y = y, ui = ui, li = li, xlim = c(0.5, 14.5), ylim = c(0, 0.65 * percent.multiplier), gap = 0, pch = 16, ylab = '', xlab = '', xaxt = "n", cex = cex.pch, col = col, lwd = ci.lwd, sfrac = sfrac)
+      axis(side = 1, at = seq(from = 1.5, by = 3, length.out = 5), labels = 1:5)
+    }
+    
+    if(j %in% c(14, 15)) {
+      plotCI(x = c(1:2, 4:5, 7:8, 10:11, 13:14), y = y, ui = ui, li = li, xlim = c(0.5, 14.5), ylim = c(0, 0.65 * percent.multiplier), gap = 0, pch = 16, ylab = '', xlab = '', xaxt = "n", yaxt = "n", cex = cex.pch, col = col, lwd = ci.lwd, sfrac = sfrac)
+      axis(side = 1, at = seq(from = 1.5, by = 3, length.out = 5), labels = 1:5)
+    }
+    
+    if(j %in% c(2, 3, 5, 6, 8, 9, 11, 12)) {
+      plotCI(x = c(1:2, 4:5, 7:8, 10:11, 13:14), y = y, ui = ui, li = li, xlim = c(0.5, 14.5), ylim = c(0, 0.65 * percent.multiplier), gap = 0, pch = 16, ylab = '', xlab = '', xaxt = "n", yaxt = "n", cex = cex.pch, col = col, lwd = ci.lwd, sfrac = sfrac)
+    }
+    
+    abline(h = MixtureProofTestProportions[j, scenario], col = "red", lwd = 2)
+    abline(h = 0, lwd = 1, lty = 2)
+    text(PCGroups15[j], x = 14, y = 0.6 * percent.multiplier, adj = 1, cex = 1.2)
+  } )
+  
+  # Plot 17 - Blank Corner
+  plot.new()
+  
+  ## Plot 18 - x-axis title
+  par(mar = c(0, 0, 0, 0))
+  plot.new()
+  text(labels = "Replicate", x = 0.5, y = 0.25, adj = c(0.5, 0.5), font = 1, cex = 2)
+  
+  dev.off()
+}
+
+
+#~~~~~~~~~~~~~~~~~~
+# Creating a function for Bias and RMSE (percent not proportions)
+BiasRMSE.GCL <- function(stats, scenario, proportions, estimator = "median", percent = TRUE) {
+  if(percent) {
+    stats <- sapply(stats, function(rpt) {rpt[, 1:5] * 100}, simplify = FALSE)
+    proportions <- proportions * 100
+  }  
+  stats.nums <- grep(pattern = scenario, x = names(stats))
+  estimator.values <- sapply(stats[stats.nums], function(rpt) {rpt[, estimator]} )
+  rmse <- sqrt(rowSums((estimator.values - proportions[, scenario])^2) / length(stats.nums))
+  bias <- apply((estimator.values - proportions[, scenario]), 1, mean)
+  average <- apply(estimator.values, 1, mean)
+  if("5%" %in% colnames(stats[stats.nums][[1]])) {
+    ci.width <- apply(sapply(stats[stats.nums], function(rpt) {rpt[, "95%"]} ) - sapply(stats[stats.nums], function(rpt) {rpt[, "5%"]} ), 1, mean)
+  } else{
+    ci.width <- apply(sapply(stats[stats.nums], function(rpt) {rpt[, "ci0.95"]} ) - sapply(stats[stats.nums], function(rpt) {rpt[, "ci0.05"]} ), 1, mean)
+  }
+  return(cbind(average = average, bias = bias, rmse = rmse, ci.width = ci.width))
+}
+
+
+MixtureProofTestProportions <- t(dget(file = "Objects/MixtureProofTestProportions.txt"))
+Proof.BiasRMSE.BAYES.list <- sapply(FisheryProofTestScenarioNames, function(scenario) {BiasRMSE.GCL(stats = BAYES_estimates, scenario = scenario, proportions = MixtureProofTestProportions, estimator = "median")}, simplify = FALSE )
+Proof.BiasRMSE.genetic_msa.list <- sapply(FisheryProofTestScenarioNames, function(scenario) {BiasRMSE.GCL(stats = genetic_msa_estimates, scenario = scenario, proportions = MixtureProofTestProportions, estimator = "median")}, simplify = FALSE )
+
+
+
+scenario = "flat"
+metric = "rmse"
+
+PlotBiasRMSE.f <- function(scenario, metric) {
+  simpleCap <- function(x) {
+    s <- strsplit(x, " ")[[1]]
+    paste(toupper(substring(s, 1,1)), substring(s, 2),
+          sep="", collapse=" ")
+  }
+  
+  par(mfrow = c(1, 1), mar = c(7.1, 4.1, 4.1, 2.1))
+  plot(Proof.BiasRMSE.BAYES.list[[scenario]][, metric], col = "black", type = "l", lwd = 3, bty = "n", axes = FALSE, ylab = simpleCap(metric), xlab = "")
+  points(Proof.BiasRMSE.genetic_msa.list[[scenario]][, metric], col = "grey70", type = "l", lwd = 3)
+  axis(side = 1, at = 1:15, labels = NA)
+  text(x = 1:15, y = rep(min(Proof.BiasRMSE.BAYES.list[[scenario]][, metric]) - diff(range(Proof.BiasRMSE.BAYES.list[[scenario]][, metric])) / 10, 15), labels = Groups15Short, srt = 90, adj = c(1, 0.5), xpd = TRUE)
+  mtext(text = "Reporting Group", side = 1, line = 5.5)
+  mtext(text = scenario, side = 3, line = 1, cex = 1.5)
+  axis(side = 2)
+  par(srt = 0)
+  legend("topright", legend = c("BAYES", "genetic_msa"), lwd = 3, col = c("black", "grey70"), bty = 'n')
+}
+
+PlotBiasRMSE.f(scenario = "flat", metric = "ci.width")
+
+sapply(FisheryProofTestScenarioNames, function(scenario) {
+  PlotBiasRMSE.f(scenario = scenario, metric = "bias")
+})
+
+sapply(FisheryProofTestScenarioNames, function(scenario) {
+  PlotBiasRMSE.f(scenario = scenario, metric = "rmse")
+})
+
+sapply(FisheryProofTestScenarioNames, function(scenario) {
+  PlotBiasRMSE.f(scenario = scenario, metric = "ci.width")
+})
