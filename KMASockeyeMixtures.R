@@ -9210,8 +9210,8 @@ md <- melt(data = harvest14, id.vars = c("Strata", "Geo"), measure.vars = "Numbe
 cast(md, Geo~Strata, sum)
 
 aggregate(Number ~ Date.Fishing.Began, data = subset(harvest14, subset = harvest14$Geo == "Uyak" & harvest14$Strata == "Late"), sum)
-
-
+aggregate(Number ~ Date.Fishing.Began, data = subset(harvest14, subset = harvest14$Geo == "CapeIgvak" & harvest14$Strata == "Early"), sum)
+aggregate(Number ~ Date.Fishing.Began, data = subset(harvest14, subset = harvest14$Geo == "CapeIgvak" & harvest14$Strata == "Middle"), sum)
 
 
 t(data.matrix(cast(aggregate(Number ~ Geo + Strata, data = harvest14, sum), Geo ~ Strata, value = "Number"))[c(1,2,8,10,11,14), ])
@@ -9307,6 +9307,8 @@ aggregate(Number ~ Date.Fishing.Began, data = subset(harvest15, subset = harvest
 aggregate(Number ~ Date.Fishing.Began, data = subset(harvest15, subset = harvest15$Geo == "Ayakulik" & harvest15$Strata == "Middle"), sum)
 aggregate(Number ~ Date.Fishing.Began, data = subset(harvest15, subset = harvest15$Geo == "Alitak" & harvest15$Strata == "Middle"), sum)
 aggregate(Number ~ Date.Fishing.Began, data = subset(harvest15, subset = harvest15$Geo == "Alitak" & harvest15$Strata == "Late"), sum)
+aggregate(Number ~ Date.Fishing.Began, data = subset(harvest15, subset = harvest15$Geo == "CapeIgvak" & harvest15$Strata == "Early"), sum)
+aggregate(Number ~ Date.Fishing.Began, data = subset(harvest15, subset = harvest15$Geo == "CapeIgvak" & harvest15$Strata == "Middle"), sum)
 
 
 
@@ -9404,6 +9406,8 @@ cast(aggregate(Number ~ Geo + Date.Fishing.Began, data = subset(x = harvest16, s
 cast(aggregate(Number ~ Geo + Date.Fishing.Began, data = subset(x = harvest16, subset = Strata == "Middle"), sum), Date.Fishing.Began ~ Geo, value = "Number")
 cast(aggregate(Number ~ Geo + Date.Fishing.Began, data = subset(x = harvest16, subset = Strata == "Late"), sum), Date.Fishing.Began ~ Geo, value = "Number")
 
+aggregate(Number ~ Date.Fishing.Began, data = subset(harvest16, subset = harvest16$Geo == "CapeIgvak" & harvest16$Strata == "Early"), sum)
+aggregate(Number ~ Date.Fishing.Began, data = subset(harvest16, subset = harvest16$Geo == "CapeIgvak" & harvest16$Strata == "Middle"), sum)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -9520,6 +9524,11 @@ KMA_Harvest.f(file = "Harvest/Kodiak Sockeye Salmon Catch by Day and Stat Area 2
 KMA_Harvest.f(file = "Harvest/Kodiak Sockeye Salmon Catch by Day and Stat Area 2015.csv", name = "KMASockeyeHarvest_2015", yr = 2015)
 KMA_Harvest.f(file = "Harvest/Kodiak Sockeye Salmon Catch by Day and Stat Area 2016.csv", name = "KMASockeyeHarvest_2016", yr = 2016)
 
+dput(x = KMASockeyeHarvest_2014, file = "Objects/KMASockeyeHarvest_2014.txt")
+dput(x = KMASockeyeHarvest_2015, file = "Objects/KMASockeyeHarvest_2015.txt")
+dput(x = KMASockeyeHarvest_2016, file = "Objects/KMASockeyeHarvest_2016.txt")
+
+
 KMA_Harvest.f(file = "Harvest/Kodiak Pink Salmon Catch by Day and Stat Area 2014.csv", name = "KMAPinkHarvest_2014", yr = 2014)
 KMA_Harvest.f(file = "Harvest/Kodiak Pink Salmon Catch by Day and Stat Area 2015.csv", name = "KMAPinkHarvest_2015", yr = 2015)
 KMA_Harvest.f(file = "Harvest/Kodiak Pink Salmon Catch by Day and Stat Area 2016.csv", name = "KMAPinkHarvest_2016", yr = 2016)
@@ -9627,6 +9636,11 @@ KMA_Harvest_Simple.f <- function(file, name, yr) {
 KMA_Harvest_Simple.f(file = "Harvest/Kodiak Sockeye Salmon Catch by Day and Stat Area 2014.csv", name = "KMASockeyeHarvestSimple_2014", yr = 2014)
 KMA_Harvest_Simple.f(file = "Harvest/Kodiak Sockeye Salmon Catch by Day and Stat Area 2015.csv", name = "KMASockeyeHarvestSimple_2015", yr = 2015)
 KMA_Harvest_Simple.f(file = "Harvest/Kodiak Sockeye Salmon Catch by Day and Stat Area 2016.csv", name = "KMASockeyeHarvestSimple_2016", yr = 2016)
+
+dput(x = KMASockeyeHarvestSimple_2014, file = "Objects/KMASockeyeHarvestSimple_2014.txt")
+dput(x = KMASockeyeHarvestSimple_2015, file = "Objects/KMASockeyeHarvestSimple_2015.txt")
+dput(x = KMASockeyeHarvestSimple_2016, file = "Objects/KMASockeyeHarvestSimple_2016.txt")
+
 
 require(reshape)
 s14 <- cast(melt(data = KMASockeyeHarvestSimple_2014, id.vars = c("Strata", "Geo"), measure.vars = "Number", na.rm = TRUE), Geo~Strata, sum)
@@ -9754,7 +9768,17 @@ dimnames(KMA_Sockeye_Pink_Harvest_Strata.mat) <-
          sapply(y, function(i) {paste(x, i, sep = "_")})
        })))
 
+KMA_Sockeye_Pink_Harvest_Strata.mat <- cbind(KMA_Sockeye_Pink_Harvest_Strata.mat,
+                                             "s14" = rowSums(KMA_Sockeye_Pink_Harvest_Strata.mat[, c("s14_Early", "s14_Middle", "s14_Late", "s14_Post")]),
+                                             "s15" = rowSums(KMA_Sockeye_Pink_Harvest_Strata.mat[, c("s15_Pre", "s15_Early", "s15_Middle", "s15_Late", "s15_Post")]),
+                                             "s16" = rowSums(KMA_Sockeye_Pink_Harvest_Strata.mat[, c("s16_Early", "s16_Middle", "s16_Late", "s16_Post")]),
+                                             "p14" = rowSums(KMA_Sockeye_Pink_Harvest_Strata.mat[, c("p14_Early", "p14_Middle", "p14_Late", "p14_Post")]),
+                                             "p15" = rowSums(KMA_Sockeye_Pink_Harvest_Strata.mat[, c("p15_Early", "p15_Middle", "p15_Late", "p15_Post")]),
+                                             "p16" = rowSums(KMA_Sockeye_Pink_Harvest_Strata.mat[, c("p16_Early", "p16_Middle", "p16_Late", "p16_Post")]))
+
 str(KMA_Sockeye_Pink_Harvest_Strata.mat)
+
+dput(x = KMA_Sockeye_Pink_Harvest_Strata.mat, file = "Objects/KMA_Sockeye_Pink_Harvest_Strata.mat.txt")
 
 write.csv(x = KMA_Sockeye_Pink_Harvest_Strata.mat,
           file = "Figures/Maps/KMA_Sockeye_Pink_Harvest_Strata.csv")
@@ -9946,11 +9970,29 @@ StatAreas.shp <- readShapePoly("Figures/Maps/pvs_stat_KMA.shp")
 str(StatAreas.shp, max.level = 2)
 str(StatAreas.shp@data)
 
+sum(rowSums(KMA_Sockeye_Pink_Harvest_Strata.mat) > 0)
+
+rownames(KMA_Sockeye_Pink_Harvest_Strata.mat) %in% StatAreas.shp@data$STAT_AREA
+intersect(rownames(KMA_Sockeye_Pink_Harvest_Strata.mat), StatAreas.shp@data$STAT_AREA)
+setdiff(rownames(KMA_Sockeye_Pink_Harvest_Strata.mat), StatAreas.shp@data$STAT_AREA)
+
+sapply(setdiff(rownames(KMA_Sockeye_Pink_Harvest_Strata.mat), StatAreas.shp@data$STAT_AREA), function(missing_stat_area) {
+  KMA_Sockeye_Pink_Harvest_Strata.mat[missing_stat_area, c(paste0("s", 14:16), paste0("p", 14:16))]
+})  # some stat areas are missing from the shapefile, WTF
+
+
+
+
+
+
+
+
 str(StatAreas.shp[!is.na(StatAreas.shp@data$Statarea)], max.level = 2)  # fail
 
 KMA_StatAreas <- as.character(read.csv(file = "Figures/Maps/KMAStatAreas.csv")[,1])
 KMAStatAreas.shp <- subset(StatAreas.shp, StatAreas.shp@data$Statarea %in% KMA_StatAreas)
-str(KMAStatAreas.shp)
+str(KMAStatAreas.shp@data, max.level = 2)
+
 max(KMAStatAreas.shp@data[, 9:21])  # Sockeye max stat area
 max(KMAStatAreas.shp@data[, 22:33])  # Pink max stat area
 
