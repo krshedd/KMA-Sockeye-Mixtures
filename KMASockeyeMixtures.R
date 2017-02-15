@@ -9966,32 +9966,44 @@ while(!require(rgeos)) {install.packages("rgeos")}
 while(!require(sp)) {install.packages("sp")}
 require(devEMF)
 
-StatAreas.shp <- readShapePoly("Figures/Maps/pvs_stat_KMA.shp")
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Read in Raw StatArea Shapefile from Kodiak, NOTE: this is different from the one on the shared drive <U:\Boundaries\CFStats\AllAkCFStats\pvs_stat.shp>, which was out of date (i.e. missing stat areas)
+StatAreas.shp <- readShapePoly("Figures/Maps/StatArea.shp")
 str(StatAreas.shp, max.level = 2)
 str(StatAreas.shp@data)
 
 sum(rowSums(KMA_Sockeye_Pink_Harvest_Strata.mat) > 0)
+table(rownames(KMA_Sockeye_Pink_Harvest_Strata.mat)[rowSums(KMA_Sockeye_Pink_Harvest_Strata.mat) > 0] %in% StatAreas.shp@data$Stat)  # Do all stat areas with harvest occur in the shapefile?
+setdiff(rownames(KMA_Sockeye_Pink_Harvest_Strata.mat), StatAreas.shp@data$Stat)  # Are there any stat areas from OceanAK not in the shapefile?
 
-rownames(KMA_Sockeye_Pink_Harvest_Strata.mat) %in% StatAreas.shp@data$STAT_AREA
-intersect(rownames(KMA_Sockeye_Pink_Harvest_Strata.mat), StatAreas.shp@data$STAT_AREA)
-setdiff(rownames(KMA_Sockeye_Pink_Harvest_Strata.mat), StatAreas.shp@data$STAT_AREA)
-
-sapply(setdiff(rownames(KMA_Sockeye_Pink_Harvest_Strata.mat), StatAreas.shp@data$STAT_AREA), function(missing_stat_area) {
+sapply(setdiff(rownames(KMA_Sockeye_Pink_Harvest_Strata.mat), StatAreas.shp@data$Stat), function(missing_stat_area) {
   KMA_Sockeye_Pink_Harvest_Strata.mat[missing_stat_area, c(paste0("s", 14:16), paste0("p", 14:16))]
 })  # some stat areas are missing from the shapefile, WTF
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Add harvest data to shapefile@data
+KMA_StatAreas.shp <- StatAreas.shp
 
+KMA_StatAreas.shp@data <- cbind(KMA_StatAreas.shp@data, KMA_Sockeye_Pink_Harvest_Strata.mat[match(as.character(KMA_StatAreas.shp@data$Stat), rownames(KMA_Sockeye_Pink_Harvest_Strata.mat)), ])
 
+# Replace NA with 0
+table(is.na(KMA_StatAreas.shp@data[, 8:38]))
+KMA_StatAreas.shp@data[, 8:38][is.na(KMA_StatAreas.shp@data[, 8:38])] <- 0
+str(KMA_StatAreas.shp@data)
 
+writePolyShape(x = KMA_StatAreas.shp, fn = "Figures/Maps/KMA_StatAreas")
 
+KMA_StatAreas.shp <- readShapePoly("Figures/Maps/KMA_StatAreas.shp")
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Restrict to only Kodiak Stat Areas
 
-
-str(StatAreas.shp[!is.na(StatAreas.shp@data$Statarea)], max.level = 2)  # fail
-
-KMA_StatAreas <- as.character(read.csv(file = "Figures/Maps/KMAStatAreas.csv")[,1])
-KMAStatAreas.shp <- subset(StatAreas.shp, StatAreas.shp@data$Statarea %in% KMA_StatAreas)
-str(KMAStatAreas.shp@data, max.level = 2)
+# KMA_StatAreas <- as.character(read.csv(file = "Figures/Maps/KMAStatAreas.csv")[,1])
+# setdiff(StatAreas.shp@data$Stat, KMA_StatAreas)
+# setdiff(KMA_StatAreas, StatAreas.shp@data$Stat)
+# 
+# KMAStatAreas.shp <- subset(StatAreas.shp, StatAreas.shp@data$Statarea %in% KMA_StatAreas)
+# str(KMAStatAreas.shp@data, max.level = 2)
 
 max(KMAStatAreas.shp@data[, 9:21])  # Sockeye max stat area
 max(KMAStatAreas.shp@data[, 22:33])  # Pink max stat area
