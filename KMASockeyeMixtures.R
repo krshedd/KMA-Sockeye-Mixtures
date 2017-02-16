@@ -9533,6 +9533,10 @@ KMA_Harvest.f(file = "Harvest/Kodiak Pink Salmon Catch by Day and Stat Area 2014
 KMA_Harvest.f(file = "Harvest/Kodiak Pink Salmon Catch by Day and Stat Area 2015.csv", name = "KMAPinkHarvest_2015", yr = 2015)
 KMA_Harvest.f(file = "Harvest/Kodiak Pink Salmon Catch by Day and Stat Area 2016.csv", name = "KMAPinkHarvest_2016", yr = 2016)
 
+dput(x = KMAPinkHarvest_2014, file = "Objects/KMAPinkHarvest_2014.txt")
+dput(x = KMAPinkHarvest_2015, file = "Objects/KMAPinkHarvest_2015.txt")
+dput(x = KMAPinkHarvest_2016, file = "Objects/KMAPinkHarvest_2016.txt")
+
 
 require(reshape)
 s14 <- cast(melt(data = KMASockeyeHarvest_2014, id.vars = c("Strata", "Geo"), measure.vars = "Number", na.rm = TRUE), Geo~Strata, sum)
@@ -9647,7 +9651,9 @@ s14 <- cast(melt(data = KMASockeyeHarvestSimple_2014, id.vars = c("Strata", "Geo
 s15 <- cast(melt(data = KMASockeyeHarvestSimple_2015, id.vars = c("Strata", "Geo"), measure.vars = "Number", na.rm = TRUE), Geo~Strata, sum)
 s16 <- cast(melt(data = KMASockeyeHarvestSimple_2016, id.vars = c("Strata", "Geo"), measure.vars = "Number", na.rm = TRUE), Geo~Strata, sum)
 
-
+s14 <- cbind(s14, "Annual" = rowSums(s14[, -1]))
+s15 <- cbind(s15, "Annual" = rowSums(s15[, -1]))
+s16 <- cbind(s16, "Annual" = rowSums(s16[, -1]))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -9968,9 +9974,12 @@ require(devEMF)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Read in Raw StatArea Shapefile from Kodiak, NOTE: this is different from the one on the shared drive <U:\Boundaries\CFStats\AllAkCFStats\pvs_stat.shp>, which was out of date (i.e. missing stat areas)
-StatAreas.shp <- readShapePoly("Figures/Maps/StatArea.shp")
+StatAreas.shp <- readShapePoly(fn = "Figures/Maps/StatArea.shp", proj4string = CRS("+proj=merc"), verbose = TRUE)
 str(StatAreas.shp, max.level = 2)
 str(StatAreas.shp@data)
+StatAreas.shp@proj4string
+str(StatAreas.shp@polygons[[1]])
+
 
 sum(rowSums(KMA_Sockeye_Pink_Harvest_Strata.mat) > 0)
 table(rownames(KMA_Sockeye_Pink_Harvest_Strata.mat)[rowSums(KMA_Sockeye_Pink_Harvest_Strata.mat) > 0] %in% StatAreas.shp@data$Stat)  # Do all stat areas with harvest occur in the shapefile?
@@ -9981,19 +9990,26 @@ sapply(setdiff(rownames(KMA_Sockeye_Pink_Harvest_Strata.mat), StatAreas.shp@data
 })  # some stat areas are missing from the shapefile, WTF
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Add harvest data to shapefile@data
-KMA_StatAreas.shp <- StatAreas.shp
+# Convert from mercator projection to latlong
+KMAStatAreas.shp <- spTransform(x = StatAreas.shp, CRSobj = CRS("+proj=longlat +datum=NAD83"))  # Need to change datum from mercator to NAD83
+str(KMAStatAreas.shp, max.level = 2)
+str(KMAStatAreas.shp@data)
+KMAStatAreas.shp@proj4string
+str(KMAStatAreas.shp@polygons[[1]])
 
-KMA_StatAreas.shp@data <- cbind(KMA_StatAreas.shp@data, KMA_Sockeye_Pink_Harvest_Strata.mat[match(as.character(KMA_StatAreas.shp@data$Stat), rownames(KMA_Sockeye_Pink_Harvest_Strata.mat)), ])
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Add harvest data to shapefile@data
+KMAStatAreas.shp@data <- cbind(KMAStatAreas.shp@data, KMA_Sockeye_Pink_Harvest_Strata.mat[match(as.character(KMAStatAreas.shp@data$Stat), rownames(KMA_Sockeye_Pink_Harvest_Strata.mat)), ])
 
 # Replace NA with 0
-table(is.na(KMA_StatAreas.shp@data[, 8:38]))
-KMA_StatAreas.shp@data[, 8:38][is.na(KMA_StatAreas.shp@data[, 8:38])] <- 0
-str(KMA_StatAreas.shp@data)
+table(is.na(KMAStatAreas.shp@data[, 7:37]))
+KMAStatAreas.shp@data[, 7:37][is.na(KMAStatAreas.shp@data[, 7:37])] <- 0
+str(KMAStatAreas.shp@data)
 
-writePolyShape(x = KMA_StatAreas.shp, fn = "Figures/Maps/KMA_StatAreas")
+writePolyShape(x = KMAStatAreas.shp, fn = "Figures/Maps/KMAStatAreas")
 
-KMA_StatAreas.shp <- readShapePoly("Figures/Maps/KMA_StatAreas.shp")
+KMAStatAreas.shp <- readShapePoly("Figures/Maps/KMAStatAreas.shp")
+str(KMAStatAreas.shp, max.level = 2)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Restrict to only Kodiak Stat Areas
@@ -10005,10 +10021,12 @@ KMA_StatAreas.shp <- readShapePoly("Figures/Maps/KMA_StatAreas.shp")
 # KMAStatAreas.shp <- subset(StatAreas.shp, StatAreas.shp@data$Statarea %in% KMA_StatAreas)
 # str(KMAStatAreas.shp@data, max.level = 2)
 
-max(KMAStatAreas.shp@data[, 9:21])  # Sockeye max stat area
-max(KMAStatAreas.shp@data[, 22:33])  # Pink max stat area
+max(KMAStatAreas.shp@data[, 8:20])  # Sockeye temporal max stat area
+max(KMAStatAreas.shp@data[, 21:32])  # Pink temporal max stat area
+max(KMAStatAreas.shp@data[, 33:35])  # Sockeye annual max stat area
+max(KMAStatAreas.shp@data[, 36:38])  # Pink annual max stat area
 
-which.max(apply(KMAStatAreas.shp@data[, 9:21], 2, max))
+which.max(apply(KMAStatAreas.shp@data[, 8:20], 2, max))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Only run this if you want to do price instead of number of fish
@@ -10049,7 +10067,7 @@ plot(KMAStatAreas.shp, add = TRUE,
      border = TRUE)
 
 
-Plot_KMA_Harvest_Map.f <- function(area, max.col = NULL) {
+Plot_Basic_KMA_Harvest_Map.f <- function(area, max.col = NULL) {
   if(is.null(max.col)) {max.col <- max(KMAStatAreas.shp@data[, area])}
   
   map("worldHires", "usa", xlim = c(-156.6, -151.7), ylim = c(56.3, 59), col = "gray90", fill = TRUE)
@@ -10064,33 +10082,33 @@ setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Mixtures/
 setwd("Harvest Maps")
 
 
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Uganik <- KMAStatAreas.shp[which(KMAStatAreas.shp@data$Statarea %in% seq(from = 25300, to = 25399, by = 1)), ]
+Uganik <- KMAStatAreas.shp[which(KMAStatAreas.shp@data$Stat %in% seq(from = 25300, to = 25399, by = 1)), ]
 Uganik@data$SampArea <- "Uganik"
 Uganik.dis <- gUnaryUnion(Uganik, id = Uganik@data$SampArea)
-Uyak <- KMAStatAreas.shp[which(KMAStatAreas.shp@data$Statarea %in% seq(from = 25400, to = 25499, by = 1)), ]
+Uyak <- KMAStatAreas.shp[which(KMAStatAreas.shp@data$Stat %in% seq(from = 25400, to = 25499, by = 1)), ]
 Uyak@data$SampArea <- "Uyak"
 Uyak.dis <- gUnaryUnion(Uyak, id = Uyak@data$SampArea)
-Karluk <- KMAStatAreas.shp[which(KMAStatAreas.shp@data$Statarea %in% c("25510", "25520", "25640")), ]
+Karluk <- KMAStatAreas.shp[which(KMAStatAreas.shp@data$Stat %in% c("25510", "25520", "25640")), ]
 Karluk@data$SampArea <- "Karluk"
 Karluk.dis <- gUnaryUnion(Karluk, id = Karluk@data$SampArea)
-Ayakulik <- KMAStatAreas.shp[which(KMAStatAreas.shp@data$Statarea %in% seq(from = 25610, to = 25630, by = 1)), ]
+Ayakulik <- KMAStatAreas.shp[which(KMAStatAreas.shp@data$Stat %in% seq(from = 25610, to = 25630, by = 1)), ]
 Ayakulik@data$SampArea <- "Ayakulik"
 Ayakulik.dis <- gUnaryUnion(Ayakulik, id = Ayakulik@data$SampArea)
-Alitak <- KMAStatAreas.shp[which(KMAStatAreas.shp@data$Statarea %in% c("25710", "25720", "25750", "25760", "25770")), ]
+Alitak <- KMAStatAreas.shp[which(KMAStatAreas.shp@data$Stat %in% c("25710", "25720", "25750", "25760", "25770")), ]
 Alitak@data$SampArea <- "Alitak"
 Alitak.dis <- gUnaryUnion(Alitak, id = Alitak@data$SampArea)
-Igvak <- KMAStatAreas.shp[which(KMAStatAreas.shp@data$Statarea %in% c("26275", "26280", "26290", "26295")), ]
+Igvak <- KMAStatAreas.shp[which(KMAStatAreas.shp@data$Stat %in% c("26275", "26280", "26290", "26295")), ]
 Igvak@data$SampArea <- "Igvak"
 Igvak.dis <- gUnaryUnion(Igvak, id = Igvak@data$SampArea)
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Plot_KMA_Harvest_Map.f <- function(area, max.col = NULL, cex.lab = 0.9) {
+Plot_SockeyeTemporal_KMA_Harvest_Map.f <- function(area, max.col = NULL, cex.lab = 0.9) {
   # emf(file = paste0("KMA Harvest by Stat Area ", area, ".emf"), width = 5.75, height = 5.75, family = "serif", bg = "white")
   if(is.null(max.col)) {max.col <- max(KMAStatAreas.shp@data[, area])}
-  map("worldHires", "usa", xlim = c(-156.55, -151.71), ylim = c(56.36, 58.85), col = "gray90", fill = TRUE)
+  map("worldHires", "usa", xlim = c(-156.55, -151.71), ylim = c(56.36, 58.85), col = "gray90", fill = TRUE, mar = rep(0, 4))
   color.ramp <- colorRampPalette(c("white", "green", "darkgreen", "black"))(101)
   plot(KMAStatAreas.shp, add = TRUE, 
        col = color.ramp[round(KMAStatAreas.shp@data[, area] / (max.col/100)) + 1],
@@ -10129,31 +10147,34 @@ Plot_KMA_Harvest_Map.f <- function(area, max.col = NULL, cex.lab = 0.9) {
 }
 
 # What is sockeye max?
-max(KMAStatAreas.shp@data[, 9:21])
-which.max(apply(KMAStatAreas.shp@data[, 9:21], 2, max))
+max(KMAStatAreas.shp@data[, 8:20])
+which.max(apply(KMAStatAreas.shp@data[, 8:20], 2, max))
 
-Plot_KMA_Harvest_Map.f(area = "s14_Early", max.col = 3.3e5)
-Plot_KMA_Harvest_Map.f(area = "s15_Early", max.col = 3.3e5)
-Plot_KMA_Harvest_Map.f(area = "s16_Early", max.col = 3.3e5)
+setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Mixtures/Figures/Harvest Maps")
+par(mar = rep(0, 4))
 
-Plot_KMA_Harvest_Map.f(area = "s14_Middle", max.col = 3.3e5)
-Plot_KMA_Harvest_Map.f(area = "s15_Middle", max.col = 3.3e5)
-Plot_KMA_Harvest_Map.f(area = "s16_Middle", max.col = 3.3e5)
+png(filename = "s14 1e.png", width = 742, height = 712, res = 120); Plot_SockeyeTemporal_KMA_Harvest_Map.f(area = "s14_Early", max.col = 3.3e5); dev.off()
+png(filename = "s15 1e.png", width = 742, height = 712, res = 120); Plot_SockeyeTemporal_KMA_Harvest_Map.f(area = "s15_Early", max.col = 3.3e5); dev.off()
+png(filename = "s16 1e.png", width = 742, height = 712, res = 120); Plot_SockeyeTemporal_KMA_Harvest_Map.f(area = "s16_Early", max.col = 3.3e5) ; dev.off()
 
-Plot_KMA_Harvest_Map.f(area = "s14_Late", max.col = 3.3e5)
-Plot_KMA_Harvest_Map.f(area = "s15_Late", max.col = 3.3e5)
-Plot_KMA_Harvest_Map.f(area = "s16_Late", max.col = 3.3e5)
+png(filename = "s14 2m.png", width = 742, height = 712, res = 120); Plot_SockeyeTemporal_KMA_Harvest_Map.f(area = "s14_Middle", max.col = 3.3e5); dev.off()
+png(filename = "s15 2m.png", width = 742, height = 712, res = 120); Plot_SockeyeTemporal_KMA_Harvest_Map.f(area = "s15_Middle", max.col = 3.3e5); dev.off()
+png(filename = "s16 2m.png", width = 742, height = 712, res = 120); Plot_SockeyeTemporal_KMA_Harvest_Map.f(area = "s16_Middle", max.col = 3.3e5); dev.off()
 
-Plot_KMA_Harvest_Map.f(area = "s14_Post", max.col = 3.3e5)
-Plot_KMA_Harvest_Map.f(area = "s15_Post", max.col = 3.3e5)
-Plot_KMA_Harvest_Map.f(area = "s16_Post", max.col = 3.3e5)
+png(filename = "s14 3l.png", width = 742, height = 712, res = 120); Plot_SockeyeTemporal_KMA_Harvest_Map.f(area = "s14_Late", max.col = 3.3e5); dev.off()
+png(filename = "s15 3l.png", width = 742, height = 712, res = 120); Plot_SockeyeTemporal_KMA_Harvest_Map.f(area = "s15_Late", max.col = 3.3e5); dev.off()
+png(filename = "s16 3l.png", width = 742, height = 712, res = 120); Plot_SockeyeTemporal_KMA_Harvest_Map.f(area = "s16_Late", max.col = 3.3e5); dev.off()
+
+png(filename = "s14 4p.png", width = 742, height = 712, res = 120); Plot_SockeyeTemporal_KMA_Harvest_Map.f(area = "s14_Post", max.col = 3.3e5); dev.off()
+png(filename = "s15 4p.png", width = 742, height = 712, res = 120); Plot_SockeyeTemporal_KMA_Harvest_Map.f(area = "s15_Post", max.col = 3.3e5); dev.off()
+png(filename = "s16 4p.png", width = 742, height = 712, res = 120); Plot_SockeyeTemporal_KMA_Harvest_Map.f(area = "s16_Post", max.col = 3.3e5); dev.off()
 
 
 # What is pink max?
-Plot_KMA_Harvest_Map.f <- function(area, max.col = NULL, cex.lab = 0.9) {
+Plot_PinkTemporal_KMA_Harvest_Map.f <- function(area, max.col = NULL, cex.lab = 0.9) {
   # emf(file = paste0("KMA Harvest by Stat Area ", area, ".emf"), width = 5.75, height = 5.75, family = "serif", bg = "white")
   if(is.null(max.col)) {max.col <- max(KMAStatAreas.shp@data[, area])}
-  map("worldHires", "usa", xlim = c(-156.55, -151.71), ylim = c(56.36, 58.85), col = "gray90", fill = TRUE)
+  map("worldHires", "usa", xlim = c(-156.55, -151.71), ylim = c(56.36, 58.85), col = "gray90", fill = TRUE, mar = rep(0, 4))
   color.ramp <- c(colorRampPalette(c("white", "green", "darkgreen", "black"))(11), colorRampPalette(c("lightpink", "red", "darkred", "purple", "purple4"))(90))
   plot(KMAStatAreas.shp, add = TRUE, 
        col = color.ramp[round(KMAStatAreas.shp@data[, area] / (max.col/100)) + 1],
@@ -10171,7 +10192,13 @@ Plot_KMA_Harvest_Map.f <- function(area, max.col = NULL, cex.lab = 0.9) {
                     "Sockeye",
                     "Pink")
   
-  text(x = -152.8, y = 56.70, labels = paste(yr, strata), cex = 1.3)
+  if(is.na(strata)){
+    text(x = -152.8, y = 56.70, labels = yr, cex = 1.3)
+  } else {
+    text(x = -152.8, y = 56.70, labels = paste(yr, strata), cex = 1.3)
+    
+  }
+  
   text(x = -152.8, y = 56.80, labels = species, cex = 1.3)
   maps::map.scale(x = -153.6, y = 56.46, ratio = FALSE, relwidth = 0.2)
   north.arrow(xb = -152, yb = 56.6, len = 0.05, lab = "N")
@@ -10191,25 +10218,33 @@ Plot_KMA_Harvest_Map.f <- function(area, max.col = NULL, cex.lab = 0.9) {
   # dev.off()
 }
 
-max(KMAStatAreas.shp@data[, 22:33])
-which.max(apply(KMAStatAreas.shp@data[, 22:33], 2, max))
+max(KMAStatAreas.shp@data[, 21:32])
+which.max(apply(KMAStatAreas.shp@data[, 21:32], 2, max))
 
-Plot_KMA_Harvest_Map.f(area = "p14_Early", max.col = 3.3e6)
-Plot_KMA_Harvest_Map.f(area = "p15_Early", max.col = 3.3e6)
-Plot_KMA_Harvest_Map.f(area = "p16_Early", max.col = 3.3e6)
 
-Plot_KMA_Harvest_Map.f(area = "p14_Middle", max.col = 3.3e6)
-Plot_KMA_Harvest_Map.f(area = "p15_Middle", max.col = 3.3e6)
-Plot_KMA_Harvest_Map.f(area = "p16_Middle", max.col = 3.3e6)
+png(filename = "p14 1e.png", width = 742, height = 712, res = 120); Plot_PinkTemporal_KMA_Harvest_Map.f(area = "p14_Early", max.col = 3.3e6); dev.off()
+png(filename = "p15 1e.png", width = 742, height = 712, res = 120); Plot_PinkTemporal_KMA_Harvest_Map.f(area = "p15_Early", max.col = 3.3e6); dev.off()
+png(filename = "p16 1e.png", width = 742, height = 712, res = 120); Plot_PinkTemporal_KMA_Harvest_Map.f(area = "p16_Early", max.col = 3.3e6) ; dev.off()
 
-Plot_KMA_Harvest_Map.f(area = "p14_Late", max.col = 3.3e6)
-Plot_KMA_Harvest_Map.f(area = "p15_Late", max.col = 3.3e6)
-Plot_KMA_Harvest_Map.f(area = "p16_Late", max.col = 3.3e6)
+png(filename = "p14 2m.png", width = 742, height = 712, res = 120); Plot_PinkTemporal_KMA_Harvest_Map.f(area = "p14_Middle", max.col = 3.3e6); dev.off()
+png(filename = "p15 2m.png", width = 742, height = 712, res = 120); Plot_PinkTemporal_KMA_Harvest_Map.f(area = "p15_Middle", max.col = 3.3e6); dev.off()
+png(filename = "p16 2m.png", width = 742, height = 712, res = 120); Plot_PinkTemporal_KMA_Harvest_Map.f(area = "p16_Middle", max.col = 3.3e6); dev.off()
 
-Plot_KMA_Harvest_Map.f(area = "p14_Post", max.col = 3.3e6)
-Plot_KMA_Harvest_Map.f(area = "p15_Post", max.col = 3.3e6)
-Plot_KMA_Harvest_Map.f(area = "p16_Post", max.col = 3.3e6)
+png(filename = "p14 3l.png", width = 742, height = 712, res = 120); Plot_PinkTemporal_KMA_Harvest_Map.f(area = "p14_Late", max.col = 3.3e6); dev.off()
+png(filename = "p15 3l.png", width = 742, height = 712, res = 120); Plot_PinkTemporal_KMA_Harvest_Map.f(area = "p15_Late", max.col = 3.3e6); dev.off()
+png(filename = "p16 3l.png", width = 742, height = 712, res = 120); Plot_PinkTemporal_KMA_Harvest_Map.f(area = "p16_Late", max.col = 3.3e6); dev.off()
 
+png(filename = "p14 4p.png", width = 742, height = 712, res = 120); Plot_PinkTemporal_KMA_Harvest_Map.f(area = "p14_Post", max.col = 3.3e6); dev.off()
+png(filename = "p15 4p.png", width = 742, height = 712, res = 120); Plot_PinkTemporal_KMA_Harvest_Map.f(area = "p15_Post", max.col = 3.3e6); dev.off()
+png(filename = "p16 4p.png", width = 742, height = 712, res = 120); Plot_PinkTemporal_KMA_Harvest_Map.f(area = "p16_Post", max.col = 3.3e6); dev.off()
+
+png(filename = "p14.png", width = 742, height = 712, res = 120); Plot_PinkTemporal_KMA_Harvest_Map.f(area = "p14", max.col = 3.3e6); dev.off()
+png(filename = "p15.png", width = 742, height = 712, res = 120); Plot_PinkTemporal_KMA_Harvest_Map.f(area = "p15", max.col = 3.3e6); dev.off()
+png(filename = "p16.png", width = 742, height = 712, res = 120); Plot_PinkTemporal_KMA_Harvest_Map.f(area = "p16", max.col = 3.3e6); dev.off()
+
+png(filename = "s14.png", width = 742, height = 712, res = 120); Plot_PinkTemporal_KMA_Harvest_Map.f(area = "s14", max.col = 3.3e6); dev.off()
+png(filename = "s15.png", width = 742, height = 712, res = 120); Plot_PinkTemporal_KMA_Harvest_Map.f(area = "s15", max.col = 3.3e6); dev.off()
+png(filename = "s16.png", width = 742, height = 712, res = 120); Plot_PinkTemporal_KMA_Harvest_Map.f(area = "s16", max.col = 3.3e6); dev.off()
 
 
 # Lattice Plot
