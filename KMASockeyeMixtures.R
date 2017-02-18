@@ -7512,7 +7512,190 @@ sapply(GeoMix, function(geomix) {
 })
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Make temporal figures as .emf files
 
+# dir.create("Figures/All Years/Temporal")
+require(devEMF)
+require(gplots)
+
+sapply(c("1_Early", "2_Middle", "3_Late"), function(TempMix){
+  
+  sapply(GeoMix, function(geomix) {
+    
+    emf(file = paste("Figures/All Years/Temporal/", filenames[geomix], TempMix, ".emf", sep = ''), width = 6, height = 5.75, family = "serif", bg = "white")
+    
+    
+    layout(mat = layoutmat, widths = c(0.075, 0.375, 0.625), heights = c(0.9, 0.9, 0.9, 0.15))
+    par(mar = rep(0, 4))
+    par(family = "times")
+    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ## Y-axis label
+    plot.new()
+    text(x = 0.25, y = 0.5, labels = "Percentage of Catch", srt = 90, cex = cex.lab)
+    
+    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ## 2014 Barplot Regional
+    if(length(grep(pattern = geomix, x = names(TempMix14), value = TRUE)) == 0) {
+      par(mar = c(1, 1, 1, 0))
+      Barplot14 <- barplot2(height = rep(0, 6), beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd, ci.l = rep(0, 6),  ci.u = rep(0, 6), 
+                            ylim = c(0, 100), col = 1, yaxt = "n", xaxt = 'n')
+      axis(side = 2, at = seq(0, 100, 25), labels = formatC(x = seq(0, 100, 25), big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+      abline(h = 0, xpd = FALSE)
+      text(x = mean(Barplot14), y = 50, labels = "No estimates avaialable for 2014", cex = cex.leg)
+    } else {
+      geomix14 <- grep(pattern = geomix, x = names(TempMix14), value = TRUE)
+      par(mar = c(1, 1, 1, 0))
+      
+      temp.mix.to.zero <- grep(pattern = TempMix, x = TempMix14[[geomix14]], value = TRUE, invert = TRUE)
+      
+      height.14 <- t(sapply(TempMix14[[geomix14]], function(tempmix) {RegionalEstimates14[[tempmix]][, "median"]})) * 100
+      height.14[temp.mix.to.zero, ] <- 0
+      ci.l.14 <- t(sapply(TempMix14[[geomix14]], function(tempmix) {RegionalEstimates14[[tempmix]][, "5%"]})) * 100
+      ci.l.14[temp.mix.to.zero, ] <- 0
+      ci.u.14 <- t(sapply(TempMix14[[geomix14]], function(tempmix) {RegionalEstimates14[[tempmix]][, "95%"]})) * 100
+      ci.u.14[temp.mix.to.zero, ] <- 0
+      
+      Barplot14 <- barplot2(height = height.14, beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd, ci.l = ci.l.14, ci.u = ci.u.14, 
+                            ylim = c(0, 100), col = TempProportionColors14[[geomix14]], yaxt = "n", xaxt = 'n')
+      axis(side = 2, at = seq(0, 100, 25), labels = formatC(x = seq(0, 100, 25), big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+      # legend(legend = TempLegend14[[geomix14]], x = "topleft", fill = TempProportionColors14[[geomix14]], border = "black", bty = "n", cex = cex.leg, title="2014")
+      abline(h = 0, xpd = FALSE)
+    }
+    #~~~~~~~~~~~~~~~~
+    ## 2014 Barplot SubRegional
+    if(length(grep(pattern = geomix, x = names(TempMix14), value = TRUE)) == 0) {
+      par(mar = c(1, 1, 1, 0))
+      Barplot14 <- barplot2(height = rep(0, 10), beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd, ci.l = rep(0, 10),  ci.u = rep(0, 10), 
+                            ylim = c(0, 100), col = 1, yaxt = "n", xaxt = 'n')
+      axis(side = 2, at = seq(0, 100, 25), labels = FALSE, cex.axis = cex.yaxis)
+      abline(h = 0, xpd = FALSE)
+      text(x = mean(Barplot14), y = 50, labels = "No estimates avaialable for 2014", cex = cex.leg)
+    } else {
+      geomix14 <- grep(pattern = geomix, x = names(TempMix14), value = TRUE)
+      par(mar = c(1, 1, 1, 0))
+      
+      temp.mix.to.zero <- grep(pattern = TempMix, x = TempMix14[[geomix14]], value = TRUE, invert = TRUE)
+      
+      height.14 <- t(sapply(TempMix14[[geomix14]], function(tempmix) {Estimates14[[tempmix]][SubRegGroups, "median"]})) * 100
+      height.14[temp.mix.to.zero, ] <- 0
+      ci.l.14 <- t(sapply(TempMix14[[geomix14]], function(tempmix) {Estimates14[[tempmix]][SubRegGroups, "5%"]})) * 100
+      ci.l.14[temp.mix.to.zero, ] <- 0
+      ci.u.14 <- t(sapply(TempMix14[[geomix14]], function(tempmix) {Estimates14[[tempmix]][SubRegGroups, "95%"]})) * 100
+      ci.u.14[temp.mix.to.zero, ] <- 0
+      
+      Barplot14 <- barplot2(height = height.14, beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd, ci.l = ci.l.14, ci.u = ci.u.14, 
+                            ylim = c(0, 100), col = TempProportionColors14[[geomix14]], yaxt = "n", xaxt = 'n')
+      axis(side = 2, at = seq(0, 100, 25), labels = FALSE, cex.axis = cex.yaxis)
+      legend(legend = TempLegend14[[geomix14]], x = min(Barplot14[, 6]), y = 100, fill = TempProportionColors14[[geomix14]], border = "black", bty = "n", cex = cex.leg, title="2014")
+      abline(h = 0, xpd = FALSE)
+      abline(v = mean(Barplot14[, 2:3]), lty = 2)
+    }
+    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ## 2015 Barplot Regional
+    geomix15 <- grep(pattern = geomix, x = names(TempMix15), value = TRUE)
+    par(mar = c(1, 1, 1, 0))
+    
+    temp.mix.to.zero <- grep(pattern = TempMix, x = TempMix15[[geomix15]], value = TRUE, invert = TRUE)
+    
+    height.15 <- t(sapply(TempMix15[[geomix15]], function(tempmix) {RegionalEstimates15[[tempmix]][, "median"]})) * 100
+    height.15[temp.mix.to.zero, ] <- 0
+    ci.l.15 <- t(sapply(TempMix15[[geomix15]], function(tempmix) {RegionalEstimates15[[tempmix]][, "5%"]})) * 100
+    ci.l.15[temp.mix.to.zero, ] <- 0
+    ci.u.15 <- t(sapply(TempMix15[[geomix15]], function(tempmix) {RegionalEstimates15[[tempmix]][, "95%"]})) * 100
+    ci.u.15[temp.mix.to.zero, ] <- 0
+    
+    Barplot15 <- barplot2(height = height.15, beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd, ci.l = ci.l.15, ci.u = ci.u.15, 
+                          ylim = c(0, 100), col = TempProportionColors15[[geomix15]], yaxt = "n", xaxt = 'n')
+    axis(side = 2, at = seq(0, 100, 25), labels = formatC(x = seq(0, 100, 25), big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+    # legend(legend = TempLegend15[[geomix15]], x = "topleft", fill = TempProportionColors15[[geomix15]], border = "black", bty = "n", cex = cex.leg, title="2015")
+    abline(h = 0, xpd = FALSE)
+    #~~~~~~~~~~~~~~~~
+    ## 2015 Barplot SubRegional
+    geomix15 <- grep(pattern = geomix, x = names(TempMix15), value = TRUE)
+    par(mar = c(1, 1, 1, 0))
+    
+    temp.mix.to.zero <- grep(pattern = TempMix, x = TempMix15[[geomix15]], value = TRUE, invert = TRUE)
+    
+    height.15 <- t(sapply(TempMix15[[geomix15]], function(tempmix) {Estimates15[[tempmix]][SubRegGroups, "median"]})) * 100
+    height.15[temp.mix.to.zero, ] <- 0
+    ci.l.15 <- t(sapply(TempMix15[[geomix15]], function(tempmix) {Estimates15[[tempmix]][SubRegGroups, "5%"]})) * 100
+    ci.l.15[temp.mix.to.zero, ] <- 0
+    ci.u.15 <- t(sapply(TempMix15[[geomix15]], function(tempmix) {Estimates15[[tempmix]][SubRegGroups, "95%"]})) * 100
+    ci.u.15[temp.mix.to.zero, ] <- 0
+    
+    Barplot15 <- barplot2(height = height.15, beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd, ci.l = ci.l.15, ci.u = ci.u.15, 
+                          ylim = c(0, 100), col = TempProportionColors15[[geomix15]], yaxt = "n", xaxt = 'n')
+    axis(side = 2, at = seq(0, 100, 25), labels = FALSE, cex.axis = cex.yaxis)
+    legend(legend = TempLegend15[[geomix15]], x = min(Barplot15[, 6]), y = 100, fill = TempProportionColors15[[geomix15]], border = "black", bty = "n", cex = cex.leg, title="2015")
+    abline(h = 0, xpd = FALSE)
+    abline(v = mean(Barplot15[, 2:3]), lty = 2)
+    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ## 2016 Barplot Regional
+    geomix16 <- grep(pattern = geomix, x = names(TempMix16), value = TRUE)
+    par(mar = c(1, 1, 1, 0))
+    
+    temp.mix.to.zero <- grep(pattern = TempMix, x = TempMix16[[geomix16]], value = TRUE, invert = TRUE)
+    
+    height.16 <- t(sapply(TempMix16[[geomix16]], function(tempmix) {RegionalEstimates16[[tempmix]][, "median"]})) * 100
+    height.16[temp.mix.to.zero, ] <- 0
+    ci.l.16 <- t(sapply(TempMix16[[geomix16]], function(tempmix) {RegionalEstimates16[[tempmix]][, "5%"]})) * 100
+    ci.l.16[temp.mix.to.zero, ] <- 0
+    ci.u.16 <- t(sapply(TempMix16[[geomix16]], function(tempmix) {RegionalEstimates16[[tempmix]][, "95%"]})) * 100
+    ci.u.16[temp.mix.to.zero, ] <- 0
+    
+    Barplot16 <- barplot2(height = height.16, beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd, ci.l = ci.l.16, ci.u = ci.u.16, 
+                          ylim = c(0, 100), col = TempProportionColors16[[geomix16]], yaxt = "n", xaxt = 'n')
+    axis(side = 2, at = seq(0, 100, 25), labels = formatC(x = seq(0, 100, 25), big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+    # legend(legend = TempLegend16[[geomix16]], x = "topleft", fill = TempProportionColors16[[geomix16]], border = "black", bty = "n", cex = cex.leg, title="2016")
+    abline(h = 0, xpd = FALSE)
+    mtext(text = c(Groups2Rows[1], "Chignik\n", "Kodiak\n", Groups2Rows[12:14]), side = 1, line = 1, at = colMeans(Barplot16), adj = 0.5, cex = cex.xaxis)
+    # text(x = colMeans(Barplot16), y = -6, labels = c(Groups2Rows[1], "Chignik\n", "Kodiak\n", Groups2Rows[12:14]), adj = 0.5, cex = cex.xaxis, srt = 45, xpd = TRUE)
+    #~~~~~~~~~~~~~~~~
+    ## 2016 Barplot SubRegional
+    geomix16 <- grep(pattern = geomix, x = names(TempMix16), value = TRUE)
+    par(mar = c(1, 1, 1, 0))
+    
+    temp.mix.to.zero <- grep(pattern = TempMix, x = TempMix16[[geomix16]], value = TRUE, invert = TRUE)
+    
+    height.16 <- t(sapply(TempMix16[[geomix16]], function(tempmix) {Estimates16[[tempmix]][SubRegGroups, "median"]})) * 100
+    height.16[temp.mix.to.zero, ] <- 0
+    ci.l.16 <- t(sapply(TempMix16[[geomix16]], function(tempmix) {Estimates16[[tempmix]][SubRegGroups, "5%"]})) * 100
+    ci.l.16[temp.mix.to.zero, ] <- 0
+    ci.u.16 <- t(sapply(TempMix16[[geomix16]], function(tempmix) {Estimates16[[tempmix]][SubRegGroups, "95%"]})) * 100
+    ci.u.16[temp.mix.to.zero, ] <- 0
+    
+    Barplot16 <- barplot2(height = height.16, beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd, ci.l = ci.l.16, ci.u = ci.u.16, 
+                          ylim = c(0, 100), col = TempProportionColors16[[geomix16]], yaxt = "n", xaxt = 'n')
+    axis(side = 2, at = seq(0, 100, 25), labels = FALSE, cex.axis = cex.yaxis)
+    legend(legend = TempLegend16[[geomix16]], x = min(Barplot16[, 6]), y = 100, fill = TempProportionColors16[[geomix16]], border = "black", bty = "n", cex = cex.leg, title="2016")
+    abline(h = 0, xpd = FALSE)
+    abline(v = mean(Barplot16[, 2:3]), lty = 2)
+    mtext(text = Groups2Rows[2:11], side = 1, line = 1, at = colMeans(Barplot16) + c(rep(0, 2), 0.25, 0.5, 0.25, -0.25, 0, 0.25, 0.25, 0), adj = 0.5, cex = cex.xaxis)
+    # text(x = colMeans(Barplot16), y = -6, labels = Groups2Rows[2:11], adj = 0.5, cex = cex.xaxis, srt = 45, xpd = TRUE)
+    # - c(rep(0.5, 3), rep(0, 2), rep(0.5, 2), rep(0, 3))
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ## Blank Corner
+    par(mar = rep(0, 4))
+    plot.new()
+    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ## x-axis label
+    par(mar = rep(0, 4))
+    plot.new()
+    text(x = 0.5, y = 0.25, labels = "Regional Reporting Group", cex = cex.lab)
+    
+    par(mar = rep(0, 4))
+    plot.new()
+    text(x = 0.5, y = 0.25, labels = "Subregional Reporting Group", cex = cex.lab)
+    
+    dev.off()
+  })  # Geomix
+})  # Tempmix
 
 
 
@@ -7740,8 +7923,6 @@ filenames <- setNames(object = c("Uganik Harvest 2014-2016",
                                  "Igvak Harvest 2014-2016"), nm = GeoMix)
 
 # If showing proportions (percetages) use blue, otherwise green as "low"
-HarvestColors <- colorpanel(n = 3, low = "green", high = "white")
-
 HarvestColors <- c("darkgreen", "green", "white")
 
 #~~~~~~~~~~~~~~~~~~
