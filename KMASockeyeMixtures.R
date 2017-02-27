@@ -5454,57 +5454,80 @@ zmax <- max(sapply(c(KMA2014_Annual_HarvestEstimatesStats,
 
 yr = 2015; zmax = 272379; bubrange = 20
 
-Annual_Marginal_Credibility_Unsamp_Bubbleplot.f <- function(yr, zmax = 272379, bubrange = 20) {
+Annual_Marginal_Credibility_Unsamp_Bubbleplot.f <- function(yr, zmax = 272379, bubrange = 20, postsamp = FALSE) {
   
-  # Read in stock-specific harvest data
-  harvest_lst <- get(paste0("KMA", yr, "_Annual_HarvestEstimatesStats"))
-  strata_silly <- c("SALIT", "SAYAK", "SIGVA", "SKARL", "SUGAN", "SUYAK")
-  strata_nms <- names(harvest_lst)
-
-  # Matrix of medians
-  harvest_median_mat <- matrix(data = 0, nrow = 14, ncol = 6, dimnames = list(KMA14GroupsPC2, c("Alitak", "Ayakulik", "Igvak", "Karluk", "Uganik", "Uyak")))
-  harvest_median_mat.temp <- sapply(strata_nms, function(strat) {round(harvest_lst[[strat]][, "median"])})
-  harvest_col_index <- sapply(strata_nms, function(strat) {which(strata_silly == paste(unlist(strsplit(x = strat, split = ''))[1:5], collapse = ''))})
-  harvest_median_mat[, harvest_col_index] <- harvest_median_mat.temp
-  harvest_median_mat <- cbind("Unsampled" = rep(0, 14), harvest_median_mat)
-  
-  # Matrix of 5%
-  harvest_5_mat <- matrix(data = 0, nrow = 14, ncol = 6, dimnames = list(KMA14GroupsPC2, c("Alitak", "Ayakulik", "Igvak", "Karluk", "Uganik", "Uyak")))
-  harvest_5_mat.temp <- sapply(strata_nms, function(strat) {round(harvest_lst[[strat]][, "5%"])})
-  harvest_col_index <- sapply(strata_nms, function(strat) {which(strata_silly == paste(unlist(strsplit(x = strat, split = ''))[1:5], collapse = ''))})
-  harvest_5_mat[, harvest_col_index] <- harvest_5_mat.temp
-  harvest_5_mat <- cbind("Unsampled" = rep(0, 14), harvest_5_mat)
-  
-  # Matrix of 95%
-  harvest_95_mat <- matrix(data = 0, nrow = 14, ncol = 6, dimnames = list(KMA14GroupsPC2, c("Alitak", "Ayakulik", "Igvak", "Karluk", "Uganik", "Uyak")))
-  harvest_95_mat.temp <- sapply(strata_nms, function(strat) {round(harvest_lst[[strat]][, "95%"])})
-  harvest_col_index <- sapply(strata_nms, function(strat) {which(strata_silly == paste(unlist(strsplit(x = strat, split = ''))[1:5], collapse = ''))})
-  harvest_95_mat[, harvest_col_index] <- harvest_95_mat.temp
-  harvest_95_mat <- cbind("Unsampled" = rep(0, 14), harvest_95_mat)
-  
-  # Create array of 5%, median, and 95% estimates
-  harvest_array <- abind("lower" = harvest_5_mat, "median" = harvest_median_mat, "upper" = harvest_95_mat, along = 3)
-  
-  # Melt array into a dataframe for ggplot
-  Stratified_HarvestEstimates_df <- melt(harvest_array)
-  names(Stratified_HarvestEstimates_df) <- c("RG", "Fishery", "Estimator", "Harvest")
-  Stratified_HarvestEstimates_df$RG <- factor(Stratified_HarvestEstimates_df$RG, levels = rev(KMA14GroupsPC2))
-  Stratified_HarvestEstimates_df$Fishery <- factor(Stratified_HarvestEstimates_df$Fishery, levels = rev(c("Uganik", "Uyak", "Karluk", "Ayakulik", "Alitak", "Igvak", "Unsampled")))
-  Stratified_HarvestEstimates_df$Harvest[Stratified_HarvestEstimates_df$Harvest == 0] <- NA
-  # str(Stratified_HarvestEstimates_df)
-  
-  # Get harvest data
-  Total_HarvestEstimates_df <- get(paste0("s", yr - 2000))[, c("Geo", "Annual")]
-  names(Total_HarvestEstimates_df) <- c("Fishery", "Harvest")
-  levels(Total_HarvestEstimates_df$Fishery)
-  Total_HarvestEstimates_df$Harvest[Total_HarvestEstimates_df$Harvest == 0] <- NA
-  
-  # Matrix of annual medians
-  annual_harvest_mat <- get(paste0("KMA", yr, "_Annual_Stratified_HarvestEstimatesStats"))
-  Annual_HarvestEstimates_df <- data.frame("RG" = KMA14GroupsPC2, annual_harvest_mat)[, c(1, 4:6)]
-  names(Annual_HarvestEstimates_df) <- c("RG", "Median", "Lower5", "Upper95")
-  Annual_HarvestEstimates_df$RG <- factor(Annual_HarvestEstimates_df$RG, levels = rev(KMA14GroupsPC2))
-  
+  if(postsamp) {
+    # Get harvest data
+    Total_HarvestEstimates_df <- get(paste0("s", yr - 2000))[, c("Geo", "Post")]
+    names(Total_HarvestEstimates_df) <- c("Fishery", "Harvest")
+    levels(Total_HarvestEstimates_df$Fishery)
+    Total_HarvestEstimates_df$Harvest[Total_HarvestEstimates_df$Harvest == 0] <- NA
+    
+    # Create blank bubble plot
+    harvest_array <- array(data = c(0, rep(NA, 293)), dim = c(14, 7, 3), dimnames = list(KMA14GroupsPC2, 
+                                                                                         rev(c("Uganik", "Uyak", "Karluk", "Ayakulik", "Alitak", "Igvak", "Unsampled")),
+                                                                                         c("lower", "median", "upper")))
+    Stratified_HarvestEstimates_df <- melt(harvest_array)
+    names(Stratified_HarvestEstimates_df) <- c("RG", "Fishery", "Estimator", "Harvest")
+    Stratified_HarvestEstimates_df$RG <- factor(Stratified_HarvestEstimates_df$RG, levels = rev(KMA14GroupsPC2))
+    Stratified_HarvestEstimates_df$Fishery <- factor(Stratified_HarvestEstimates_df$Fishery, levels = rev(c("Uganik", "Uyak", "Karluk", "Ayakulik", "Alitak", "Igvak", "Unsampled")))
+    
+    # Create blank right plot
+    Annual_HarvestEstimates_df <- data.frame("RG" = factor(x = KMA14GroupsPC2, levels = KMA14GroupsPC2),
+                                               "Median" = rep(0, 14),
+                                               "Lower5" = rep(0, 14),
+                                               "Upper95" = rep(0, 14))
+  } else {
+    
+    # Read in stock-specific harvest data
+    harvest_lst <- get(paste0("KMA", yr, "_Annual_HarvestEstimatesStats"))
+    strata_silly <- c("SALIT", "SAYAK", "SIGVA", "SKARL", "SUGAN", "SUYAK")
+    strata_nms <- names(harvest_lst)
+    
+    # Matrix of medians
+    harvest_median_mat <- matrix(data = 0, nrow = 14, ncol = 6, dimnames = list(KMA14GroupsPC2, c("Alitak", "Ayakulik", "Igvak", "Karluk", "Uganik", "Uyak")))
+    harvest_median_mat.temp <- sapply(strata_nms, function(strat) {round(harvest_lst[[strat]][, "median"])})
+    harvest_col_index <- sapply(strata_nms, function(strat) {which(strata_silly == paste(unlist(strsplit(x = strat, split = ''))[1:5], collapse = ''))})
+    harvest_median_mat[, harvest_col_index] <- harvest_median_mat.temp
+    harvest_median_mat <- cbind("Unsampled" = rep(0, 14), harvest_median_mat)
+    
+    # Matrix of 5%
+    harvest_5_mat <- matrix(data = 0, nrow = 14, ncol = 6, dimnames = list(KMA14GroupsPC2, c("Alitak", "Ayakulik", "Igvak", "Karluk", "Uganik", "Uyak")))
+    harvest_5_mat.temp <- sapply(strata_nms, function(strat) {round(harvest_lst[[strat]][, "5%"])})
+    harvest_col_index <- sapply(strata_nms, function(strat) {which(strata_silly == paste(unlist(strsplit(x = strat, split = ''))[1:5], collapse = ''))})
+    harvest_5_mat[, harvest_col_index] <- harvest_5_mat.temp
+    harvest_5_mat <- cbind("Unsampled" = rep(0, 14), harvest_5_mat)
+    
+    # Matrix of 95%
+    harvest_95_mat <- matrix(data = 0, nrow = 14, ncol = 6, dimnames = list(KMA14GroupsPC2, c("Alitak", "Ayakulik", "Igvak", "Karluk", "Uganik", "Uyak")))
+    harvest_95_mat.temp <- sapply(strata_nms, function(strat) {round(harvest_lst[[strat]][, "95%"])})
+    harvest_col_index <- sapply(strata_nms, function(strat) {which(strata_silly == paste(unlist(strsplit(x = strat, split = ''))[1:5], collapse = ''))})
+    harvest_95_mat[, harvest_col_index] <- harvest_95_mat.temp
+    harvest_95_mat <- cbind("Unsampled" = rep(0, 14), harvest_95_mat)
+    
+    # Create array of 5%, median, and 95% estimates
+    harvest_array <- abind("lower" = harvest_5_mat, "median" = harvest_median_mat, "upper" = harvest_95_mat, along = 3)
+    
+    # Melt array into a dataframe for ggplot
+    Stratified_HarvestEstimates_df <- melt(harvest_array)
+    names(Stratified_HarvestEstimates_df) <- c("RG", "Fishery", "Estimator", "Harvest")
+    Stratified_HarvestEstimates_df$RG <- factor(Stratified_HarvestEstimates_df$RG, levels = rev(KMA14GroupsPC2))
+    Stratified_HarvestEstimates_df$Fishery <- factor(Stratified_HarvestEstimates_df$Fishery, levels = rev(c("Uganik", "Uyak", "Karluk", "Ayakulik", "Alitak", "Igvak", "Unsampled")))
+    Stratified_HarvestEstimates_df$Harvest[Stratified_HarvestEstimates_df$Harvest == 0] <- NA
+    # str(Stratified_HarvestEstimates_df)
+    
+    # Get harvest data
+    Total_HarvestEstimates_df <- get(paste0("s", yr - 2000))[, c("Geo", "Annual")]
+    names(Total_HarvestEstimates_df) <- c("Fishery", "Harvest")
+    levels(Total_HarvestEstimates_df$Fishery)
+    Total_HarvestEstimates_df$Harvest[Total_HarvestEstimates_df$Harvest == 0] <- NA
+    
+    # Matrix of annual medians
+    annual_harvest_mat <- get(paste0("KMA", yr, "_Annual_Stratified_HarvestEstimatesStats"))
+    Annual_HarvestEstimates_df <- data.frame("RG" = KMA14GroupsPC2, annual_harvest_mat)[, c(1, 4:6)]
+    names(Annual_HarvestEstimates_df) <- c("RG", "Median", "Lower5", "Upper95")
+    Annual_HarvestEstimates_df$RG <- factor(Annual_HarvestEstimates_df$RG, levels = rev(KMA14GroupsPC2))
+  }
   
   bar_top <- ggplot(data = Total_HarvestEstimates_df, aes(x = Fishery, y = Harvest)) + 
     geom_bar(stat = "identity") +
@@ -5583,7 +5606,7 @@ Annual_Marginal_Credibility_Unsamp_Bubbleplot.f <- function(yr, zmax = 272379, b
   grid.arrange(p1, legend_topright, p3, p4, ncol=2, nrow=2, widths=c(4, 1.35), heights=c(1.35, 4))
 }
 
-ggsave(filename = "test.png", plot = Strata_Marginal_Credibility_Unsamp_Bubbleplot.f(yr = 2014, strata = "1_Early"))
+# ggsave(filename = "test.png", plot = Strata_Marginal_Credibility_Unsamp_Bubbleplot.f(yr = 2014, strata = "1_Early"))
 
 
 png(file ="Figures/Harvest Maps/2014 Annual Marginal Unsamp Bubble.png", width = 811, height = 957, units = "px", res = 96, family = "serif", bg = "white")
@@ -5592,6 +5615,14 @@ png(file ="Figures/Harvest Maps/2015 Annual Marginal Unsamp Bubble.png", width =
 Annual_Marginal_Credibility_Unsamp_Bubbleplot.f(yr = 2015); dev.off()
 png(file ="Figures/Harvest Maps/2016 Annual Marginal Unsamp Bubble.png", width = 811, height = 957, units = "px", res = 96, family = "serif", bg = "white")
 Annual_Marginal_Credibility_Unsamp_Bubbleplot.f(yr = 2016); dev.off()
+
+
+png(file ="Figures/Harvest Maps/2014 Annual Post Marginal Unsamp Bubble.png", width = 811, height = 957, units = "px", res = 96, family = "serif", bg = "white")
+Annual_Marginal_Credibility_Unsamp_Bubbleplot.f(yr = 2014, postsamp = TRUE); dev.off()
+png(file ="Figures/Harvest Maps/2015 Annual Post Marginal Unsamp Bubble.png", width = 811, height = 957, units = "px", res = 96, family = "serif", bg = "white")
+Annual_Marginal_Credibility_Unsamp_Bubbleplot.f(yr = 2015, postsamp = TRUE); dev.off()
+png(file ="Figures/Harvest Maps/2016 Annual Post Marginal Unsamp Bubble.png", width = 811, height = 957, units = "px", res = 96, family = "serif", bg = "white")
+Annual_Marginal_Credibility_Unsamp_Bubbleplot.f(yr = 2016, postsamp = TRUE); dev.off()
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
