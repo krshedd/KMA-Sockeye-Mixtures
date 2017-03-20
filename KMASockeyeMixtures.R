@@ -1976,6 +1976,7 @@ GeoHeader <- setNames(object = c(paste("Cape Alitak/Humpy Deadman 257-10,20,50,6
                       nm = unlist(strsplit(x = KMA2014, split = "14")))
 
 HarvestColors <- colorpanel(n = 3, low = "green", high = "white")
+HarvestColors <- c("darkgreen", "green", "white")
 TempHarvestColors14 <- sapply(KMA2014, function(geo) {
   HarvestColors[sapply(TempMix14[[geo]], function(strata) {as.numeric(unlist(strsplit(x = strata, split = "_"))[2])} )]
 } )
@@ -1985,15 +1986,16 @@ Groups <- KMA14GroupsPC
 Groups2Rows <- KMA14GroupsPC2Rows
 cex.lab <- 1.5
 cex.yaxis <- 1.3
-cex.xaxis <- 0.6
+cex.xaxis <- 0.7
 cex.main <- 1.7
 cex.leg <- 1.3
 ci.lwd <- 2.5
-ymax <- 140000
+ymax <- 160000
 
 sapply(names(TempMix14[c(4, 5, 3, 2, 1)]), function(geomix) {
-  emf(file = paste("Figures/2014/", geomix, "Harvest.emf", sep = ''), width = 8.5, height = 6.5, family = "serif", bg = "white")
-  par(mar = c(2.1, 4.1, 2.6, 0.6))
+  emf(file = paste("Figures/2014/", geomix, "Harvest.emf", sep = ''), width = 6, height = 5.75, family = "serif", bg = "white")
+  par(mar = c(3.1, 4.1, 2.6, 0.6))
+  par(family = "times")
   
   Barplot1 <- barplot2(height = t(sapply(TempMix14[[geomix]], function(tempmix) {Estimates[[tempmix]][, "median"]})), 
                        beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
@@ -2005,8 +2007,9 @@ sapply(names(TempMix14[c(4, 5, 3, 2, 1)]), function(geomix) {
   abline(h = 0, xpd = FALSE)
   
   mtext(text = "Number of Fish Harvested (Thousands)", side = 2, cex = cex.yaxis, line = 3)
-  mtext(text = Groups2Rows, side = 1, line = 1, at = apply(Barplot1, 2, mean), adj = 0.5, cex = cex.xaxis)
+  mtext(text = KMA14GroupsPC2Rows, side = 1, line = 0.5, at = apply(Barplot1, 2, mean), adj = 0.5, cex = cex.xaxis)
   mtext(text = GeoHeader[unlist(strsplit(geomix, split = "14"))], side = 3, cex = cex.main, line = 1)
+  mtext(text = "Reporting Group", side = 1, line = 2, cex = cex.yaxis)
   dev.off()
 })
 
@@ -2058,9 +2061,48 @@ KMA2014_Annual_HarvestEstimatesStats <- sapply(KMA2014, function(strata) {
 dput(x = KMA2014_Annual_HarvestEstimatesStats, file = "Estimates objects/Final/KMA2014_Annual_HarvestEstimatesStats.txt")
 str(KMA2014_Annual_HarvestEstimatesStats)
 
+KMA2014_Annual_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2014_Annual_HarvestEstimatesStats.txt")
+KMA2014_Annual_HarvestEstimatesStats$SUGANC14[, "median"]
 
+#~~~~~~~~~~~~~~~~~~
+emf(file = paste("Figures/2014/Uganik Stratified Annual Harvest.emf", sep = ''), width = 6, height = 5.75, family = "serif", bg = "white")
+par(mar = c(3.1, 4.1, 2.6, 0.6))
+par(family = "times")
 
+Barplot1 <- barplot2(height = KMA2014_Annual_HarvestEstimatesStats$SUGANC14[, "median"], 
+                     beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
+                     ci.l = KMA2014_Annual_HarvestEstimatesStats$SUGANC14[, "5%"], 
+                     ci.u = KMA2014_Annual_HarvestEstimatesStats$SUGANC14[, "95%"], 
+                     ylim = c(0, ymax), col = "green", cex.axis = cex.yaxis, yaxt = "n", xaxt = 'n')
+axis(side = 2, at = seq(0, ymax, 20000), labels = formatC(x = seq(0, ymax, 20000) / 1000, big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+legend(legend = 2014, x = "topleft", fill = "green", border = "black", bty = "n", cex = cex.leg, title="")
+abline(h = 0, xpd = FALSE)
 
+mtext(text = "Number of Fish Harvested (Thousands)", side = 2, cex = cex.yaxis, line = 3)
+mtext(text = KMA14GroupsPC2Rows, side = 1, line = 0.5, at = Barplot1, adj = 0.5, cex = cex.xaxis)
+mtext(text = GeoHeader["SUGANC"], side = 3, cex = cex.main, line = 1)
+mtext(text = "Reporting Group", side = 1, line = 2, cex = cex.yaxis)
+dev.off()
+
+emf(file = paste("Figures/2014/Uyak Stratified Annual Harvest.emf", sep = ''), width = 6, height = 5.75, family = "serif", bg = "white")
+par(mar = c(3.1, 4.1, 2.6, 0.6))
+par(family = "times")
+
+Barplot1 <- barplot2(height = KMA2014_Annual_HarvestEstimatesStats$SUYAKC14[, "median"], 
+                     beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
+                     ci.l = KMA2014_Annual_HarvestEstimatesStats$SUYAKC14[, "5%"], 
+                     ci.u = KMA2014_Annual_HarvestEstimatesStats$SUYAKC14[, "95%"], 
+                     ylim = c(0, ymax), col = "green", cex.axis = cex.yaxis, yaxt = "n", xaxt = 'n')
+axis(side = 2, at = seq(0, ymax, 20000), labels = formatC(x = seq(0, ymax, 20000) / 1000, big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+legend(legend = 2014, x = "topleft", fill = "green", border = "black", bty = "n", cex = cex.leg, title="")
+abline(h = 0, xpd = FALSE)
+
+mtext(text = "Number of Fish Harvested (Thousands)", side = 2, cex = cex.yaxis, line = 3)
+mtext(text = KMA14GroupsPC2Rows, side = 1, line = 0.5, at = Barplot1, adj = 0.5, cex = cex.xaxis)
+mtext(text = GeoHeader["SUYAKC"], side = 3, cex = cex.main, line = 1)
+mtext(text = "Reporting Group", side = 1, line = 2, cex = cex.yaxis)
+dev.off()
+#~~~~~~~~~~~~~~~~~~
 
 
 # Create a matrix of annual means
@@ -10644,6 +10686,89 @@ Plot_KMA_Harvest_Map.f(area = "p16_Late", max.col = 3.1e6)
 Plot_KMA_Harvest_Map.f(area = "s15_Middle")
 Plot_KMA_Harvest_Map.f(area = "p15_Middle")
 legend("bottomright", legend = c(0, 10000), fill = c("white", "black"), bty = 'n')
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### PBS Mapping ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+while(!require(PBSmapping)) {install.packages("PBSmapping")}
+
+land <- importGSHHS("C:/Users/krshedd/Documents/R/win-library/3.3/PBSmapping/gshhs_h.b", xlim = c(203.4, 208.5), ylim = c(56.3, 59), maxLevel = 4, useWest = TRUE)
+plotMap(land, col = "grey90")
+
+rivers <- importGSHHS("C:/Users/krshedd/Documents/R/win-library/3.3/PBSmapping/wdb_rivers_f.b", xlim = c(203.4, 208.5), ylim = c(56.3, 59), useWest = TRUE)
+addLines(polys = rivers, col = "white", lwd = 2)
+
+RiversPBS.shp <- importShapefile(fn = "V:/Analysis/1_SEAK/Sockeye/Mixture/Harvest Data/GIS Data/Rivers/mv_hydro_2mil_ln.shp")
+addLines(polys = RiversPBS.shp, col = "white", lwd = 1)
+
+WaterbodyPBS.shp <- importShapefile(fn = "V:/Analysis/1_SEAK/Sockeye/Mixture/Harvest Data/GIS Data/Waterbody/Waterbody.shp")
+addPolys(polys = WaterbodyPBS.shp, boder = "black", col = "white")
+
+
+StatAreasPBS.shp <- importShapefile(fn = "Figures/Maps/KMAStatAreas")
+str(StatAreasPBS.shp)
+
+color.ramp <- colorRampPalette(c("white", "green", "darkgreen", "black"))(101)
+
+max.col <- NULL
+if(is.null(max.col)) {max.col <- max(attributes(StatAreasPBS.shp)[["PolyData"]][, "s14_Samp"], na.rm = TRUE)}
+max.col <- 250000
+
+addPolys(polys = StatAreasPBS.shp, border = "black", col = color.ramp[round(attributes(StatAreasPBS.shp)[["PolyData"]][, "s14_Samp"] / (max.col/100)) + 1])
+
+legend("bottomleft",
+       legend = c(formatC(x = max.col, digits = 0, format = "f", big.mark = ","), rep("", 99), 0),
+       fill = rev(color.ramp),
+       border = NA,
+       bty = 'n', x.intersp = 0.5, y.intersp = 0.07, lty = NULL)
+text(x = -156.35, y = 56.75, labels = "Harvest", cex = 1.3, adj = c(0, 0.5))
+
+#~~~~~~~~~~~~~~~~~~
+while(!require(maps)) {install.packages("maps")}
+while(!require(mapdata)) {install.packages("mapdata")}
+while(!require(maptools)) {install.packages("maptools")}
+while(!require(GISTools)) {install.packages("GISTools")}
+while(!require(rgeos)) {install.packages("rgeos")}
+while(!require(sp)) {install.packages("sp")}
+require(devEMF)
+KMAStatAreas.shp <- readShapePoly("Figures/Maps/KMAStatAreas.shp")
+
+
+Uganik <- KMAStatAreas.shp[which(KMAStatAreas.shp@data$Stat %in% seq(from = 25300, to = 25399, by = 1)), ]
+Uganik@data$SampArea <- "Uganik"
+Uganik.dis <- gUnaryUnion(Uganik, id = Uganik@data$SampArea)
+Uyak <- KMAStatAreas.shp[which(KMAStatAreas.shp@data$Stat %in% seq(from = 25400, to = 25499, by = 1)), ]
+Uyak@data$SampArea <- "Uyak"
+Uyak.dis <- gUnaryUnion(Uyak, id = Uyak@data$SampArea)
+Karluk <- KMAStatAreas.shp[which(KMAStatAreas.shp@data$Stat %in% c("25510", "25520", "25640")), ]
+Karluk@data$SampArea <- "Karluk"
+Karluk.dis <- gUnaryUnion(Karluk, id = Karluk@data$SampArea)
+Ayakulik <- KMAStatAreas.shp[which(KMAStatAreas.shp@data$Stat %in% seq(from = 25610, to = 25630, by = 1)), ]
+Ayakulik@data$SampArea <- "Ayakulik"
+Ayakulik.dis <- gUnaryUnion(Ayakulik, id = Ayakulik@data$SampArea)
+Alitak <- KMAStatAreas.shp[which(KMAStatAreas.shp@data$Stat %in% c("25710", "25720", "25750", "25760", "25770")), ]
+Alitak@data$SampArea <- "Alitak"
+Alitak.dis <- gUnaryUnion(Alitak, id = Alitak@data$SampArea)
+Igvak <- KMAStatAreas.shp[which(KMAStatAreas.shp@data$Stat %in% c("26275", "26280", "26290", "26295")), ]
+Igvak@data$SampArea <- "Igvak"
+Igvak.dis <- gUnaryUnion(Igvak, id = Igvak@data$SampArea)
+
+cex.lab = 0.9
+plot(Uganik.dis, add = TRUE, border = "black", lwd = 3)
+text(x = -153.7, y = 58.04, labels = "Uganik\nKupreanof", cex = cex.lab, adj = c(1, 0.5))
+plot(Uyak.dis, add = TRUE, border = "black", lwd = 3)
+text(x = -154.15, y = 57.8, labels = "Uyak", cex = cex.lab, adj = c(1, 0.5))
+plot(Karluk.dis, add = TRUE, border = "black", lwd = 3)
+text(x = -154.72, y = 57.62, labels = "Karluk\nSturgeon", cex = cex.lab, adj = c(1, 0.5))
+plot(Ayakulik.dis, add = TRUE, border = "black", lwd = 3)
+text(x = -154.95, y = 57.3, labels = "Ayakulik\nHalibut Bay", cex = cex.lab, adj = c(1, 0.5))
+plot(Alitak.dis, add = TRUE, border = "black", lwd = 3)
+text(x = -154.43, y = 56.84, labels = "Alitak", cex = cex.lab, adj = c(1, 0.5))
+plot(Igvak.dis, add = TRUE, border = "black", lwd = 3)
+text(x = -155.85, y = 57.45, labels = "Igvak", cex = cex.lab, adj = c(0, 0.5))
+
+north.arrow(xb = -152, yb = 56.6, len = 0.05, lab = "N")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Harvest for Table 1 ####
