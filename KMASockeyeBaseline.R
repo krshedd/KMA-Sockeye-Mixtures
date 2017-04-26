@@ -6001,3 +6001,207 @@ sapply(FisheryProofTestScenarioNames, function(scenario) {
 sapply(FisheryProofTestScenarioNames, function(scenario) {
   PlotBiasRMSE.f(scenario = scenario, metric = "ci.width")
 })
+
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### 100% Proof Tests for 4 UCI Reporting Groups ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+KMA473Pops17UCIFlatPrior <- Prior.GCL(groupvec = KMA473PopsGroupVec17UCI, groupweights = rep(1 / 17, 17), minval = 0.01)
+str(KMA473Pops17UCIFlatPrior)
+plot(KMA473Pops17UCIFlatPrior)
+dput(x = KMA473Pops17UCIFlatPrior, file = "Objects/KMA473Pops17UCIFlatPrior.txt")
+
+str(KMA473PopsInits)
+apply(KMA473PopsInits, 2, plot)
+
+KMA17UCIGroups
+CommonNames473
+KMA473Pops.named
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Get sample sizes for Proof Tests
+# Sample size for each of the 473 Pops (pooled)
+KMA473Pops.SampleSize <- sapply(paste(KMA473Pops.named, ".gcl", sep = ''), function(x) get(x)$n)
+str(KMA473Pops.SampleSize)
+
+# Sample size for each of the 15 RGs
+KMA473Pops.17UCIRG.SampleSize <- setNames(object = sapply(seq(KMA17UCIGroups), function(RG) {sum(KMA473Pops.SampleSize[which(KMA473PopsGroupVec17UCI == RG)])} ), nm = KMA17UCIGroups)
+
+# Sample size for proof tests
+UCIProofTest100.SampleSize <- pmin(floor(KMA473Pops.17UCIRG.SampleSize[12:15] / 2), 200) # 200 is standard, unless RG has < 400, then it is (n of RG/2)
+dput(x = UCIProofTest100.SampleSize, file = "Objects/UCIProofTest100.SampleSize.txt")
+
+# Create sample size matrix for repeated proof test function
+UCIProofTest100.SampleSize.Matrix <- matrix(data = 0, nrow = length(KMA17UCIGroups), ncol = length(KMA17UCIGroups[12:15]))
+colnames(UCIProofTest100.SampleSize.Matrix) <- KMA17UCIGroups[12:15]
+rownames(UCIProofTest100.SampleSize.Matrix) <- KMA17UCIGroups
+diag(UCIProofTest100.SampleSize.Matrix[12:15, 1:4]) <- UCIProofTest100.SampleSize
+dput(x = UCIProofTest100.SampleSize.Matrix, file = "Objects/UCIProofTest100.SampleSize.Matrix")
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Create Proof Tests
+KMA473PopsGroups17UCIRepeated100ProofTests <- paste(rep(KMA17UCIGroups[12:15], each = 5), 1:5, sep = '')
+dput(x = KMA473PopsGroups17UCIRepeated100ProofTests, file = "Objects/KMA473PopsGroups17UCIRepeated100ProofTests")
+
+KMA473Pops.17UCIRG.SampleSize
+UCIProofTest100.SampleSize.Matrix
+
+# dir.create("BAYES/100% Proof Tests")
+# dir.create("BAYES/100% Proof Tests/loci89")
+
+## All RGs
+for(RG in seq(KMA17UCIGroups[12:15])) {
+  for(Proof in KMA473PopsGroups17UCIRepeated100ProofTests[(RG * 5 - 4):(RG * 5)]) {
+    assign(x = paste(Proof, "Proof", sep = ""),
+           value = ProofTest.GCL(sillyvec = KMA473Pops.named, loci = loci46, groupnames = KMA17UCIGroups, groupvec = KMA473PopsGroupVec17UCI,
+                                 samplesize = UCIProofTest100.SampleSize.Matrix[, RG], prefix = Proof, dir = "BAYES/100% Proof Tests/loci46", 
+                                 prprtnl = TRUE, type = "BAYES", suffix = "", nreps = 40000, nchains = 5, priorvec = KMA473Pops17UCIFlatPrior, 
+                                 initmat = KMA473PopsInits, thin = c(1, 1, 100), switches = "F T F T T T F"))
+  }
+}; rm(RG, Proof); beep(8)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Dput proof test objects
+# dir.create("100%ProofTests objects")
+objects(pattern = "Proof$")
+invisible(sapply(KMA473PopsGroups17UCIRepeated100ProofTests, function(proof) {dput(x = get(paste(proof, "Proof", sep = "")), file = paste("100%ProofTests objects/", proof, "Proof.txt", sep = ""))} ))
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Create BAYES.output folders
+sapply(KMA473PopsGroups17UCIRepeated100ProofTests, function(proof) {dir <- paste(getwd(), "/BAYES/100% Proof Tests/loci46/BAYES.output/", proof, sep = "")
+dir.create(dir) })
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Repeated 100% proof tests with genetic_msa ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# Get proof objects from loci46, 17UCI RG, 4 scenarios (these have 5 chains each for 5 repeats)
+KMA473PopsGroups17UCIRepeated100ProofTests
+
+KMAobjects <- list.files("100%ProofTests objects", recursive = FALSE, pattern = ".txt", full.names = FALSE)
+KMAobjects
+KMAobjects <- paste0(KMA473PopsGroups17UCIRepeated100ProofTests, "Proof.txt")
+
+invisible(sapply(KMAobjects, function(objct) {assign(x = unlist(strsplit(x = objct, split = ".txt")), value = dget(file = paste(getwd(), "100%ProofTests objects", objct, sep = "/")), pos = 1) }))
+
+str(Susitna1Proof, max.level = 1)
+
+
+sum(sapply(KMA473Pops, function(silly) {get(paste0(silly, ".gcl"))$n}))
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+source("C:/Users/krshedd/Documents/R/GCL-R-Scripts/write_data4msa.R")
+source("C:/Users/krshedd/Documents/R/GCL-R-Scripts/genetic_msa.R")
+
+ReProofTest_genetic_msa.GCL <- function(ProofTestIDs.char = "Susitna1Proof", sillyvec = KMA473Pops, loci = loci46, groupvec = KMA473PopsGroupVec17UCI, groupnames = KMA17UCIGroups, out_dir = "genetic_msa") {
+  
+  original_dir <- getwd()
+  
+  ProofTestIDs <- get(ProofTestIDs.char, pos = 1)
+  sapply(ProofTestIDs, function(RG) {sum(sapply(RG, function(pop) {length(pop)}))})  # Confirm mixture proportions
+  
+  # Create baseline and mixture sillyvecs
+  # Code from ReProofTest.GCL
+  IncludedGroups <- names(ProofTestIDs)
+  baselinesillyvec <- sillyvec
+  names(baselinesillyvec) <- sillyvec
+  mixsillyvec <- NULL
+  baselineSillysIncluded <- NULL
+  
+  for(group in IncludedGroups){
+    
+    g <- match(group,groupnames)
+    groupsillys <- sillyvec[groupvec == g]
+    newnames <- paste(group, groupsillys, sep = ".")
+    names(newnames) <- groupsillys
+    names(ProofTestIDs[[group]]) <- groupsillys
+    IND <- sapply(groupsillys, function(silly) {!is.null(ProofTestIDs[[group]][[silly]])} )
+    newnames <- newnames[IND]
+    
+    for(silly in groupsillys[IND]){
+      newname <- newnames[silly]
+      gclname <- paste(silly, "gcl", sep = ".")
+      silly.gcl <- get(gclname, pos = 1)
+      baselineSillysIncluded <- c(newname, baselineSillysIncluded)
+      baselinesillyvec[silly] <- newname
+      newgclname <- paste(newname, "gcl", sep = ".")
+      newmixname <- paste("mix", newname, sep = ".")
+      mixsillyvec <- c(newmixname, mixsillyvec)
+      newmixgclname <- paste(newmixname, "gcl", sep = ".")
+      
+      assign(newgclname, silly.gcl, pos = 1)
+      assign(newmixgclname, silly.gcl, pos = 1)
+      
+      AllIDs <- dimnames(silly.gcl$scores)[[1]]
+      baselineIDs2remove <- as.character(sort(as.numeric(ProofTestIDs[[group]][[silly]])))
+      mixIDs2remove <- AllIDs[is.na(match(AllIDs,baselineIDs2remove))]
+      
+      invisible(RemoveIDs.GCL(silly = newname, IDs = list(baselineIDs2remove)))
+      invisible(RemoveIDs.GCL(silly = newmixname, IDs = list(mixIDs2remove)))
+      
+    }  # silly
+    
+  }  # group
+  
+  # Pool mixture
+  PoolCollections.GCL(collections = mixsillyvec, loci = loci, newname = "collection_mix")  # create one mixture silly object (.gcl)
+  
+  #~~~~~~~~~~~~~~~~~~
+  # Create baseline and mixture files
+  # source("C:/Users/krshedd/Documents/R/GCL-R-Scripts/write_data4msa.R")
+  # dir.create("genetic_msa")
+  setwd(out_dir)
+  dir.create(ProofTestIDs.char); setwd(ProofTestIDs.char)
+  write_data4msa(mix_silly = "collection_mix", base_sillys = baselinesillyvec, loci = loci)
+  
+  # Create initial starting values matrix
+  group_inits <- matrix(data = rep(c(rep(0.3, 3), rep(0.1/14, 17)), 5), nrow = 17, ncol = 5, byrow = FALSE)  # had to define since nchains does not == ngroups
+  groups = groupvec
+  
+  # source("C:/Users/krshedd/Documents/R/GCL-R-Scripts/genetic_msa.R")
+  
+  genetic_msa_Estimates <- 
+    genetic_msa(nalleles = as.vector(LocusControl$nalleles[loci]), 
+                groupnames = groupnames,
+                groups = groupvec,
+                group_prior = rep(1 / max(groups), max(groups)),
+                group_inits = group_inits,
+                nchains = 5,
+                nits = 4e4,
+                nburn = 2e4,
+                thin = 1,
+                q_out = FALSE,
+                level = 0.1
+    )
+  
+  dput(x = genetic_msa_Estimates, file = paste0(ProofTestIDs.char, "_genetic_msa_Estimates.txt"))
+  # return(genetic_msa_Estimates)
+  
+  setwd(original_dir)
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ReProofTest_genetic_msa.GCL(ProofTestIDs.char = "Susitna1Proof")
+
+## Save .RData with mixture proof objects, sillys
+setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Baseline")
+save.image(file = "genetic_msa/17UCIRGProofTest_genetic_msa.RData")
+
+ReProofTest_genetic_msa.GCL(ProofTestIDs.char = "Kasilof5Proof")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Code to loop through on servers
+setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Baseline")
+load(file = "genetic_msa/17UCIRGProofTest_genetic_msa.RData")
+
+for(Proof in c("Other Cook Inlet4Proof", "Other Cook Inlet5Proof", "Susitna2Proof")) {
+  ReProofTest_genetic_msa.GCL(ProofTestIDs.char = Proof)
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
