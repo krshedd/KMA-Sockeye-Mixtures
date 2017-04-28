@@ -6222,3 +6222,78 @@ for(Proof in c("Other Cook Inlet4Proof", "Other Cook Inlet5Proof", "Susitna2Proo
   ReProofTest_genetic_msa.GCL(ProofTestIDs.char = Proof)
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### 17UCI RG Proof Test Figures ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Likelihood profile
+KMA473Pops17UCIGroups_46loci_Confusion <- dget(file = "Objects/KMA473Pops17UCIGroups_46loci_Confusion.txt")
+
+require(lattice)
+require(devEMF)
+new.colors <- colorRampPalette(c("white", "black"))
+emf(file = "Likelihood Profiles/KMA473Pops_17UCIGroups_46.loci_Confusion.emf", width = 6.5, height = 6.5, family = "Times")
+levelplot(KMA473Pops17UCIGroups_46loci_Confusion[[1]], col.regions = new.colors, xlab = "Known Origin", ylab = "Mean Genotype Likelihood", at = seq(0, 1, length.out = 100), scales = list(x = list(rot = 90)))
+dev.off()
+
+levelplot(KMA473Pops17UCIGroups_46loci_Confusion[[1]], col.regions = new.colors, 
+          xlab = "Known Origin", ylab = "Mean Genotype Likelihood", 
+          at = seq(0, 1, length.out = 100), scales = list(x = list(rot = 90)),
+          par.settings = list(axis.text = list(fontfamily = "serif"),
+                              par.xlab.text = list(fontfamily = "serif"),
+                              par.ylab.text = list(fontfamily = "serif")))
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Master plot of all 100% proof tests (a la WASSIP Figure 18)
+
+# Libraries
+library(devEMF)
+library(gplots)
+library(plotrix)
+
+# Inputs
+loci <- "loci46"
+
+percent = 100
+
+Groups15.nospace <- dget(file = "Objects/Groups15.nospace.txt")
+Groups14.nospace <- c(Groups15.nospace[1:4], "AyakulikFrazer", Groups15.nospace[7:15])
+ProofTest100.SampleSize <- dget(file = "Objects/ProofTest100.SampleSize.txt")
+ci.bar.colors.Groups15 <- setNames(object = c("black", "grey50", rep("black", 3), "grey50", rep("black", 9)), nm = Groups15.nospace)
+StatsObject <- dget(file = paste("Estimates objects/", loci, "/KMA473PopsGroups15", loci, "Repeated100ProofTestsEstimatesStats.txt", sep = ''))
+StatsObject <- sapply(StatsObject, function(rpt) {rpt[, 1:5] * percent}, simplify = FALSE)
+
+AyakulikFrazerObject <- dget(file = paste0("Estimates objects/", loci, "/AyakulikFrazer", loci, "Repeated100ProofTestsEstimatesStats.txt"))
+AyakulikFrazerObject <- sapply(AyakulikFrazerObject, function(rpt) {rpt[, 1:5] * percent}, simplify = FALSE)
+
+StatsObject <- c(StatsObject, AyakulikFrazerObject)
+
+PCGroups15 <- dget(file = "Objects/PCGroups15.txt")
+KMA14GroupsPC2 <- dget(file = "V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Mixtures/Objects/KMA14GroupsPC2.txt")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Add UCI 100% proof tests)
+Groups17UCI <- c(Groups14.nospace[1:11], KMA17UCIGroups[12:15], Groups14.nospace[13:14])
+StatsObject <- c(StatsObject, sapply(KMA473PopsGroups17UCIRepeated100ProofTests, function(proof) {dget(file = paste0("genetic_msa/", proof, "Proof/", proof, "Proof_genetic_msa_Estimates.txt"))[, 1:5] * 100}, simplify = FALSE))
+Colors17 <- c(Colors14[1:11], "blue", "pink2", "cyan", "snow4", Colors14[13:14])
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# Create .emf file
+emf(file = paste("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Baseline/genetic_msa/MasterPlotPercent17UCIRG.emf", sep = ''), width = 9.5, height = 5.5, family = "Times")
+
+par(mar = c(2.6, 4.1, 1.1, 9.1))
+
+ProofPlot <- barplot2(height = sapply(Groups17UCI, function(RG) {sapply(1:5, function(i) {StatsObject[[paste(RG, i, sep = '')]][RG, "median"]} )} ),
+                      ci.l = sapply(Groups17UCI, function(RG) {sapply(1:5, function(i) {StatsObject[[paste(RG, i, sep = '')]][RG, 4]} )} ),
+                      ci.u = sapply(Groups17UCI, function(RG) {sapply(1:5, function(i) {StatsObject[[paste(RG, i, sep = '')]][RG, 5]} )} ),
+                      names.arg = NULL, col = rep(Colors17, each = 5), main = '', xlab = '', ylab = "Percent Correctly Allocated", plot.ci = TRUE, 
+                      beside = TRUE, ylim = c(0, 1 * percent), ci.lwd = 2  # , ci.color = rep(ci.bar.colors.Groups15, each = 5)
+)
+abline(h = 0)
+abline(h = 0.9 * percent, lwd = 2)
+mtext(text = "Reporting Group", side = 1, line = 1)
+legend(x = max(ProofPlot), y = 0.8 * percent, legend = KMA17UCIGroups, fill = Colors17, bty = "n", xpd = TRUE)
+
+dev.off()
