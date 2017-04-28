@@ -5509,9 +5509,26 @@ dput(x = KMA473Pops_17UCIGroups_46loci_LikelihoodProfile, file = "Likelihood Pro
 KMA473Pops17UCIGroups_46loci_Confusion <- ConfusionMatrices.GCL(LeaveOneOutDist = KMA473Pops_17UCIGroups_46loci_LikelihoodProfile, groupnames = KMA17UCIGroups, groupvec = KMA473PopsGroupVec17UCI, sillyvec = KMA473Pops)
 dput(x = KMA473Pops17UCIGroups_46loci_Confusion, file = "Objects/KMA473Pops17UCIGroups_46loci_Confusion.txt")
 
+KMA473Pops17UCIGroups_46loci_Confusion <- dget(file = "Objects/KMA473Pops17UCIGroups_46loci_Confusion.txt")
+
 require(lattice)
 new.colors <- colorRampPalette(c("white", "black"))
 levelplot(KMA473Pops17UCIGroups_46loci_Confusion[[1]], col.regions = new.colors, xlab = "Known Origin", ylab = "Mean Genotype Likelihood", main = "17 Fine Scale Groups with UCI, 46 loci", at = seq(0, 1, length.out = 100), scales = list(x = list(rot = 45)))
+
+require(lattice)
+require(devEMF)
+new.colors <- colorRampPalette(c("white", "black"))
+emf(file = "Likelihood Profiles/KMA473Pops_17UCIGroups_46.loci_Confusion.emf", width = 6.5, height = 6.5, family = "Times")
+levelplot(KMA473Pops17UCIGroups_46loci_Confusion[[1]], col.regions = new.colors, xlab = "Known Origin", ylab = "Mean Genotype Likelihood", at = seq(0, 1, length.out = 100), scales = list(x = list(rot = 90)))
+dev.off()
+
+levelplot(KMA473Pops17UCIGroups_46loci_Confusion[[1]], col.regions = new.colors, 
+          xlab = "Known Origin", ylab = "Mean Genotype Likelihood", 
+          at = seq(0, 1, length.out = 100), scales = list(x = list(rot = 90)),
+          par.settings = list(axis.text = list(fontfamily = "serif"),
+                              par.xlab.text = list(fontfamily = "serif"),
+                              par.ylab.text = list(fontfamily = "serif")))
+
 
 
 
