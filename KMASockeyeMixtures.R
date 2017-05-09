@@ -12455,8 +12455,8 @@ KMA_Strata_17UCIRG_HarvestEstimatesStats <- sapply(KMA2014_2016Strata_Final, fun
   strata.split <- unlist(strsplit(x = strata, split = "_"))
   strata.split <- c(strata.split[1], paste(c(strata.split[2], strata.split[3]), collapse = "_"))
   
-  cbind(KMA_Strata_17UCIRG_EstimatesStats[[strata]][, c("mean", "sd", "median", "5%", "95%")] * HarvestByStrata2014_2016_Final[strata.split[1], strata.split[2]],
-        KMA_Strata_17UCIRG_EstimatesStats[[strata]][, c("P=0", "GR")])
+  cbind(KMA_Strata_17UCIRG_EstimatesStats_Final[[strata]][, c("mean", "sd", "median", "5%", "95%")] * HarvestByStrata2014_2016_Final[strata.split[1], strata.split[2]],
+        KMA_Strata_17UCIRG_EstimatesStats_Final[[strata]][, c("P=0", "GR")])
 }, simplify = FALSE )
 str(KMA_Strata_17UCIRG_HarvestEstimatesStats)
 dput(x = KMA_Strata_17UCIRG_HarvestEstimatesStats, file = "Estimates objects/Final/KMA_Strata_17UCIRG_HarvestEstimatesStats.txt")
@@ -12784,10 +12784,8 @@ str(KMA2016_Annual_Stratified_HarvestEstimatesStats)
 #### Plot Harvest for KMA Strata Mixtures 17UCIRG/6RG ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-KMA2014Strata_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2014Strata_HarvestEstimatesStats.txt")
-KMA2015Strata_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2015Strata_HarvestEstimatesStats.txt")
-KMA2016Strata_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2016Strata_HarvestEstimatesStats.txt")
-str(KMA2014Strata_HarvestEstimatesStats)
+KMA_Strata_17UCIRG_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA_Strata_17UCIRG_HarvestEstimatesStats.txt")
+str(KMA_Strata_17UCIRG_HarvestEstimatesStats)
 
 KMA2014Strata_Regional_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2014Strata_Regional_HarvestEstimatesStats.txt")
 KMA2015Strata_Regional_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2015Strata_Regional_HarvestEstimatesStats.txt")
@@ -12795,11 +12793,11 @@ KMA2016Strata_Regional_HarvestEstimatesStats <- dget(file = "Estimates objects/F
 str(KMA2014Strata_Regional_HarvestEstimatesStats)
 
 
-sapply(c(KMA2014Strata_HarvestEstimatesStats, KMA2015Strata_HarvestEstimatesStats, KMA2016Strata_HarvestEstimatesStats), function(mix) {table(mix[, "GR"] > 1.2)})
+sapply(KMA_Strata_17UCIRG_HarvestEstimatesStats, function(mix) {table(mix[, "GR"] > 1.2)})
 
-round(KMA2014Strata_HarvestEstimatesStats$SUYAKC14_2_Middle[, c("mean", "GR")], 3)
-round(KMA2015Strata_HarvestEstimatesStats$SUGANC15_3_Late[, c("mean", "GR")], 3)
-round(KMA2016Strata_HarvestEstimatesStats$SKARLC16_1_Early[, c("mean", "GR")], 3)
+round(KMA_Strata_17UCIRG_HarvestEstimatesStats$SUYAKC14_2_Middle[, c("mean", "GR")], 3)
+round(KMA_Strata_17UCIRG_HarvestEstimatesStats$SUGANC15_3_Late[, c("mean", "GR")], 3)
+round(KMA_Strata_17UCIRG_HarvestEstimatesStats$SKARLC16_1_Early[, c("mean", "GR")], 3)
 
 sapply(c(KMA2014Strata_Regional_HarvestEstimatesStats, KMA2015Strata_Regional_HarvestEstimatesStats, KMA2016Strata_Regional_HarvestEstimatesStats), function(mix) {table(mix[, "GR"] > 1.2)})
 
@@ -12829,7 +12827,7 @@ HarvestColors <- c("darkgreen", "green", "white")
 
 #~~~~~~~~~~~~~~~~~~
 # 2014
-TempMix14 <- sapply(KMA2014, function(geo) {grep(pattern = geo, x = names(KMA2014Strata_HarvestEstimatesStats), value = TRUE)}, simplify = FALSE)
+TempMix14 <- sapply(KMA2014, function(geo) {grep(pattern = geo, x = names(KMA_Strata_17UCIRG_HarvestEstimatesStats), value = TRUE)}, simplify = FALSE)
 
 Legend14 <- setNames(object = c("June 1-27", "June 28-July 25", "July 26-August 29"), 
                      nm = c("1_Early", "2_Middle", "3_Late"))
@@ -12842,13 +12840,13 @@ TempHarvestColors14 <- sapply(KMA2014, function(geo) {
   HarvestColors[sapply(TempMix14[[geo]], function(strata) {as.numeric(unlist(strsplit(x = strata, split = "_"))[2])} )]
 }, simplify = FALSE)
 
-HarvestEstimates14 <- KMA2014Strata_HarvestEstimatesStats
+HarvestEstimates14 <- KMA_Strata_17UCIRG_HarvestEstimatesStats[unlist(TempMix14)]
 
 RegionalHarvestEstimates14 <- KMA2014Strata_Regional_HarvestEstimatesStats
 
 #~~~~~~~~~~~~~~~~~~
 # 2015
-TempMix15 <- sapply(KMA2015, function(geo) {grep(pattern = geo, x = names(KMA2015Strata_HarvestEstimatesStats), value = TRUE)}, simplify = FALSE)
+TempMix15 <- sapply(KMA2015, function(geo) {grep(pattern = geo, x = names(KMA_Strata_17UCIRG_HarvestEstimatesStats), value = TRUE)}, simplify = FALSE)
 
 Legend15 <- setNames(object = c("June 1-July 3", "July 4-August 1", "August 2-29"), 
                      nm = c("1_Early", "2_Middle", "3_Late"))
@@ -12861,13 +12859,13 @@ TempHarvestColors15 <- sapply(KMA2015, function(geo) {
   HarvestColors[sapply(TempMix15[[geo]], function(strata) {as.numeric(unlist(strsplit(x = strata, split = "_"))[2])} )]
 }, simplify = FALSE)
 
-HarvestEstimates15 <- KMA2015Strata_HarvestEstimatesStats
+HarvestEstimates15 <- KMA_Strata_17UCIRG_HarvestEstimatesStats[unlist(TempMix15)]
 
 RegionalHarvestEstimates15 <- KMA2015Strata_Regional_HarvestEstimatesStats
 
 #~~~~~~~~~~~~~~~~~~
 # 2016
-TempMix16 <- sapply(KMA2016, function(geo) {grep(pattern = geo, x = names(KMA2016Strata_HarvestEstimatesStats), value = TRUE)}, simplify = FALSE)
+TempMix16 <- sapply(KMA2016, function(geo) {grep(pattern = geo, x = names(KMA_Strata_17UCIRG_HarvestEstimatesStats), value = TRUE)}, simplify = FALSE)
 
 Legend16 <- setNames(object = c("June 1-27", "June 28-July 25", "July 26-August 29"),
                      nm = c("1_Early", "2_Middle", "3_Late"))
@@ -12880,17 +12878,44 @@ TempHarvestColors16 <- sapply(KMA2016, function(geo) {
   HarvestColors[sapply(TempMix16[[geo]], function(strata) {as.numeric(unlist(strsplit(x = strata, split = "_"))[2])} )]
 }, simplify = FALSE)
 
-HarvestEstimates16 <- KMA2016Strata_HarvestEstimatesStats
+HarvestEstimates16 <- KMA_Strata_17UCIRG_HarvestEstimatesStats[unlist(TempMix16)]
 
 RegionalHarvestEstimates16 <- KMA2016Strata_Regional_HarvestEstimatesStats
 
 #~~~~~~~~~~~~~~~~~~
+# Which mixtures get an * for the UCI subregional groups (i.e. those <5% median est. of total Cook Inlet)?
+KMA2014Strata_Regional_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2014Strata_Regional_EstimatesStats.txt")
+KMA2014Strata_LowUCI <- sapply(grep(pattern = "LateLate", x = KMA2014Strata, invert = TRUE, value = TRUE), function(strata) {KMA2014Strata_Regional_EstimatesStats[[strata]]["Cook Inlet", "median"] < 0.05})
+KMA2014Strata_LowUCI <- names(KMA2014Strata_LowUCI)[KMA2014Strata_LowUCI]
+for(strata in KMA2014Strata_LowUCI) {
+  HarvestEstimates14[[strata]][KMA17UCIGroups[12:15], c("mean", "sd", "median", "5%", "95%")] <- 0
+}
+
+KMA2015Strata_Regional_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2015Strata_Regional_EstimatesStats.txt")
+KMA2015Strata_LowUCI <- sapply(KMA2015Strata, function(strata) {KMA2015Strata_Regional_EstimatesStats[[strata]]["Cook Inlet", "median"] < 0.05})
+KMA2015Strata_LowUCI <- names(KMA2015Strata_LowUCI)[KMA2015Strata_LowUCI]
+for(strata in KMA2015Strata_LowUCI) {
+  HarvestEstimates15[[strata]][KMA17UCIGroups[12:15], c("mean", "sd", "median", "5%", "95%")] <- 0
+}
+
+KMA2016Strata_Regional_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2016Strata_Regional_EstimatesStats.txt")
+KMA2016Strata_LowUCI <- sapply(KMA2016Strata, function(strata) {KMA2016Strata_Regional_EstimatesStats[[strata]]["Cook Inlet", "median"] < 0.05})
+KMA2016Strata_LowUCI <- names(KMA2016Strata_LowUCI)[KMA2016Strata_LowUCI]
+for(strata in KMA2016Strata_LowUCI) {
+  HarvestEstimates16[[strata]][KMA17UCIGroups[12:15], c("mean", "sd", "median", "5%", "95%")] <- 0
+}
+#~~~~~~~~~~~~~~~~~~
 # Size Parameters
-Groups <- KMA14GroupsPC
-Groups2Rows <- KMA14GroupsPC2Rows
-SubRegGroups <- KMA14GroupsPC[2:11]
-cex.lab <- 1.5
-cex.xaxis <- 0.5  # 0.5
+
+# KMA17UCIGroups2Rows <- c(KMA14GroupsPC2Rows[1:11], "Other\nCook Inlet", "Susitna\n", "Kenai\n", "Kasilof\n", KMA14GroupsPC2Rows[13:14])
+# dput(x = KMA17UCIGroups2Rows, file = "Objects/KMA17UCIGroups2Rows.txt")
+
+Groups <- KMA17UCIGroups
+SubRegGroups <- KMA17UCIGroups[2:15]
+RegGroups2Rows <- c("West of\nChignik", "Chignik\n", "Kodiak\n", "Cook\nInlet", "PWS\n", "South of\nCape Suckling")
+SubRegGroups2Rows <- KMA17UCIGroups2Rows[2:15]
+cex.lab <- 1.4  # 1.5
+cex.xaxis <- 0.4  # 0.5
 cex.yaxis <- 1.3
 cex.leg <- 1.1
 ci.lwd <- 2.5
@@ -12908,7 +12933,7 @@ sapply(GeoMix, function(geomix) {
   emf(file = paste("Figures/All Years/", filenames[geomix], "DarkGreen.emf", sep = ''), width = 6, height = 5.75, family = "serif", bg = "white")
   
   
-  layout(mat = layoutmat, widths = c(0.075, 0.375, 0.625), heights = c(0.9, 0.9, 0.9, 0.15))
+  layout(mat = layoutmat, widths = c(0.06, 0.3, 0.7), heights = c(0.9, 0.9, 0.9, 0.15))  # widths = c(0.075, 0.375, 0.625)
   par(mar = rep(0, 4))
   par(family = "times")
   
@@ -12957,9 +12982,12 @@ sapply(GeoMix, function(geomix) {
                           ci.u = t(sapply(TempMix14[[geomix14]], function(tempmix) {HarvestEstimates14[[tempmix]][SubRegGroups, "95%"]})), 
                           ylim = c(0, ymax), col = TempHarvestColors14[[geomix14]], yaxt = "n", xaxt = 'n')
     axis(side = 2, at = seq(0, ymax, 50000), labels = FALSE, cex.axis = cex.yaxis)
-    legend(legend = TempLegend14[[geomix14]], x = min(Barplot14[, 6]), y = ymax, fill = TempHarvestColors14[[geomix14]], border = "black", bty = "n", cex = cex.leg, title="2014")
+    legend(legend = TempLegend14[[geomix14]], x = max(Barplot14[, 5]), y = ymax, fill = TempHarvestColors14[[geomix14]], border = "black", bty = "n", cex = cex.leg, title="2014")
     abline(h = 0, xpd = FALSE)
-    abline(v = mean(Barplot14[, 2:3]), lty = 2)
+    abline(v = c(mean(Barplot14[, 2:3]), mean(Barplot14[, 10:11])), lty = 2)
+    if(any(TempMix14[[geomix14]] %in% KMA2014Strata_LowUCI)) {
+      text(x = Barplot14[which(TempMix14[[geomix14]] %in% KMA2014Strata_LowUCI), 11:14], y = ymax/40, labels = "*")
+    }
   }
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -12984,9 +13012,12 @@ sapply(GeoMix, function(geomix) {
                         ci.u = t(sapply(TempMix15[[geomix15]], function(tempmix) {HarvestEstimates15[[tempmix]][SubRegGroups, "95%"]})), 
                         ylim = c(0, ymax), col = TempHarvestColors15[[geomix15]], yaxt = "n", xaxt = 'n')
   axis(side = 2, at = seq(0, ymax, 50000), labels = FALSE, cex.axis = cex.yaxis)
-  legend(legend = TempLegend15[[geomix15]], x = min(Barplot15[, 6]), y = ymax, fill = TempHarvestColors15[[geomix15]], border = "black", bty = "n", cex = cex.leg, title="2015")
+  legend(legend = TempLegend15[[geomix15]], x = max(Barplot15[, 5]), y = ymax, fill = TempHarvestColors15[[geomix15]], border = "black", bty = "n", cex = cex.leg, title="2015")
   abline(h = 0, xpd = FALSE)
-  abline(v = mean(Barplot15[, 2:3]), lty = 2)
+  abline(v = c(mean(Barplot15[, 2:3]), mean(Barplot15[, 10:11])), lty = 2)
+  if(any(TempMix15[[geomix15]] %in% KMA2015Strata_LowUCI)) {
+    text(x = Barplot15[which(TempMix15[[geomix15]] %in% KMA2015Strata_LowUCI), 11:14], y = ymax/40, labels = "*")
+  }
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   ## 2016 Barplot Regional
@@ -13000,7 +13031,7 @@ sapply(GeoMix, function(geomix) {
   axis(side = 2, at = seq(0, ymax, 50000), labels = formatC(x = seq(0, ymax, 50000) / 1000, big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
   # legend(legend = TempLegend16[[geomix16]], x = "topleft", fill = TempHarvestColors16[[geomix16]], border = "black", bty = "n", cex = cex.leg, title="2016")
   abline(h = 0, xpd = FALSE)
-  mtext(text = c(Groups2Rows[1], "Chignik\n", "Kodiak\n", Groups2Rows[12:14]), side = 1, line = 1, at = colMeans(Barplot16), adj = 0.5, cex = cex.xaxis)
+  mtext(text = RegGroups2Rows, side = 1, line = 1, at = colMeans(Barplot16), adj = 0.5, cex = cex.xaxis)
   # text(x = colMeans(Barplot16), y = -6, labels = c(Groups2Rows[1], "Chignik\n", "Kodiak\n", Groups2Rows[12:14]), adj = 0.5, cex = cex.xaxis, srt = 45, xpd = TRUE)
   #~~~~~~~~~~~~~~~~
   ## 2016 Barplot SubRegional
@@ -13012,10 +13043,13 @@ sapply(GeoMix, function(geomix) {
                         ci.u = t(sapply(TempMix16[[geomix16]], function(tempmix) {HarvestEstimates16[[tempmix]][SubRegGroups, "95%"]})), 
                         ylim = c(0, ymax), col = TempHarvestColors16[[geomix16]], yaxt = "n", xaxt = 'n')
   axis(side = 2, at = seq(0, ymax, 50000), labels = FALSE, cex.axis = cex.yaxis)
-  legend(legend = TempLegend16[[geomix16]], x = min(Barplot16[, 6]), y = ymax, fill = TempHarvestColors16[[geomix16]], border = "black", bty = "n", cex = cex.leg, title="2016")
+  legend(legend = TempLegend16[[geomix16]], x = max(Barplot16[, 5]), y = ymax, fill = TempHarvestColors16[[geomix16]], border = "black", bty = "n", cex = cex.leg, title="2016")
   abline(h = 0, xpd = FALSE)
-  abline(v = mean(Barplot16[, 2:3]), lty = 2)
-  mtext(text = Groups2Rows[2:11], side = 1, line = 1, at = colMeans(Barplot16) + c(rep(0, 2), 0.25, 0.5, 0.25, -0.25, 0, 0.25, 0.25, 0), adj = 0.5, cex = cex.xaxis)
+  abline(v = c(mean(Barplot16[, 2:3]), mean(Barplot16[, 10:11])), lty = 2)
+  if(any(TempMix16[[geomix16]] %in% KMA2016Strata_LowUCI)) {
+    text(x = Barplot16[which(TempMix16[[geomix16]] %in% KMA2016Strata_LowUCI), 11:14], y = ymax/40, labels = "*")
+  }
+  mtext(text = SubRegGroups2Rows, side = 1, line = 1, at = colMeans(Barplot16) + c(0, -0.25, 0, 0.5, 0.25, -0.25, 0, 0.25, 0.25, 0, rep(0, 4)), adj = 0.5, cex = cex.xaxis)
   # text(x = colMeans(Barplot16), y = -6, labels = Groups2Rows[2:11], adj = 0.5, cex = cex.xaxis, srt = 45, xpd = TRUE)
   # - c(rep(0.5, 3), rep(0, 2), rep(0.5, 2), rep(0, 3))
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -13062,11 +13096,12 @@ ProportionColors <- colorpanel(n = 3, low = "blue", high = "white")
 
 #~~~~~~~~~~~~~~~~~~
 # Size Parameters
-Groups <- KMA14GroupsPC
-Groups2Rows <- KMA14GroupsPC2Rows
-SubRegGroups <- KMA14GroupsPC[2:11]
-cex.lab <- 1.5
-cex.xaxis <- 0.5  # 0.5
+Groups <- KMA17UCIGroups
+SubRegGroups <- KMA17UCIGroups[2:15]
+RegGroups2Rows <- c("West of\nChignik", "Chignik\n", "Kodiak\n", "Cook\nInlet", "PWS\n", "South of\nCape Suckling")
+SubRegGroups2Rows <- KMA17UCIGroups2Rows[2:15]
+cex.lab <- 1.4  # 1.5
+cex.xaxis <- 0.4  # 0.5
 cex.yaxis <- 1.3
 cex.leg <- 1.8  # 1.1
 ci.lwd <- 2.5
@@ -13083,7 +13118,7 @@ require(gplots)
 emf(file = "Figures/All Years/KMA Proportions 2014-2016.emf", width = 6, height = 5.75, family = "serif", bg = "white")
 
 
-layout(mat = layoutmat, widths = c(0.075, 0.375, 0.6725), heights = c(2.7, 0.15))
+layout(mat = layoutmat, widths = c(0.06, 0.3, 0.7), heights = c(2.7, 0.15))
 par(mar = rep(0, 4))
 par(family = "times")
 
@@ -13110,7 +13145,7 @@ Barplot <- barplot2(height = t(cbind(KMA2014_Annual_Regional_Stratified_Estimate
 axis(side = 2, at = seq(0, 100, 25), labels = formatC(x = seq(0, 100, 25), big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
 # legend(legend = 2014:2016, x = "topleft", fill = ProportionColors, border = "black", bty = "n", cex = cex.leg, title="")
 abline(h = 0, xpd = FALSE)
-mtext(text = c(Groups2Rows[1], "Chignik\n", "Kodiak\n", Groups2Rows[12:14]), side = 1, line = 1, at = colMeans(Barplot), adj = 0.5, cex = cex.xaxis)
+mtext(text = RegGroups2Rows, side = 1, line = 1, at = colMeans(Barplot), adj = 0.5, cex = cex.xaxis)
 
 ## Barplot Subregional
 par(mar = c(1, 1, 1.5, 0))
@@ -13129,8 +13164,8 @@ axis(side = 2, at = seq(0, 100, 25), labels = FALSE, cex.axis = cex.yaxis)
 legend(legend = 2014:2016, x = min(Barplot[, 5]), y = 100, fill = ProportionColors, border = "black", bty = "n", cex = cex.leg, title="June 1-August 29")
 #legend(legend = rep("", 3), x = min(Barplot[, 6]), y = 100, border = "black", bty = "n", cex = cex.title, title="June 1-August 29")
 abline(h = 0, xpd = FALSE)
-abline(v = mean(Barplot[, 2:3]), lty = 2)
-mtext(text = Groups2Rows[2:11], side = 1, line = 1, at = colMeans(Barplot) + c(rep(0, 2), 0.25, 0.5, 0.25, -0.25, 0, 0.25, 0.25, 0), adj = 0.5, cex = cex.xaxis)
+abline(v = c(mean(Barplot[, 2:3]), mean(Barplot[, 10:11])), lty = 2)
+mtext(text = SubRegGroups2Rows, side = 1, line = 1, at = colMeans(Barplot) + c(0, -0.25, 0, 0.5, 0.25, -0.25, 0, 0.25, 0.25, 0, rep(0, 4)), adj = 0.5, cex = cex.xaxis)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## Blank Corner
 par(mar = rep(0, 4))
@@ -13157,7 +13192,7 @@ dev.off()
 emf(file = "Figures/All Years/KMA Proportions 2014-2016 Blank.emf", width = 6, height = 5.75, family = "serif", bg = "white")
 
 
-layout(mat = layoutmat, widths = c(0.075, 0.375, 0.6725), heights = c(2.7, 0.15))
+layout(mat = layoutmat, widths = c(0.06, 0.3, 0.7), heights = c(2.7, 0.15))
 par(mar = rep(0, 4))
 par(family = "times")
 
@@ -13184,26 +13219,26 @@ Barplot <- barplot2(height = t(cbind(rep(0, 6),
 axis(side = 2, at = seq(0, 100, 25), labels = formatC(x = seq(0, 100, 25), big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
 # legend(legend = 2014:2016, x = "topleft", fill = ProportionColors, border = "black", bty = "n", cex = cex.leg, title="")
 abline(h = 0, xpd = FALSE)
-mtext(text = c(Groups2Rows[1], "Chignik\n", "Kodiak\n", Groups2Rows[12:14]), side = 1, line = 1, at = colMeans(Barplot), adj = 0.5, cex = cex.xaxis)
+mtext(text = RegGroups2Rows, side = 1, line = 1, at = colMeans(Barplot), adj = 0.5, cex = cex.xaxis)
 
 ## Barplot Subregional
 par(mar = c(1, 1, 1.5, 0))
-Barplot <- barplot2(height = t(cbind(rep(0, 10),
-                                     rep(0, 10),
-                                     rep(0, 10))) * 100, 
+Barplot <- barplot2(height = t(cbind(rep(0, 14),
+                                     rep(0, 14),
+                                     rep(0, 14))) * 100, 
                     beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd,
-                    ci.l = t(cbind(rep(0, 10),
-                                   rep(0, 10),
-                                   rep(0, 10))) * 100, 
-                    ci.u = t(cbind(rep(0, 10),
-                                   rep(0, 10),
-                                   rep(0, 10))) * 100, 
+                    ci.l = t(cbind(rep(0, 14),
+                                   rep(0, 14),
+                                   rep(0, 14))) * 100, 
+                    ci.u = t(cbind(rep(0, 14),
+                                   rep(0, 14),
+                                   rep(0, 14))) * 100, 
                     ylim = c(0, 100), col = ProportionColors, yaxt = "n", xaxt = 'n')
 axis(side = 2, at = seq(0, 100, 25), labels = FALSE, cex.axis = cex.yaxis)
 legend(legend = 2014:2016, x = min(Barplot[, 5]), y = 100, fill = ProportionColors, border = "black", bty = "n", cex = cex.leg, title="June 1-August 29", adj = 0)
 abline(h = 0, xpd = FALSE)
-abline(v = mean(Barplot[, 2:3]), lty = 2)
-mtext(text = Groups2Rows[2:11], side = 1, line = 1, at = colMeans(Barplot) + c(rep(0, 2), 0.25, 0.5, 0.25, -0.25, 0, 0.25, 0.25, 0), adj = 0.5, cex = cex.xaxis)
+abline(v = c(mean(Barplot[, 2:3]), mean(Barplot[, 10:11])), lty = 2)
+mtext(text = SubRegGroups2Rows, side = 1, line = 1, at = colMeans(Barplot) + c(0, -0.25, 0, 0.5, 0.25, -0.25, 0, 0.25, 0.25, 0, rep(0, 4)), adj = 0.5, cex = cex.xaxis)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## Blank Corner
 par(mar = rep(0, 4))
@@ -13399,7 +13434,7 @@ GeoHeader <- dget(file = "Objects/GeoHeader.txt")
 
 # Get Final Estimates Objects
 KMAfinalestimatesobjects <- list.files(path = "Estimates objects/Final", recursive = FALSE)
-invisible(sapply(KMAfinalestimatesobjects, function(objct) {assign(x = unlist(strsplit(x = objct, split = ".txt")), value = dget(file = paste("Estimates objects/Final", objct, sep = "/")), pos = 1) })); beep(2)
+invisible(sapply(KMAfinalestimatesobjects, function(objct) {assign(x = unlist(strsplit(x = objct, split = ".txt")), value = dget(file = paste("Estimates objects/Final", objct, sep = "/")), pos = 1) }))
 KMAfinalestimatesobjects; rm(KMAfinalestimatesobjects)
 
 
