@@ -13274,17 +13274,16 @@ KMA2016_Annual_Regional_Stratified_HarvestEstimatesStats <- dget(file = "Estimat
 layoutmat <- matrix(data=c(  1, 2, 3,
                              4, 5, 6), nrow = 2, ncol = 3, byrow = TRUE)
 
-HarvestColors <- colorpanel(n = 3, low = "green", high = "white")
-
 HarvestColors <- c("darkgreen", "green", "white")
 
 #~~~~~~~~~~~~~~~~~~
 # Size Parameters
-Groups <- KMA14GroupsPC
-Groups2Rows <- KMA14GroupsPC2Rows
-SubRegGroups <- KMA14GroupsPC[2:11]
-cex.lab <- 1.5
-cex.xaxis <- 0.5
+Groups <- KMA17UCIGroups
+SubRegGroups <- KMA17UCIGroups[2:15]
+RegGroups2Rows <- c("West of\nChignik", "Chignik\n", "Kodiak\n", "Cook\nInlet", "PWS\n", "South of\nCape Suckling")
+SubRegGroups2Rows <- KMA17UCIGroups2Rows[2:15]
+cex.lab <- 1.4  # 1.5
+cex.xaxis <- 0.4  # 0.5
 cex.yaxis <- 1.3
 cex.leg <- 1.8  # 1.1
 ci.lwd <- 2.5
@@ -13303,7 +13302,7 @@ require(gplots)
 emf(file = "Figures/All Years/KMA Harvest 2014-2016DarkGreen.emf", width = 6, height = 5.75, family = "serif", bg = "white")
 
 
-layout(mat = layoutmat, widths = c(0.075, 0.375, 0.6725), heights = c(2.7, 0.15))
+layout(mat = layoutmat, widths = c(0.06, 0.3, 0.7), heights = c(2.7, 0.15))
 par(mar = rep(0, 4))
 par(family = "times")
 
@@ -13331,7 +13330,7 @@ axis(side = 2, at = seq(0, ymax, 200000), labels = formatC(x = seq(0, ymax, 2000
 # legend(legend = 2014:2016, x = "topleft", fill = HarvestColors, border = "black", bty = "n", cex = cex.leg, title="")
 abline(h = 0, xpd = FALSE)
 
-mtext(text = c(Groups2Rows[1], "Chignik\n", "Kodiak\n", Groups2Rows[12:14]), side = 1, line = 1, at = colMeans(Barplot), adj = 0.5, cex = cex.xaxis)
+mtext(text = RegGroups2Rows, side = 1, line = 1, at = colMeans(Barplot), adj = 0.5, cex = cex.xaxis)
 
 ## Barplot Subregional
 par(mar = c(1, 1, 1.5, 0))
@@ -13349,8 +13348,8 @@ Barplot <- barplot2(height = t(cbind(KMA2014_Annual_Stratified_HarvestEstimatesS
 axis(side = 2, at = seq(0, ymax, 200000), labels = FALSE, cex.axis = cex.yaxis)
 legend(legend = 2014:2016, x = min(Barplot[, 5]), y = ymax, fill = HarvestColors, border = "black", bty = "n", cex = cex.leg, title="June 1-August 29")
 abline(h = 0, xpd = FALSE)
-abline(v = mean(Barplot[, 2:3]), lty = 2)
-mtext(text = Groups2Rows[2:11], side = 1, line = 1, at = colMeans(Barplot) + c(rep(0, 2), 0.25, 0.5, 0.25, -0.25, 0, 0.25, 0.25, 0), adj = 0.5, cex = cex.xaxis)
+abline(v = c(mean(Barplot[, 2:3]), mean(Barplot[, 10:11])), lty = 2)
+mtext(text = SubRegGroups2Rows, side = 1, line = 1, at = colMeans(Barplot) + c(0, -0.25, 0, 0.5, 0.25, -0.25, 0, 0.25, 0.25, 0, rep(0, 4)), adj = 0.5, cex = cex.xaxis)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -13378,48 +13377,18 @@ dev.off()
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#### Table Regional Results ####
+#### Table 17UCI Results ####
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ## Dates
-# DatesStrata2014 <- read.table(file = "Harvest/2014DatesByStrata.txt", header = TRUE, sep = "\t", as.is = TRUE)
-# DatesStrata2014.mat <- as.matrix(DatesStrata2014[-1])
-# dimnames(DatesStrata2014.mat) <- list(DatesStrata2014$location, c("1_Early", "2_Middle", "3_Late"))
-# dput(x = DatesStrata2014.mat, file = "Objects/DatesStrata2014_Final.txt"); rm(DatesStrata2014.mat)
-DatesStrata2014_Final <- dget(file = "Objects/DatesStrata2014_Final.txt")
-
-
-# DatesStrata2015 <- read.table(file = "Harvest/2015DatesByStrata.txt", header = TRUE, sep = "\t", as.is = TRUE)
-# DatesStrata2015.mat <- as.matrix(DatesStrata2015[-1])
-# dimnames(DatesStrata2015.mat) <- list(DatesStrata2015$location, c("1_Early", "2_Middle", "3_Late"))
-# dput(x = DatesStrata2015.mat, file = "Objects/DatesStrata2015_Final.txt"); rm(DatesStrata2015.mat)
-DatesStrata2015_Final <- dget(file = "Objects/DatesStrata2015_Final.txt")
-
-
-# DatesStrata2016 <- read.table(file = "Harvest/2016DatesByStrata.txt", header = TRUE, sep = "\t", as.is = TRUE)
-# DatesStrata2016.mat <- as.matrix(DatesStrata2016[-1])
-# dimnames(DatesStrata2016.mat) <- list(DatesStrata2016$location, c("1_Early", "2_Middle", "3_Late"))
-# dput(x = DatesStrata2016.mat, file = "Objects/DatesStrata2016_Final.txt"); rm(DatesStrata2016.mat)
-DatesStrata2016_Final <- dget(file = "Objects/DatesStrata2016_Final.txt")
-
+DatesStrata2014_Final
+DatesStrata2015_Final
+DatesStrata2016_Final
 
 ## Sample sizes
-# KMA2014_2016Strata_SampleSizes_Final <- KMA2014_2016Strata_SampleSizes[, "Final"]
-# LateLateStrata <- grep(pattern = "LateLate", x = names(KMA2014_2016Strata_SampleSizes_Final))
-# KMA2014_2016Strata_SampleSizes_Final[LateLateStrata-1] <- KMA2014_2016Strata_SampleSizes_Final[LateLateStrata-1] + KMA2014_2016Strata_SampleSizes_Final[LateLateStrata]
-# KMA2014_2016Strata_SampleSizes_Final_Condense <- KMA2014_2016Strata_SampleSizes_Final[-LateLateStrata]
-# dput(x = KMA2014_2016Strata_SampleSizes_Final_Condense, file = "Objects/KMA2014_2016Strata_SampleSizes_Final_Condense.txt")
-KMA2014_2016Strata_SampleSizes_Final_Condense <- dget(file = "Objects/KMA2014_2016Strata_SampleSizes_Final_Condense.txt")
-
+KMA2014_2016Strata_SampleSizes_Final_Condense
 
 ## Geographic headers
-# GeoHeader <- setNames(object = c(paste0("Alitak (statistical areas 257-10, 20, 50, 60, 70)"),
-#                                  paste0("Ayakulik-Halibut Bay (statistical areas 256-10", "\u2013", "256-30)"),
-#                                  paste0("Igvak (statistical areas 262-75, 80, 90, 95)"),
-#                                  paste0("Karluk-Sturgeon (statistical areas 255-10, 20; 256-40)"),
-#                                  paste0("Uganik-Kupreanof (statistical areas 253-10", "\u2013", "253-35)"),
-#                                  paste0("Uyak (statistical areas 254-10)", "\u2013", "254-41)")),
-#                       nm = unlist(strsplit(x = KMA2016, split = "16")))
 GeoHeader <- setNames(object = c(paste0("Alitak (statistical areas 257-10, 20, 50, 60, 70)"),
                                  paste0("Ayakulik-Halibut Bay (statistical areas 256-10, 15, 20, 25, 30)"),
                                  paste0("Igvak (statistical areas 262-75, 80, 90, 95)"),
@@ -13429,8 +13398,6 @@ GeoHeader <- setNames(object = c(paste0("Alitak (statistical areas 257-10, 20, 5
                       nm = unlist(strsplit(x = KMA2016, split = "16")))
 dput(x = GeoHeader, file = "Objects/GeoHeader.txt")
 GeoHeader <- dget(file = "Objects/GeoHeader.txt")
-
-
 
 # Get Final Estimates Objects
 KMAfinalestimatesobjects <- list.files(path = "Estimates objects/Final", recursive = FALSE)
@@ -13442,13 +13409,15 @@ KMAfinalestimatesobjects; rm(KMAfinalestimatesobjects)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## Defining caption variables
 
-EstimatesStats <- c(KMA2014Strata_EstimatesStats, KMA2014_Annual_EstimatesStats,
-                    KMA2015Strata_EstimatesStats, KMA2015_Annual_EstimatesStats,
-                    KMA2016Strata_EstimatesStats, KMA2016_Annual_EstimatesStats)
+EstimatesStats <- c(KMA_Strata_17UCIRG_EstimatesStats_Final,
+                    KMA2014_Spatial_17UCIRG_EstimatesStats,
+                    KMA2015_Spatial_17UCIRG_EstimatesStats,
+                    KMA2016_Spatial_17UCIRG_EstimatesStats)
 
-HarvestEstimatesStats <- c(KMA2014Strata_HarvestEstimatesStats, KMA2014_Annual_HarvestEstimatesStats,
-                           KMA2015Strata_HarvestEstimatesStats, KMA2015_Annual_HarvestEstimatesStats,
-                           KMA2016Strata_HarvestEstimatesStats, KMA2016_Annual_HarvestEstimatesStats)
+HarvestEstimatesStats <- c(KMA_Strata_17UCIRG_HarvestEstimatesStats,
+                           KMA2014_Spatial_17UCIRG_HarvestEstimatesStats,
+                           KMA2015_Spatial_17UCIRG_HarvestEstimatesStats,
+                           KMA2016_Spatial_17UCIRG_HarvestEstimatesStats)
 
 Regional_EstimatesStats <- c(KMA2014Strata_Regional_EstimatesStats, KMA2014_Annual_Regional_EstimatesStats,
                              KMA2015Strata_Regional_EstimatesStats, KMA2015_Annual_Regional_EstimatesStats,
@@ -13469,7 +13438,42 @@ harvest <- rbind(HarvestByStrata2014_Final, HarvestByStrata2015_Final, HarvestBy
 dates <- rbind(DatesStrata2014_Final, DatesStrata2015_Final, DatesStrata2016_Final)
 sampsize <- KMA2014_2016Strata_SampleSizes_Final_Condense
 
-SubRegGroups <- KMA14GroupsPC[2:11]
+RegGroups <- c(KMA14GroupsPC[1], "Chignik", "Kodiak", KMA14GroupsPC[12:14])
+SubRegGroups <- KMA17UCIGroups[2:15]
+
+
+#~~~~~~~~~~~~~~~~~~
+# Which mixtures get an * for the UCI subregional groups (i.e. those <5% median est. of total Cook Inlet)?
+KMA2014Strata_Regional_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2014Strata_Regional_EstimatesStats.txt")
+KMA2014Strata_LowUCI <- sapply(grep(pattern = "LateLate", x = KMA2014Strata, invert = TRUE, value = TRUE), function(strata) {KMA2014Strata_Regional_EstimatesStats[[strata]]["Cook Inlet", "median"] < 0.05})
+KMA2014Strata_LowUCI <- names(KMA2014Strata_LowUCI)[KMA2014Strata_LowUCI]
+for(strata in KMA2014Strata_LowUCI) {
+  EstimatesStats[[strata]][KMA17UCIGroups[12:15], c("mean", "sd", "median", "5%", "95%")] <- 0
+  HarvestEstimatesStats[[strata]][KMA17UCIGroups[12:15], c("mean", "sd", "median", "5%", "95%")] <- 0
+}
+
+KMA2015Strata_Regional_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2015Strata_Regional_EstimatesStats.txt")
+KMA2015Strata_LowUCI <- sapply(KMA2015Strata, function(strata) {KMA2015Strata_Regional_EstimatesStats[[strata]]["Cook Inlet", "median"] < 0.05})
+KMA2015Strata_LowUCI <- names(KMA2015Strata_LowUCI)[KMA2015Strata_LowUCI]
+for(strata in KMA2015Strata_LowUCI) {
+  EstimatesStats[[strata]][KMA17UCIGroups[12:15], c("mean", "sd", "median", "5%", "95%")] <- 0
+  HarvestEstimatesStats[[strata]][KMA17UCIGroups[12:15], c("mean", "sd", "median", "5%", "95%")] <- 0
+}
+
+KMA2016Strata_Regional_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2016Strata_Regional_EstimatesStats.txt")
+KMA2016Strata_LowUCI <- sapply(KMA2016Strata, function(strata) {KMA2016Strata_Regional_EstimatesStats[[strata]]["Cook Inlet", "median"] < 0.05})
+KMA2016Strata_LowUCI <- names(KMA2016Strata_LowUCI)[KMA2016Strata_LowUCI]
+for(strata in KMA2016Strata_LowUCI) {
+  EstimatesStats[[strata]][KMA17UCIGroups[12:15], c("mean", "sd", "median", "5%", "95%")] <- 0
+  HarvestEstimatesStats[[strata]][KMA17UCIGroups[12:15], c("mean", "sd", "median", "5%", "95%")] <- 0
+}
+
+
+EstimatesStats[["SUGANC14"]][KMA17UCIGroups[12:15], c("mean", "sd", "median", "5%", "95%")] <- 0
+HarvestEstimatesStats[["SUGANC14"]][KMA17UCIGroups[12:15], c("mean", "sd", "median", "5%", "95%")] <- 0
+
+EstimatesStats[["SKARLC14"]][KMA17UCIGroups[12:15], c("mean", "sd", "median", "5%", "95%")] <- 0
+HarvestEstimatesStats[["SKARLC14"]][KMA17UCIGroups[12:15], c("mean", "sd", "median", "5%", "95%")] <- 0
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -13492,41 +13496,41 @@ for(mix in SheetNames) {
   if(length(SheetNames.split) > 1) {
     tempmix <- paste(c(SheetNames.split[2], SheetNames.split[3]), collapse = "_")
     
-    Caption <- paste("Table X.-Regional and subregional (within Chignik and Kodiak) estimates of stock composition (%) and stock-specific harvest for temporal stratum ",
-                     SheetNames.split[2], " (", dates[geomix, tempmix],
-                     "; Harvest=", formatC(x = harvest[geomix, tempmix], format = "f", digits = 0, big.mark = ","),
-                     "; n=", sampsize[mix], ")", " of ", GeoHeader[geo], ", 20", yr,
-                     ". Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and standard deviation (SD).",
-                     sep = '')
+    Caption <- paste0("Table X.-", GeoHeader[geo], ", temporal stratum ", SheetNames.split[2], " (", dates[geomix, tempmix],
+                      "; Harvest=", formatC(x = harvest[geomix, tempmix], format = "f", digits = 0, big.mark = ","),
+                      "; n=", sampsize[mix], ")", ", 20", yr, ". Regional and subregional (within Chignik, Kodiak, and Cook Inlet) estimates of stock composition (%) and stock-specific harvest.", 
+                      " Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and standard deviation (SD).")
   } else {
-    Caption <- paste("Table X.-Annual regional and subregional (within Chignik and Kodiak) estimates of stock composition (%) and stock-specific harvest for ", GeoHeader[geo], ", 20", yr,
-                     ". Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and standard deviation (SD).",
-                     sep = '')
+    Caption <- paste0("Table X.-", GeoHeader[geo], ", 20", yr, ", all strata. Annual regional and subregional (within Chignik, Kodiak, and Cook Inlet) estimates of stock composition (%) and stock-specific harvest.", 
+                      " Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and standard deviation (SD).")
   }
   
   Disclaimer <- "Note: Stock composition estimates may not sum to 100% and stock-specific harvest estimates may not sum to the total harvest due to rounding error."
+  Disclaimer2 <- "Note: Results for Cook Inlet subregional reporting groups are only reported if the overall contribution of Cook Inlet groups in a strata is greater than 5%."
   
   
-  TableX <- matrix(data = "", nrow = 24, ncol = 14)
+  TableX <- matrix(data = "", nrow = 30, ncol = 14)
   
   TableX[1, 1] <- Caption
   TableX[2, c(3, 10)] <- c("Stock Composition", "Stock-specific Harvest")
   TableX[3, c(1, 4, 11)] <- c("Reporting Group", rep("90% CI", 2))
   TableX[4, c(1, 2, 3:5, 7:8, 10:14, 6)] <- c("Regional", "Subregional", rep(c("Median", "5%", "95%", "Mean", "SD"), 2), "P=0")
-  TableX[5:10, 1] <- c(KMA14GroupsPC[1], "Chignik", "Kodiak", KMA14GroupsPC[12:14])
+  TableX[5:10, 1] <- RegGroups
   TableX[5:10, c(3:5, 7:8)] <- formatC(x = Regional_EstimatesStats[[mix]][, c("median", "5%", "95%", "mean", "sd")] * 100, digits = 1, format = "f")
   TableX[5:10, 6] <- formatC(x = Regional_EstimatesStats[[mix]][, "P=0"], digits = 2, format = "f")
   TableX[5:10, 10:14] <- formatC(x = Regional_HarvestEstimatesStats[[mix]][, c("median", "5%", "95%", "mean", "sd")], digits = 0, format = "f", big.mark = ",")
   TableX[11, 12:13] <- c("Total", formatC(x = sum(Regional_HarvestEstimatesStats[[mix]][, "mean"]), digits = 0, format = "f", big.mark = ","))
-  TableX[c(13, 16), 1] <- c("Chignik", "Kodiak")
-  TableX[c(13:14, 16:23), 2] <- c(SubRegGroups[1:3], "Ayakulik / Frazer", SubRegGroups[5:10])
-  TableX[c(13:14, 16:23), c(3:5, 7:8)] <- formatC(x = EstimatesStats[[mix]][SubRegGroups, c("median", "5%", "95%", "mean", "sd")] * 100, digits = 1, format = "f")
-  TableX[c(13:14, 16:23), 6] <- formatC(x = EstimatesStats[[mix]][SubRegGroups, "P=0"], digits = 2, format = "f")
-  TableX[c(13:14, 16:23), 10:14] <- formatC(x = HarvestEstimatesStats[[mix]][SubRegGroups, c("median", "5%", "95%", "mean", "sd")], digits = 0, format = "f", big.mark = ",")
-  TableX[24, 1] <- Disclaimer
+  TableX[c(13, 16, 25), 1] <- c("Chignik", "Kodiak", "Cook Inlet")
+  TableX[c(13:14, 16:23, 25:28), 2] <- SubRegGroups
+  TableX[c(13:14, 16:23, 25:28), c(3:5, 7:8)] <- formatC(x = EstimatesStats[[mix]][SubRegGroups, c("median", "5%", "95%", "mean", "sd")] * 100, digits = 1, format = "f")
+  TableX[c(13:14, 16:23, 25:28), 6] <- formatC(x = EstimatesStats[[mix]][SubRegGroups, "P=0"], digits = 2, format = "f")
+  TableX[c(13:14, 16:23, 25:28), 10:14] <- formatC(x = HarvestEstimatesStats[[mix]][SubRegGroups, c("median", "5%", "95%", "mean", "sd")], digits = 0, format = "f", big.mark = ",")
+  if(all(TableX[25:28, 10:14] == "0")) {TableX[25:28, c(3:8, 10:14)] <- "-"}
+  TableX[29, 1] <- Disclaimer
+  TableX[30, 1] <- Disclaimer2
   
   write.xlsx(x = as.data.frame(TableX), 
-             file = "Estimates tables/KMA Sockeye Estimates Tables Regional.xlsx",
+             file = "Estimates tables/KMA Sockeye Estimates Tables Regional 17UCI.xlsx",
              col.names = FALSE, row.names = FALSE, append = TRUE, sheetName = mix)
 }; beep(5)
 
@@ -13552,34 +13556,34 @@ for(yr in 14:16){
   Regional_HarvestEstimatesStats <- dget(file = paste0("Estimates objects/Final/KMA20", yr, "_Annual_Regional_Stratified_HarvestEstimatesStats.txt"))
   
   
-  Caption <- paste("Table X.-Annual regional and subregional (within Chignik and Kodiak) estimates of stock composition (%) and stock-specific harvest for KMA, 20", yr,
-                   ". Note that these annual summaries only include strata sampled for this project, which account for ", KMApercent[as.character(yr)],"% of the KMA commercial sockeye salmon harvest. Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and standard deviation (SD).",
-                   sep = '')
+  Caption <- paste0("Table X.-Kodiak Management Area, 20", yr,", all strata. Annual regional and subregional (within Chignik, Kodiak, and Cook Inlet) estimates of stock composition (%) and stock-specific harvest.",
+                    " Note that these annual summaries only include strata sampled for this project, which account for ", KMApercent[as.character(yr)],"% of the KMA commercial sockeye salmon harvest.",
+                    " Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and standard deviation (SD).")
   
   
   Disclaimer <- "Note: Stock composition estimates may not sum to 100% and stock-specific harvest estimates may not sum to the total harvest due to rounding error."
   
   
-  TableX <- matrix(data = "", nrow = 24, ncol = 14)
+  TableX <- matrix(data = "", nrow = 29, ncol = 14)
   
   TableX[1, 1] <- Caption
   TableX[2, c(3, 10)] <- c("Stock Composition", "Stock-specific Harvest")
   TableX[3, c(1, 4, 11)] <- c("Reporting Group", rep("90% CI", 2))
   TableX[4, c(1, 2, 3:5, 7:8, 10:14, 6)] <- c("Regional", "Subregional", rep(c("Median", "5%", "95%", "Mean", "SD"), 2), "P=0")
-  TableX[5:10, 1] <- c(KMA14GroupsPC[1], "Chignik", "Kodiak", KMA14GroupsPC[12:14])
+  TableX[5:10, 1] <- RegGroups
   TableX[5:10, c(3:5, 7:8)] <- formatC(x = Regional_EstimatesStats[, c("median", "5%", "95%", "mean", "sd")] * 100, digits = 1, format = "f")
   TableX[5:10, 6] <- formatC(x = Regional_EstimatesStats[, "P=0"], digits = 2, format = "f")
   TableX[5:10, 10:14] <- formatC(x = Regional_HarvestEstimatesStats[, c("median", "5%", "95%", "mean", "sd")], digits = 0, format = "f", big.mark = ",")
   TableX[11, 12:13] <- c("Total", formatC(x = sum(Regional_HarvestEstimatesStats[, "mean"]), digits = 0, format = "f", big.mark = ","))
-  TableX[c(13, 16), 1] <- c("Chignik", "Kodiak")
-  TableX[c(13:14, 16:23), 2] <- c(SubRegGroups[1:3], "Ayakulik / Frazer", SubRegGroups[5:10])
-  TableX[c(13:14, 16:23), c(3:5, 7:8)] <- formatC(x = EstimatesStats[SubRegGroups, c("median", "5%", "95%", "mean", "sd")] * 100, digits = 1, format = "f")
-  TableX[c(13:14, 16:23), 6] <- formatC(x = EstimatesStats[SubRegGroups, "P=0"], digits = 2, format = "f")
-  TableX[c(13:14, 16:23), 10:14] <- formatC(x = HarvestEstimatesStats[SubRegGroups, c("median", "5%", "95%", "mean", "sd")], digits = 0, format = "f", big.mark = ",")
-  TableX[24, 1] <- Disclaimer
+  TableX[c(13, 16, 25), 1] <- c("Chignik", "Kodiak", "Cook Inlet")
+  TableX[c(13:14, 16:23, 25:28), 2] <- SubRegGroups
+  TableX[c(13:14, 16:23, 25:28), c(3:5, 7:8)] <- formatC(x = EstimatesStats[SubRegGroups, c("median", "5%", "95%", "mean", "sd")] * 100, digits = 1, format = "f")
+  TableX[c(13:14, 16:23, 25:28), 6] <- formatC(x = EstimatesStats[SubRegGroups, "P=0"], digits = 2, format = "f")
+  TableX[c(13:14, 16:23, 25:28), 10:14] <- formatC(x = HarvestEstimatesStats[SubRegGroups, c("median", "5%", "95%", "mean", "sd")], digits = 0, format = "f", big.mark = ",")
+  TableX[29, 1] <- Disclaimer
   
   write.xlsx(x = as.data.frame(TableX), 
-             file = "Estimates tables/KMA Sockeye Estimates Tables Regional.xlsx",
+             file = "Estimates tables/KMA Sockeye Estimates Tables Regional 17UCI.xlsx",
              col.names = FALSE, row.names = FALSE, append = TRUE, sheetName = paste0("KMA20", yr))
 }; beep(5)
 
