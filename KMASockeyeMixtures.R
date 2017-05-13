@@ -13496,7 +13496,7 @@ for(mix in SheetNames) {
   if(length(SheetNames.split) > 1) {
     tempmix <- paste(c(SheetNames.split[2], SheetNames.split[3]), collapse = "_")
     
-    Caption <- paste0("Table X.-", GeoHeader[geo], ", temporal stratum ", SheetNames.split[2], " (", dates[geomix, tempmix],
+    Caption <- paste0("Table X.-", GeoHeader[geo], ", temporal stratum ", SheetNames.split[2], " (\"", SheetNames.split[3], "\"; ", dates[geomix, tempmix],
                       "; Harvest=", formatC(x = harvest[geomix, tempmix], format = "f", digits = 0, big.mark = ","),
                       "; n=", sampsize[mix], ")", ", 20", yr, ". Regional and subregional (within Chignik, Kodiak, and Cook Inlet) estimates of stock composition (%) and stock-specific harvest.", 
                       " Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and standard deviation (SD).")
@@ -13506,7 +13506,7 @@ for(mix in SheetNames) {
   }
   
   Disclaimer <- "Note: Stock composition estimates may not sum to 100% and stock-specific harvest estimates may not sum to the total harvest due to rounding error."
-  Disclaimer2 <- "Note: Results for Cook Inlet subregional reporting groups are only reported if the overall contribution of Cook Inlet groups in a strata is greater than 5%."
+  Disclaimer2 <- "Note: Results for Cook Inlet subregional reporting groups are only reported if the overall contribution to the Cook Inlet group in the stratum or any contributing strata is greater than 5%."
   
   
   TableX <- matrix(data = "", nrow = 30, ncol = 14)
@@ -13525,7 +13525,7 @@ for(mix in SheetNames) {
   TableX[c(13:14, 16:23, 25:28), c(3:5, 7:8)] <- formatC(x = EstimatesStats[[mix]][SubRegGroups, c("median", "5%", "95%", "mean", "sd")] * 100, digits = 1, format = "f")
   TableX[c(13:14, 16:23, 25:28), 6] <- formatC(x = EstimatesStats[[mix]][SubRegGroups, "P=0"], digits = 2, format = "f")
   TableX[c(13:14, 16:23, 25:28), 10:14] <- formatC(x = HarvestEstimatesStats[[mix]][SubRegGroups, c("median", "5%", "95%", "mean", "sd")], digits = 0, format = "f", big.mark = ",")
-  if(all(TableX[25:28, 10:14] == "0")) {TableX[25:28, c(3:8, 10:14)] <- "-"}
+  if(all(TableX[25:28, 10:14] == "0")) {TableX[25:28, c(3:8, 10:14)] <- "*"}
   TableX[29, 1] <- Disclaimer
   TableX[30, 1] <- Disclaimer2
   
@@ -13534,6 +13534,44 @@ for(mix in SheetNames) {
              col.names = FALSE, row.names = FALSE, append = TRUE, sheetName = mix)
 }; beep(5)
 
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Captions
+All_Strata_Captions <- sapply(SheetNames, function(mix) {
+  SheetNames.split <- unlist(strsplit(x = mix, split = "_"))
+  
+  
+  # The first element is the geographic area + year
+  geomix <- SheetNames.split[1]
+  yr <- unlist(strsplit(x = geomix, split = "C"))[2]
+  geo <- unlist(strsplit(x = geomix, split = "1"))[1]
+  
+  
+  # If it is not an annual roll-up, then get the strata number + strata name
+  if(length(SheetNames.split) > 1) {
+    tempmix <- paste(c(SheetNames.split[2], SheetNames.split[3]), collapse = "_")
+    
+    paste0(GeoHeader[geo], ", temporal stratum ", SheetNames.split[2], " (\"", SheetNames.split[3], "\"; ", dates[geomix, tempmix],
+           "; Harvest=", formatC(x = harvest[geomix, tempmix], format = "f", digits = 0, big.mark = ","),
+           "; n=", sampsize[mix], ")", ", 20", yr, ". Regional and subregional (within Chignik, Kodiak, and Cook Inlet) estimates of stock composition (%) and stock-specific harvest.", 
+           " Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and standard deviation (SD).")
+  } else {
+    paste0(GeoHeader[geo], ", 20", yr, ", all strata. Annual regional and subregional (within Chignik, Kodiak, and Cook Inlet) estimates of stock composition (%) and stock-specific harvest.", 
+           " Estimates include median, 90% credibility interval (CI), the probability that the group estimate is equal to zero (P=0), mean, and standard deviation (SD).")
+  }
+})
+
+str(All_Strata_Captions)
+
+All_Potential_Strata <- unlist(lapply(c("SUGANC", "SUYAKC", "SKARLC", "SAYAKC", "SALITC", "SIGVAC"), function(geo) {
+  sapply(14:16, function(yr) {
+    paste0(geo, yr, c("_1_Early", "_2_Middle", "_3_Late", ""))
+  })
+}))
+
+
+write.xlsx(x = paste(All_Strata_Captions[intersect(All_Potential_Strata, SheetNames)]), file = "Estimates tables/KMA Sockeye Estimates Tables Captions.xlsx", row.names = FALSE, col.names = FALSE)
 
 
 
