@@ -14082,14 +14082,14 @@ Igvak.dis <- gUnaryUnion(Igvak, id = Igvak@data$SampArea)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 color.ramp <- colorRampPalette(c("white", "green", "darkgreen", "black"))(101)
 
-max.col <- NULL
-# Strata
-if(is.null(max.col)) {max.col <- max(attributes(StatAreasPBS.shp)[["PolyData"]][, dimnames(attributes(StatAreasPBS.shp)[["PolyData"]])[[2]][9:21]], na.rm = TRUE)}
-# Annual
-if(is.null(max.col)) {max.col <- max(attributes(StatAreasPBS.shp)[["PolyData"]][, dimnames(attributes(StatAreasPBS.shp)[["PolyData"]])[[2]][c(40:42, 12,17, 21)]], na.rm = TRUE)}
-# max.col <- 250000
+# max.col <- NULL
+# # Strata
+# if(is.null(max.col)) {max.col <- max(attributes(StatAreasPBS.shp)[["PolyData"]][, dimnames(attributes(StatAreasPBS.shp)[["PolyData"]])[[2]][9:21]], na.rm = TRUE)}
+# # Annual
+# if(is.null(max.col)) {max.col <- max(attributes(StatAreasPBS.shp)[["PolyData"]][, dimnames(attributes(StatAreasPBS.shp)[["PolyData"]])[[2]][c(40:42, 12,17, 21)]], na.rm = TRUE)}
+# # max.col <- 250000
 
-cex.lab = 0.9  # This is for sampling area labels
+cex.lab = 1.1  # This is for sampling area labels
 
 # Strata
 harvest_strata <- dimnames(attributes(StatAreasPBS.shp)[["PolyData"]])[[2]][9:21]
@@ -14099,35 +14099,64 @@ harvest_strata <- dimnames(attributes(StatAreasPBS.shp)[["PolyData"]])[[2]][c(40
 harvest_strata <- "s14_Early"
 
 
+Plot_PBSMapping_SockeyeHarvest.f <- function(harvest_strata, annual = FALSE) {
+  
+  if(annual) {
+    max.col <- max(attributes(StatAreasPBS.shp)[["PolyData"]][, dimnames(attributes(StatAreasPBS.shp)[["PolyData"]])[[2]][c(40:42, 12,17, 21)]], na.rm = TRUE)
+  } else {
+    max.col <- max(attributes(StatAreasPBS.shp)[["PolyData"]][, dimnames(attributes(StatAreasPBS.shp)[["PolyData"]])[[2]][9:21]], na.rm = TRUE)
+  }
+  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Round max.col to nearest 25,000
+  nice <- seq(from = 0, to = 1e6, by = 2.5e4)
+  max.col.round <- min(nice[nice - max.col > 0])
+  
+  plotMap(land, col = "grey90", cex.lab = 1.5, cex.axis = 1.5)
+  addLines(polys = RiversPBS.shp, col = "white", lwd = 1)
+  addPolys(polys = WaterbodyPBS.shp, boder = "black", col = "white")
+  addPolys(polys = StatAreasPBS.shp, border = "black", col = color.ramp[round(attributes(StatAreasPBS.shp)[["PolyData"]][, harvest_strata] / (max.col.round/100)) + 1])
+  
+  legend("bottomleft",
+         legend = c(formatC(x = max.col.round, digits = 0, format = "f", big.mark = ","), rep("", 99), 0),
+         fill = rev(color.ramp),
+         border = NA,
+         bty = 'n', x.intersp = 0.5, y.intersp = 0.07, lty = NULL, cex = 1.1)
+  text(x = -156.35, y = 56.75, labels = "Harvest", cex = 1.5, adj = c(0, 0.5))
+  
+  plot(Uganik.dis, add = TRUE, border = "black", lwd = 3)
+  text(x = -153.7, y = 58.04, labels = "Uganik\nKupreanof", cex = cex.lab, adj = c(1, 0.5))
+  plot(Uyak.dis, add = TRUE, border = "black", lwd = 3)
+  text(x = -154.15, y = 57.8, labels = "Uyak", cex = cex.lab, adj = c(1, 0.5))
+  plot(Karluk.dis, add = TRUE, border = "black", lwd = 3)
+  text(x = -154.72, y = 57.62, labels = "Karluk\nSturgeon", cex = cex.lab, adj = c(1, 0.5))
+  plot(Ayakulik.dis, add = TRUE, border = "black", lwd = 3)
+  text(x = -154.95, y = 57.3, labels = "Ayakulik\nHalibut Bay", cex = cex.lab, adj = c(1, 0.5))
+  plot(Alitak.dis, add = TRUE, border = "black", lwd = 3)
+  text(x = -154.43, y = 56.84, labels = "Alitak", cex = cex.lab, adj = c(1, 0.5))
+  plot(Igvak.dis, add = TRUE, border = "black", lwd = 3)
+  text(x = -155.85, y = 57.45, labels = "Igvak", cex = cex.lab, adj = c(0, 0.5))
+  
+  north.arrow(xb = -152, yb = 56.6, len = 0.05, lab = "N")
+  
+  yr <- 2000 + as.numeric(paste(strsplit(x = harvest_strata, split = "")[[1]][2:3], collapse = ''))
+  stratum <- strsplit(x = harvest_strata, split = "_")[[1]][2]
+  if(stratum == "Samp") {stratum <- "Annual"}
+  text(x = -153.4, y = 56.6, labels = paste(yr, stratum), cex = 1.5, adj = c(0, 0.5))
+}
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Round max.col to nearest 25,000
-nice <- seq(from = 0, to = 1e6, by = 2.5e4)
-max.col.round <- min(nice[nice - max.col > 0])
+# png(file ="Figures/Harvest Maps/PBS Mapping/s14_Early.png", width = 871, height = 917, units = "px", res = 96, family = "serif", bg = "white")
+# Plot_PBSMapping_SockeyeHarvest.f(harvest_strata = "s14_Early"); dev.off()
 
-plotMap(land, col = "grey90")
-addLines(polys = RiversPBS.shp, col = "white", lwd = 1)
-addPolys(polys = WaterbodyPBS.shp, boder = "black", col = "white")
-addPolys(polys = StatAreasPBS.shp, border = "black", col = color.ramp[round(attributes(StatAreasPBS.shp)[["PolyData"]][, harvest_strata] / (max.col.round/100)) + 1])
 
-legend("bottomleft",
-       legend = c(formatC(x = max.col.round, digits = 0, format = "f", big.mark = ","), rep("", 99), 0),
-       fill = rev(color.ramp),
-       border = NA,
-       bty = 'n', x.intersp = 0.5, y.intersp = 0.07, lty = NULL)
-text(x = -156.35, y = 56.75, labels = "Harvest", cex = 1.3, adj = c(0, 0.5))
+for(harvest_strata in dimnames(attributes(StatAreasPBS.shp)[["PolyData"]])[[2]][9:21]){
+  i <- which(dimnames(attributes(StatAreasPBS.shp)[["PolyData"]])[[2]][9:21] == harvest_strata)
+  png(file = paste0("Figures/Harvest Maps/PBS Mapping/Strata/", i, "_", harvest_strata, ".png"), width = 871, height = 917, units = "px", res = 96, family = "serif", bg = "white")
+  Plot_PBSMapping_SockeyeHarvest.f(harvest_strata = harvest_strata); dev.off()
+}
 
-plot(Uganik.dis, add = TRUE, border = "black", lwd = 3)
-text(x = -153.7, y = 58.04, labels = "Uganik\nKupreanof", cex = cex.lab, adj = c(1, 0.5))
-plot(Uyak.dis, add = TRUE, border = "black", lwd = 3)
-text(x = -154.15, y = 57.8, labels = "Uyak", cex = cex.lab, adj = c(1, 0.5))
-plot(Karluk.dis, add = TRUE, border = "black", lwd = 3)
-text(x = -154.72, y = 57.62, labels = "Karluk\nSturgeon", cex = cex.lab, adj = c(1, 0.5))
-plot(Ayakulik.dis, add = TRUE, border = "black", lwd = 3)
-text(x = -154.95, y = 57.3, labels = "Ayakulik\nHalibut Bay", cex = cex.lab, adj = c(1, 0.5))
-plot(Alitak.dis, add = TRUE, border = "black", lwd = 3)
-text(x = -154.43, y = 56.84, labels = "Alitak", cex = cex.lab, adj = c(1, 0.5))
-plot(Igvak.dis, add = TRUE, border = "black", lwd = 3)
-text(x = -155.85, y = 57.45, labels = "Igvak", cex = cex.lab, adj = c(0, 0.5))
-
-north.arrow(xb = -152, yb = 56.6, len = 0.05, lab = "N")
+for(harvest_strata in dimnames(attributes(StatAreasPBS.shp)[["PolyData"]])[[2]][c(40,12,41,17,42,21)]){
+  i <- which(dimnames(attributes(StatAreasPBS.shp)[["PolyData"]])[[2]][c(40,12,41,17,42,21)] == harvest_strata)
+  png(file = paste0("Figures/Harvest Maps/PBS Mapping/Annual/", i, "_", harvest_strata, ".png"), width = 871, height = 917, units = "px", res = 96, family = "serif", bg = "white")
+  Plot_PBSMapping_SockeyeHarvest.f(harvest_strata = harvest_strata, annual = TRUE); dev.off()
+}
