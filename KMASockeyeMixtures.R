@@ -14160,3 +14160,307 @@ for(harvest_strata in dimnames(attributes(StatAreasPBS.shp)[["PolyData"]])[[2]][
   png(file = paste0("Figures/Harvest Maps/PBS Mapping/Annual/", i, "_", harvest_strata, ".png"), width = 871, height = 917, units = "px", res = 96, family = "serif", bg = "white")
   Plot_PBSMapping_SockeyeHarvest.f(harvest_strata = harvest_strata, annual = TRUE); dev.off()
 }
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Cook Inlet Harvest Maps ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Get Final Estimates Objects
+KMAfinalestimatesobjects <- list.files(path = "Estimates objects/Final", recursive = FALSE)
+invisible(sapply(KMAfinalestimatesobjects, function(objct) {assign(x = unlist(strsplit(x = objct, split = ".txt")), value = dget(file = paste("Estimates objects/Final", objct, sep = "/")), pos = 1) }))
+KMAfinalestimatesobjects; rm(KMAfinalestimatesobjects)
+
+
+EstimatesStats <- c(KMA_Strata_17UCIRG_EstimatesStats_Final,
+                    KMA2014_Spatial_17UCIRG_EstimatesStats,
+                    KMA2015_Spatial_17UCIRG_EstimatesStats,
+                    KMA2016_Spatial_17UCIRG_EstimatesStats)
+
+HarvestEstimatesStats <- c(KMA_Strata_17UCIRG_HarvestEstimatesStats,
+                           KMA2014_Spatial_17UCIRG_HarvestEstimatesStats,
+                           KMA2015_Spatial_17UCIRG_HarvestEstimatesStats,
+                           KMA2016_Spatial_17UCIRG_HarvestEstimatesStats)
+
+Regional_EstimatesStats <- c(KMA2014Strata_Regional_EstimatesStats, KMA2014_Annual_Regional_EstimatesStats,
+                             KMA2015Strata_Regional_EstimatesStats, KMA2015_Annual_Regional_EstimatesStats,
+                             KMA2016Strata_Regional_EstimatesStats, KMA2016_Annual_Regional_EstimatesStats)
+
+Regional_HarvestEstimatesStats <- c(KMA2014Strata_Regional_HarvestEstimatesStats, KMA2014_Annual_Regional_HarvestEstimatesStats,
+                                    KMA2015Strata_Regional_HarvestEstimatesStats, KMA2015_Annual_Regional_HarvestEstimatesStats,
+                                    KMA2016Strata_Regional_HarvestEstimatesStats, KMA2016_Annual_Regional_HarvestEstimatesStats)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Harvest
+CookInlet_Median_HarvestEstimates <- sapply(Regional_HarvestEstimatesStats, function(mix) {mix["Cook Inlet", "median"]})
+
+strsplit(x = names(Regional_HarvestEstimatesStats), split = "C")
+
+CI_Harvest.df <- data.frame(
+  "Geo" = sapply(names(Regional_HarvestEstimatesStats), function(x) {unlist(strsplit(x = x, split = "C"))[1]}),
+  "Year" = sapply(names(Regional_HarvestEstimatesStats), function(x) {as.numeric(paste(unlist(strsplit(x = unlist(strsplit(x = x, split = "C"))[2], split = ''))[1:2], collapse = ''))+2000}),
+  "Strata" = sapply(names(Regional_HarvestEstimatesStats), function(x) {unlist(strsplit(x = unlist(strsplit(x = x, split = "C"))[2], split = '_'))[3]}),
+  "Harvest" = round(CookInlet_Median_HarvestEstimates),
+  stringsAsFactors = FALSE)
+CI_Harvest.df$Strata[is.na(CI_Harvest.df$Strata)] <- "Annual"
+str(CI_Harvest.df)
+
+CI_Harvest.df$Geo <- factor(x = CI_Harvest.df$Geo, levels = c("SUGAN", "SUYAK", "SKARL", "SAYAK", "SALIT", "SIGVA"))
+CI_Harvest.df$Strata <- factor(x = CI_Harvest.df$Strata, levels = c("Early", "Middle", "Late", "Annual"))
+
+require(reshape)
+cast(subset(CI_Harvest.df, subset = CI_Harvest.df$Year == "2014"), Geo ~ Strata)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Percent
+CookInlet_Median_Estimates <- sapply(Regional_EstimatesStats, function(mix) {mix["Cook Inlet", "median"] * 100})
+
+strsplit(x = names(Regional_EstimatesStats), split = "C")
+
+CI_Percent.df <- data.frame(
+  "Geo" = sapply(names(Regional_EstimatesStats), function(x) {unlist(strsplit(x = x, split = "C"))[1]}),
+  "Year" = sapply(names(Regional_EstimatesStats), function(x) {as.numeric(paste(unlist(strsplit(x = unlist(strsplit(x = x, split = "C"))[2], split = ''))[1:2], collapse = ''))+2000}),
+  "Strata" = sapply(names(Regional_EstimatesStats), function(x) {unlist(strsplit(x = unlist(strsplit(x = x, split = "C"))[2], split = '_'))[3]}),
+  "Percent" = round(CookInlet_Median_Estimates, 2),
+  stringsAsFactors = FALSE)
+CI_Percent.df$Strata[is.na(CI_Percent.df$Strata)] <- "Annual"
+str(CI_Percent.df)
+
+CI_Percent.df$Geo <- factor(x = CI_Percent.df$Geo, levels = c("SUGAN", "SUYAK", "SKARL", "SAYAK", "SALIT", "SIGVA"))
+CI_Percent.df$Strata <- factor(x = CI_Percent.df$Strata, levels = c("Early", "Middle", "Late", "Annual"))
+
+require(reshape)
+cast(subset(CI_Percent.df, subset = CI_Percent.df$Year == "2014"), Geo ~ Strata)
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+strata <- "15_2_Middle"
+cex.lab = 1.1  # This is for sampling area labels
+color.ramp <- colorRampPalette(c("white", "red", "darkred", "black"))(101)
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Individual Harvest Plots
+Plot_PBSMapping_UCISockeyeHarvest.f <- function(strata) {
+  
+  if(nchar(strata) > 2) {
+    max.col <- max(CookInlet_Median_HarvestEstimates[nchar(names(CookInlet_Median_HarvestEstimates)) > 8])
+  } else {
+    max.col <- max(CookInlet_Median_HarvestEstimates[nchar(names(CookInlet_Median_HarvestEstimates)) == 8])
+  }
+  
+  max.col <- max(CookInlet_Median_HarvestEstimates)
+  
+  nice <- seq(from = 0, to = 1e6, by = 2.5e4)
+  max.col.round <- min(nice[nice - max.col > 0])
+  
+  
+  
+  plotMap(land, col = "grey90", cex.lab = 1.5, cex.axis = 1.5)
+  addLines(polys = RiversPBS.shp, col = "white", lwd = 1)
+  addPolys(polys = WaterbodyPBS.shp, boder = "black", col = "white")
+  
+  plot(Uganik.dis, add = TRUE, border = "black", lwd = 3,
+       col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SUGANC", strata)] / (max.col.round/100)) + 1])
+  text(x = -153.7, y = 58.04, labels = "Uganik\nKupreanof", cex = cex.lab, adj = c(1, 0.5))
+  plot(Uyak.dis, add = TRUE, border = "black", lwd = 3,
+       col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SUYAKC", strata)] / (max.col.round/100)) + 1])
+  text(x = -154.15, y = 57.8, labels = "Uyak", cex = cex.lab, adj = c(1, 0.5))
+  plot(Karluk.dis, add = TRUE, border = "black", lwd = 3,
+       col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SKARLC", strata)] / (max.col.round/100)) + 1])
+  text(x = -154.72, y = 57.62, labels = "Karluk\nSturgeon", cex = cex.lab, adj = c(1, 0.5))
+  plot(Ayakulik.dis, add = TRUE, border = "black", lwd = 3,
+       col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SAYAKC", strata)] / (max.col.round/100)) + 1])
+  text(x = -154.95, y = 57.3, labels = "Ayakulik\nHalibut Bay", cex = cex.lab, adj = c(1, 0.5))
+  plot(Alitak.dis, add = TRUE, border = "black", lwd = 3,
+       col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SALITC", strata)] / (max.col.round/100)) + 1])
+  text(x = -154.43, y = 56.84, labels = "Alitak", cex = cex.lab, adj = c(1, 0.5))
+  plot(Igvak.dis, add = TRUE, border = "black", lwd = 3,
+       col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SIGVAC", strata)] / (max.col.round/100)) + 1])
+  text(x = -155.85, y = 57.45, labels = "Igvak", cex = cex.lab, adj = c(0, 0.5))
+  
+  legend("bottomleft",
+         legend = c(formatC(x = max.col.round, digits = 0, format = "f", big.mark = ","), rep("", 99), 0),
+         fill = rev(color.ramp),
+         border = NA,
+         bty = 'n', x.intersp = 0.5, y.intersp = 0.07, lty = NULL, cex = 1.1)
+  text(x = -156.35, y = 56.75, labels = "Harvest", cex = 1.5, adj = c(0, 0.5))
+  
+  north.arrow(xb = -152, yb = 56.6, len = 0.05, lab = "N")
+  
+  yr <- 2000 + as.numeric(paste(strsplit(x = strata, split = "")[[1]][1:2], collapse = ''))
+  stratum <- strsplit(x = strata, split = "_")[[1]][3]
+  if(is.na(stratum)) {stratum <- "Annual"}
+  text(x = -153.4, y = 56.6, labels = paste(yr, stratum), cex = 1.5, adj = c(0, 0.5))
+}
+
+
+# dir.create("Figures/Harvest Maps/UCI Harvest Maps")
+
+for(strata in as.vector(outer(14:16, c("1_Early", "2_Middle", "3_Late"), paste, sep = "_"))) {
+  png(file = paste0("Figures/Harvest Maps/UCI Harvest Maps/", strata, ".png"), width = 871, height = 917, units = "px", res = 96, family = "serif", bg = "white")
+  Plot_PBSMapping_UCISockeyeHarvest.f(strata = strata); dev.off()
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 3x3 Matrix of Harvest Plots
+
+cex.lab = 0.7  # This is for sampling area labels
+color.ramp <- colorRampPalette(c("white", "red", "darkred", "black"))(101)
+
+Plot_PBSMapping_UCISockeyeHarvest_NoMar.f <- function(strata) {
+  
+  if(nchar(strata) > 2) {
+    max.col <- max(CookInlet_Median_HarvestEstimates[nchar(names(CookInlet_Median_HarvestEstimates)) > 8])
+  } else {
+    max.col <- max(CookInlet_Median_HarvestEstimates[nchar(names(CookInlet_Median_HarvestEstimates)) == 8])
+  }
+  
+  nice <- seq(from = 0, to = 1e6, by = 2.5e4)
+  max.col.round <- min(nice[nice - max.col > 0])
+  
+  # plotMap(land, col = "grey90", axes = TRUE, plt = c(0.1, 1, 0.1, 1))
+  plotMap(land, col = "grey90", axes = FALSE, plt = c(0, 1, 0, 1))
+  addLines(polys = RiversPBS.shp, col = "white", lwd = 1)
+  addPolys(polys = WaterbodyPBS.shp, boder = "black", col = "white")
+  
+  plot(Uganik.dis, add = TRUE, border = "black", lwd = 1,
+       col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SUGANC", strata)] / (max.col.round/100)) + 1])
+  text(x = -153.53, y = 58.03, labels = "Uganik\nKupreanof", cex = cex.lab, adj = c(1, 0))
+  plot(Uyak.dis, add = TRUE, border = "black", lwd = 1,
+       col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SUYAKC", strata)] / (max.col.round/100)) + 1])
+  text(x = -154.12, y = 57.78, labels = "Uyak", cex = cex.lab, adj = c(1, 0))
+  plot(Karluk.dis, add = TRUE, border = "black", lwd = 1,
+       col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SKARLC", strata)] / (max.col.round/100)) + 1])
+  text(x = -154.63, y = 57.58, labels = "Karluk\nSturgeon", cex = cex.lab, adj = c(1, 0))
+  plot(Ayakulik.dis, add = TRUE, border = "black", lwd = 1,
+       col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SAYAKC", strata)] / (max.col.round/100)) + 1])
+  text(x = -154.7, y = 57.2, labels = "Ayakulik\nHalibut Bay", cex = cex.lab, adj = c(1, 1))
+  plot(Alitak.dis, add = TRUE, border = "black", lwd = 1,
+       col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SALITC", strata)] / (max.col.round/100)) + 1])
+  text(x = -154.42, y = 56.88, labels = "Alitak", cex = cex.lab, adj = c(1, 1))
+  plot(Igvak.dis, add = TRUE, border = "black", lwd = 1,
+       col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SIGVAC", strata)] / (max.col.round/100)) + 1])
+  text(x = -155.85, y = 57.48, labels = "Igvak", cex = cex.lab, adj = c(0, 1))
+  
+  # abline(v = seq(-157, -151, by = 0.5), lwd = 2)
+  # abline(h = seq(56.5, 59, by = 0.5), lwd = 2)
+  # abline(v = seq(-157, -151, by = 0.1), lwd = 1)
+  # abline(h = seq(56.5, 59, by = 0.1), lwd = 1)
+
+  if(strata == "14_1_Early") {
+    legend("topleft",
+           legend = c(formatC(x = max.col.round, digits = 0, format = "f", big.mark = ","), rep("", 99), 0),
+           fill = rev(color.ramp),
+           border = NA,
+           bg = 'white', x.intersp = 0.5, y.intersp = 0.07, lty = NULL, cex = cex.lab * 1.3)
+    text(x = -156.22, y = 58.5, labels = "Cook\nInlet\nHarvest", cex = 1.5 * cex.lab, adj = c(0, 0.5))
+    
+    north.arrow(xb = -152, yb = 56.6, len = 0.05, lab = "N")
+  }
+  
+  yr <- 2000 + as.numeric(paste(strsplit(x = strata, split = "")[[1]][1:2], collapse = ''))
+  stratum <- strsplit(x = strata, split = "_")[[1]][3]
+  if(is.na(stratum)) {stratum <- "Annual"}
+  text(x = -153.6, y = 56.6, labels = paste(yr, stratum), cex = 1.5 * cex.lab, adj = c(0, 0))
+}
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+png(file = paste0("Figures/Harvest Maps/UCI Harvest Maps/Overall_CookInlet_Harvest.png"), width = 6.5, height = 6.5, units = "in", res = 300, family = "serif", bg = "white")
+
+cex.lab = 0.7  # This is for sampling area labels
+
+layoutmat <- matrix(data=c(  1, 2, 3,
+                             4, 5, 6,
+                             7, 8, 9), nrow = 3, ncol = 3, byrow = TRUE)
+
+layout(mat = layoutmat, widths = c(1, 1, 1), heights = c(1, 1, 1))
+
+for(strata in as.vector(t(outer(14:16, c("1_Early", "2_Middle", "3_Late"), paste, sep = "_")))) {
+  Plot_PBSMapping_UCISockeyeHarvest_NoMar.f(strata = strata)
+}
+
+dev.off(); beep(4)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 3x3 Matrix of Percentage Plots
+
+cex.lab = 0.7  # This is for sampling area labels
+color.ramp <- colorRampPalette(c("white", "blue", "black"))(101)
+
+Plot_PBSMapping_UCISockeyePercent_NoMar.f <- function(strata) {
+  
+  max.col.round <- 100
+  
+  # plotMap(land, col = "grey90", axes = TRUE, plt = c(0.1, 1, 0.1, 1))
+  plotMap(land, col = "grey90", axes = FALSE, plt = c(0, 1, 0, 1))
+  addLines(polys = RiversPBS.shp, col = "white", lwd = 1)
+  addPolys(polys = WaterbodyPBS.shp, boder = "black", col = "white")
+  
+  plot(Uganik.dis, add = TRUE, border = "black", lwd = 1,
+       col = color.ramp[round(CookInlet_Median_Estimates[paste0("SUGANC", strata)]) + 1])
+  text(x = -153.53, y = 58.03, labels = "Uganik\nKupreanof", cex = cex.lab, adj = c(1, 0))
+  plot(Uyak.dis, add = TRUE, border = "black", lwd = 1,
+       col = color.ramp[round(CookInlet_Median_Estimates[paste0("SUYAKC", strata)]) + 1])
+  text(x = -154.12, y = 57.78, labels = "Uyak", cex = cex.lab, adj = c(1, 0))
+  plot(Karluk.dis, add = TRUE, border = "black", lwd = 1,
+       col = color.ramp[round(CookInlet_Median_Estimates[paste0("SKARLC", strata)]) + 1])
+  text(x = -154.63, y = 57.58, labels = "Karluk\nSturgeon", cex = cex.lab, adj = c(1, 0))
+  plot(Ayakulik.dis, add = TRUE, border = "black", lwd = 1,
+       col = color.ramp[round(CookInlet_Median_Estimates[paste0("SAYAKC", strata)]) + 1])
+  text(x = -154.7, y = 57.2, labels = "Ayakulik\nHalibut Bay", cex = cex.lab, adj = c(1, 1))
+  plot(Alitak.dis, add = TRUE, border = "black", lwd = 1,
+       col = color.ramp[round(CookInlet_Median_Estimates[paste0("SALITC", strata)]) + 1])
+  text(x = -154.42, y = 56.88, labels = "Alitak", cex = cex.lab, adj = c(1, 1))
+  plot(Igvak.dis, add = TRUE, border = "black", lwd = 1,
+       col = color.ramp[round(CookInlet_Median_Estimates[paste0("SIGVAC", strata)]) + 1])
+  text(x = -155.85, y = 57.48, labels = "Igvak", cex = cex.lab, adj = c(0, 1))
+  
+  # abline(v = seq(-157, -151, by = 0.5), lwd = 2)
+  # abline(h = seq(56.5, 59, by = 0.5), lwd = 2)
+  # abline(v = seq(-157, -151, by = 0.1), lwd = 1)
+  # abline(h = seq(56.5, 59, by = 0.1), lwd = 1)
+  
+  if(strata == "14_1_Early") {
+    legend("topleft",
+           legend = c("100%   ", rep("", 99), 0),
+           fill = rev(color.ramp),
+           border = NA,
+           bg = 'white', x.intersp = 0.5, y.intersp = 0.07, lty = NULL, cex = cex.lab * 1.3)
+    text(x = -156.22, y = 58.5, labels = "Cook\nInlet\nPercent", cex = 1.5 * cex.lab, adj = c(0, 0.5))
+    
+    north.arrow(xb = -152, yb = 56.6, len = 0.05, lab = "N")
+  }
+  
+  yr <- 2000 + as.numeric(paste(strsplit(x = strata, split = "")[[1]][1:2], collapse = ''))
+  stratum <- strsplit(x = strata, split = "_")[[1]][3]
+  if(is.na(stratum)) {stratum <- "Annual"}
+  text(x = -153.6, y = 56.6, labels = paste(yr, stratum), cex = 1.5 * cex.lab, adj = c(0, 0))
+}
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+png(file = paste0("Figures/Harvest Maps/UCI Harvest Maps/Overall_CookInlet_Percent.png"), width = 6.5, height = 6.5, units = "in", res = 300, family = "serif", bg = "white")
+
+cex.lab = 0.7  # This is for sampling area labels
+
+layoutmat <- matrix(data=c(  1, 2, 3,
+                             4, 5, 6,
+                             7, 8, 9), nrow = 3, ncol = 3, byrow = TRUE)
+
+layout(mat = layoutmat, widths = c(1, 1, 1), heights = c(1, 1, 1))
+
+for(strata in as.vector(t(outer(14:16, c("1_Early", "2_Middle", "3_Late"), paste, sep = "_")))) {
+  Plot_PBSMapping_UCISockeyePercent_NoMar.f(strata = strata)
+}
+
+dev.off(); beep(4)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
