@@ -14194,6 +14194,7 @@ Regional_HarvestEstimatesStats <- c(KMA2014Strata_Regional_HarvestEstimatesStats
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Harvest
 CookInlet_Median_HarvestEstimates <- sapply(Regional_HarvestEstimatesStats, function(mix) {mix["Cook Inlet", "median"]})
+CookInlet_Median_HarvestEstimates <- CookInlet_Median_HarvestEstimates[-which(names(CookInlet_Median_HarvestEstimates) == "SAYAKC16_1_Early")]
 
 strsplit(x = names(Regional_HarvestEstimatesStats), split = "C")
 
@@ -14214,6 +14215,7 @@ cast(subset(CI_Harvest.df, subset = CI_Harvest.df$Year == "2014"), Geo ~ Strata)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Percent
 CookInlet_Median_Estimates <- sapply(Regional_EstimatesStats, function(mix) {mix["Cook Inlet", "median"] * 100})
+CookInlet_Median_Estimates <- CookInlet_Median_Estimates[-which(names(CookInlet_Median_Estimates) == "SAYAKC16_1_Early")]
 
 strsplit(x = names(Regional_EstimatesStats), split = "C")
 
@@ -14231,6 +14233,8 @@ CI_Percent.df$Strata <- factor(x = CI_Percent.df$Strata, levels = c("Early", "Mi
 
 require(reshape)
 cast(subset(CI_Percent.df, subset = CI_Percent.df$Year == "2014"), Geo ~ Strata)
+cast(subset(CI_Percent.df, subset = CI_Percent.df$Year == "2015"), Geo ~ Strata)
+cast(subset(CI_Percent.df, subset = CI_Percent.df$Year == "2016"), Geo ~ Strata)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -14261,23 +14265,52 @@ Plot_PBSMapping_UCISockeyeHarvest.f <- function(strata) {
   addLines(polys = RiversPBS.shp, col = "white", lwd = 1)
   addPolys(polys = WaterbodyPBS.shp, boder = "black", col = "white")
   
-  plot(Uganik.dis, add = TRUE, border = "black", lwd = 3,
-       col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SUGANC", strata)] / (max.col.round/100)) + 1])
+  if(paste0("SUGANC", strata) %in% names(CookInlet_Median_HarvestEstimates)) {
+    plot(Uganik.dis, add = TRUE, border = "black", lwd = 3,
+         col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SUGANC", strata)] / (max.col.round/100)) + 1])  
+  } else {
+    plot(Uganik.dis, add = TRUE, border = "black", lwd = 3, col = "black", density = 10, angle = -45)
+  }
   text(x = -153.7, y = 58.04, labels = "Uganik\nKupreanof", cex = cex.lab, adj = c(1, 0.5))
-  plot(Uyak.dis, add = TRUE, border = "black", lwd = 3,
+  
+  if(paste0("SUYAKC", strata) %in% names(CookInlet_Median_HarvestEstimates)) {
+    plot(Uyak.dis, add = TRUE, border = "black", lwd = 3,
        col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SUYAKC", strata)] / (max.col.round/100)) + 1])
+  } else {
+    plot(Uyak.dis, add = TRUE, border = "black", lwd = 3, col = "black", density = 10, angle = -45)
+  }
   text(x = -154.15, y = 57.8, labels = "Uyak", cex = cex.lab, adj = c(1, 0.5))
-  plot(Karluk.dis, add = TRUE, border = "black", lwd = 3,
+  
+  if(paste0("SKARLC", strata) %in% names(CookInlet_Median_HarvestEstimates)) {
+    plot(Karluk.dis, add = TRUE, border = "black", lwd = 3,
        col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SKARLC", strata)] / (max.col.round/100)) + 1])
+  } else {
+    plot(Karluk.dis, add = TRUE, border = "black", lwd = 3, col = "black", density = 10, angle = -45)
+  }
   text(x = -154.72, y = 57.62, labels = "Karluk\nSturgeon", cex = cex.lab, adj = c(1, 0.5))
-  plot(Ayakulik.dis, add = TRUE, border = "black", lwd = 3,
+  
+  if(paste0("SAYAKC", strata) %in% names(CookInlet_Median_HarvestEstimates)) {
+    plot(Ayakulik.dis, add = TRUE, border = "black", lwd = 3,
        col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SAYAKC", strata)] / (max.col.round/100)) + 1])
+  } else {
+    plot(Ayakulik.dis, add = TRUE, border = "black", lwd = 3, col = "black", density = 10, angle = -45)
+  }
   text(x = -154.95, y = 57.3, labels = "Ayakulik\nHalibut Bay", cex = cex.lab, adj = c(1, 0.5))
-  plot(Alitak.dis, add = TRUE, border = "black", lwd = 3,
+  
+  if(paste0("SALITC", strata) %in% names(CookInlet_Median_HarvestEstimates)) {
+    plot(Alitak.dis, add = TRUE, border = "black", lwd = 3,
        col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SALITC", strata)] / (max.col.round/100)) + 1])
+  } else {
+    plot(Alitak.dis, add = TRUE, border = "black", lwd = 3, col = "black", density = 10, angle = -45)
+  }
   text(x = -154.43, y = 56.84, labels = "Alitak", cex = cex.lab, adj = c(1, 0.5))
-  plot(Igvak.dis, add = TRUE, border = "black", lwd = 3,
+  
+  if(paste0("SIGVAC", strata) %in% names(CookInlet_Median_HarvestEstimates)) {
+    plot(Igvak.dis, add = TRUE, border = "black", lwd = 3,
        col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SIGVAC", strata)] / (max.col.round/100)) + 1])
+  } else {
+    plot(Igvak.dis, add = TRUE, border = "black", lwd = 3, col = "black", density = 10, angle = -45)
+  }
   text(x = -155.85, y = 57.45, labels = "Igvak", cex = cex.lab, adj = c(0, 0.5))
   
   legend("bottomleft",
@@ -14324,23 +14357,48 @@ Plot_PBSMapping_UCISockeyeHarvest_NoMar.f <- function(strata) {
   addLines(polys = RiversPBS.shp, col = "white", lwd = 1)
   addPolys(polys = WaterbodyPBS.shp, boder = "black", col = "white")
   
-  plot(Uganik.dis, add = TRUE, border = "black", lwd = 1,
-       col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SUGANC", strata)] / (max.col.round/100)) + 1])
+  if(paste0("SUGANC", strata) %in% names(CookInlet_Median_HarvestEstimates)) {
+    plot(Uganik.dis, add = TRUE, border = "black", lwd = 1,
+         col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SUGANC", strata)] / (max.col.round/100)) + 1])  
+  } else {
+    plot(Uganik.dis, add = TRUE, border = "black", lwd = 1, col = "black", density = 30, angle = -45)
+  }
+  if(paste0("SUYAKC", strata) %in% names(CookInlet_Median_HarvestEstimates)) {
+    plot(Uyak.dis, add = TRUE, border = "black", lwd = 1,
+         col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SUYAKC", strata)] / (max.col.round/100)) + 1])
+  } else {
+    plot(Uyak.dis, add = TRUE, border = "black", lwd = 1, col = "black", density = 30, angle = -45)
+  }
+  if(paste0("SKARLC", strata) %in% names(CookInlet_Median_HarvestEstimates)) {
+    plot(Karluk.dis, add = TRUE, border = "black", lwd = 1,
+         col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SKARLC", strata)] / (max.col.round/100)) + 1])
+  } else {
+    plot(Karluk.dis, add = TRUE, border = "black", lwd = 1, col = "black", density = 30, angle = -45)
+  }
+  if(paste0("SAYAKC", strata) %in% names(CookInlet_Median_HarvestEstimates)) {
+    plot(Ayakulik.dis, add = TRUE, border = "black", lwd = 1,
+         col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SAYAKC", strata)] / (max.col.round/100)) + 1])
+  } else {
+    plot(Ayakulik.dis, add = TRUE, border = "black", lwd = 1, col = "black", density = 30, angle = -45)
+  }
+  if(paste0("SALITC", strata) %in% names(CookInlet_Median_HarvestEstimates)) {
+    plot(Alitak.dis, add = TRUE, border = "black", lwd = 1,
+         col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SALITC", strata)] / (max.col.round/100)) + 1])
+  } else {
+    plot(Alitak.dis, add = TRUE, border = "black", lwd = 1, col = "black", density = 30, angle = -45)
+  }
+  if(paste0("SIGVAC", strata) %in% names(CookInlet_Median_HarvestEstimates)) {
+    plot(Igvak.dis, add = TRUE, border = "black", lwd = 1,
+         col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SIGVAC", strata)] / (max.col.round/100)) + 1])
+  } else {
+    plot(Igvak.dis, add = TRUE, border = "black", lwd = 1, col = "black", density = 30, angle = -45)
+  }
+  
   text(x = -153.53, y = 58.03, labels = "Uganik\nKupreanof", cex = cex.lab, adj = c(1, 0))
-  plot(Uyak.dis, add = TRUE, border = "black", lwd = 1,
-       col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SUYAKC", strata)] / (max.col.round/100)) + 1])
   text(x = -154.12, y = 57.78, labels = "Uyak", cex = cex.lab, adj = c(1, 0))
-  plot(Karluk.dis, add = TRUE, border = "black", lwd = 1,
-       col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SKARLC", strata)] / (max.col.round/100)) + 1])
   text(x = -154.63, y = 57.58, labels = "Karluk\nSturgeon", cex = cex.lab, adj = c(1, 0))
-  plot(Ayakulik.dis, add = TRUE, border = "black", lwd = 1,
-       col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SAYAKC", strata)] / (max.col.round/100)) + 1])
   text(x = -154.7, y = 57.2, labels = "Ayakulik\nHalibut Bay", cex = cex.lab, adj = c(1, 1))
-  plot(Alitak.dis, add = TRUE, border = "black", lwd = 1,
-       col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SALITC", strata)] / (max.col.round/100)) + 1])
   text(x = -154.42, y = 56.88, labels = "Alitak", cex = cex.lab, adj = c(1, 1))
-  plot(Igvak.dis, add = TRUE, border = "black", lwd = 1,
-       col = color.ramp[round(CookInlet_Median_HarvestEstimates[paste0("SIGVAC", strata)] / (max.col.round/100)) + 1])
   text(x = -155.85, y = 57.48, labels = "Igvak", cex = cex.lab, adj = c(0, 1))
   
   # abline(v = seq(-157, -151, by = 0.5), lwd = 2)
@@ -14404,23 +14462,48 @@ Plot_PBSMapping_UCISockeyePercent_NoMar.f <- function(strata) {
   addLines(polys = RiversPBS.shp, col = "white", lwd = 1)
   addPolys(polys = WaterbodyPBS.shp, boder = "black", col = "white")
   
-  plot(Uganik.dis, add = TRUE, border = "black", lwd = 1,
-       col = color.ramp[round(CookInlet_Median_Estimates[paste0("SUGANC", strata)]) + 1])
+  if(paste0("SUGANC", strata) %in% names(CookInlet_Median_Estimates)) {
+    plot(Uganik.dis, add = TRUE, border = "black", lwd = 1,
+         col = color.ramp[round(CookInlet_Median_Estimates[paste0("SUGANC", strata)]) + 1])  
+  } else {
+    plot(Uganik.dis, add = TRUE, border = "black", lwd = 1, col = "black", density = 30, angle = -45)
+  }
+  if(paste0("SUYAKC", strata) %in% names(CookInlet_Median_Estimates)) {
+    plot(Uyak.dis, add = TRUE, border = "black", lwd = 1,
+         col = color.ramp[round(CookInlet_Median_Estimates[paste0("SUYAKC", strata)]) + 1])
+  } else {
+    plot(Uyak.dis, add = TRUE, border = "black", lwd = 1, col = "black", density = 30, angle = -45)
+  }
+  if(paste0("SKARLC", strata) %in% names(CookInlet_Median_Estimates)) {
+    plot(Karluk.dis, add = TRUE, border = "black", lwd = 1,
+         col = color.ramp[round(CookInlet_Median_Estimates[paste0("SKARLC", strata)]) + 1])
+  } else {
+    plot(Karluk.dis, add = TRUE, border = "black", lwd = 1, col = "black", density = 30, angle = -45)
+  }
+  if(paste0("SAYAKC", strata) %in% names(CookInlet_Median_Estimates)) {
+    plot(Ayakulik.dis, add = TRUE, border = "black", lwd = 1,
+         col = color.ramp[round(CookInlet_Median_Estimates[paste0("SAYAKC", strata)]) + 1])
+  } else {
+    plot(Ayakulik.dis, add = TRUE, border = "black", lwd = 1, col = "black", density = 30, angle = -45)
+  }
+  if(paste0("SALITC", strata) %in% names(CookInlet_Median_Estimates)) {
+    plot(Alitak.dis, add = TRUE, border = "black", lwd = 1,
+         col = color.ramp[round(CookInlet_Median_Estimates[paste0("SALITC", strata)]) + 1])
+  } else {
+    plot(Alitak.dis, add = TRUE, border = "black", lwd = 1, col = "black", density = 30, angle = -45)
+  }
+  if(paste0("SIGVAC", strata) %in% names(CookInlet_Median_Estimates)) {
+    plot(Igvak.dis, add = TRUE, border = "black", lwd = 1,
+         col = color.ramp[round(CookInlet_Median_Estimates[paste0("SIGVAC", strata)]) + 1])
+  } else {
+    plot(Igvak.dis, add = TRUE, border = "black", lwd = 1, col = "black", density = 30, angle = -45)
+  }
+  
   text(x = -153.53, y = 58.03, labels = "Uganik\nKupreanof", cex = cex.lab, adj = c(1, 0))
-  plot(Uyak.dis, add = TRUE, border = "black", lwd = 1,
-       col = color.ramp[round(CookInlet_Median_Estimates[paste0("SUYAKC", strata)]) + 1])
   text(x = -154.12, y = 57.78, labels = "Uyak", cex = cex.lab, adj = c(1, 0))
-  plot(Karluk.dis, add = TRUE, border = "black", lwd = 1,
-       col = color.ramp[round(CookInlet_Median_Estimates[paste0("SKARLC", strata)]) + 1])
   text(x = -154.63, y = 57.58, labels = "Karluk\nSturgeon", cex = cex.lab, adj = c(1, 0))
-  plot(Ayakulik.dis, add = TRUE, border = "black", lwd = 1,
-       col = color.ramp[round(CookInlet_Median_Estimates[paste0("SAYAKC", strata)]) + 1])
   text(x = -154.7, y = 57.2, labels = "Ayakulik\nHalibut Bay", cex = cex.lab, adj = c(1, 1))
-  plot(Alitak.dis, add = TRUE, border = "black", lwd = 1,
-       col = color.ramp[round(CookInlet_Median_Estimates[paste0("SALITC", strata)]) + 1])
   text(x = -154.42, y = 56.88, labels = "Alitak", cex = cex.lab, adj = c(1, 1))
-  plot(Igvak.dis, add = TRUE, border = "black", lwd = 1,
-       col = color.ramp[round(CookInlet_Median_Estimates[paste0("SIGVAC", strata)]) + 1])
   text(x = -155.85, y = 57.48, labels = "Igvak", cex = cex.lab, adj = c(0, 1))
   
   # abline(v = seq(-157, -151, by = 0.5), lwd = 2)
