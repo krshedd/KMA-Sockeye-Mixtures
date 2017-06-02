@@ -13451,6 +13451,7 @@ for(strata in KMA2014Strata_LowUCI) {
   EstimatesStats[[strata]][KMA17UCIGroups[12:15], c("mean", "sd", "median", "5%", "95%")] <- 0
   HarvestEstimatesStats[[strata]][KMA17UCIGroups[12:15], c("mean", "sd", "median", "5%", "95%")] <- 0
 }
+dput(x = KMA2014Strata_LowUCI, file = "Objects/KMA2014Strata_LowUCI.txt")
 
 KMA2015Strata_Regional_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2015Strata_Regional_EstimatesStats.txt")
 KMA2015Strata_LowUCI <- sapply(KMA2015Strata, function(strata) {KMA2015Strata_Regional_EstimatesStats[[strata]]["Cook Inlet", "median"] < 0.05})
@@ -13459,6 +13460,7 @@ for(strata in KMA2015Strata_LowUCI) {
   EstimatesStats[[strata]][KMA17UCIGroups[12:15], c("mean", "sd", "median", "5%", "95%")] <- 0
   HarvestEstimatesStats[[strata]][KMA17UCIGroups[12:15], c("mean", "sd", "median", "5%", "95%")] <- 0
 }
+dput(x = KMA2015Strata_LowUCI, file = "Objects/KMA2015Strata_LowUCI.txt")
 
 KMA2016Strata_Regional_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2016Strata_Regional_EstimatesStats.txt")
 KMA2016Strata_LowUCI <- sapply(KMA2016Strata, function(strata) {KMA2016Strata_Regional_EstimatesStats[[strata]]["Cook Inlet", "median"] < 0.05})
@@ -13467,6 +13469,7 @@ for(strata in KMA2016Strata_LowUCI) {
   EstimatesStats[[strata]][KMA17UCIGroups[12:15], c("mean", "sd", "median", "5%", "95%")] <- 0
   HarvestEstimatesStats[[strata]][KMA17UCIGroups[12:15], c("mean", "sd", "median", "5%", "95%")] <- 0
 }
+dput(x = KMA2016Strata_LowUCI, file = "Objects/KMA2016Strata_LowUCI.txt")
 
 
 EstimatesStats[["SUGANC14"]][KMA17UCIGroups[12:15], c("mean", "sd", "median", "5%", "95%")] <- 0
@@ -13826,6 +13829,133 @@ png(file ="Figures/Harvest Maps/2016 3_Late Marginal Unsamp Bubble.png", width =
 Strata_Marginal_Credibility_Unsamp_Bubbleplot.f(yr = 2016, strata = "3_Late"); dev.off()
 png(file ="Figures/Harvest Maps/2016 4_Post Marginal Unsamp Bubble.png", width = 811, height = 957, units = "px", res = 96, family = "serif", bg = "white")
 Strata_Marginal_Credibility_Unsamp_Bubbleplot.f(yr = 2016, strata = "4_Post"); dev.off()
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Bubble Table
+
+yr = 2014
+strata = "1_Early"
+
+Strata_Marginal_Credibility_Unsamp_Table.f <- function(yr, strata) {
+  
+  ngroups <- length(Groups)
+  nspatialareas <- length(SpatialAreas)
+  
+  if(strata == "4_Post") {
+    # Get harvest data
+    Total_HarvestEstimates_df <- get(paste0("s", yr - 2000))[, c("Geo", unlist(strsplit(x = strata, split = "_"))[2])]
+    names(Total_HarvestEstimates_df) <- c("Fishery", "Harvest")
+    levels(Total_HarvestEstimates_df$Fishery)
+    Total_HarvestEstimates_df$Harvest[Total_HarvestEstimates_df$Harvest == 0] <- NA
+    
+    # Create blank bubble plot
+    harvest_array <- array(data = c(0, rep(NA, ((ngroups * (nspatialareas + 1) * 3) - 1))), dim = c(ngroups, nspatialareas + 1, 3), 
+                           dimnames = list(Groups, rev(c(SpatialAreas, "Unsampled")), c("lower", "median", "upper")))
+    Stratified_HarvestEstimates_df <- melt(harvest_array)
+    names(Stratified_HarvestEstimates_df) <- c("RG", "Fishery", "Estimator", "Harvest")
+    Stratified_HarvestEstimates_df$RG <- factor(Stratified_HarvestEstimates_df$RG, levels = rev(Groups))
+    Stratified_HarvestEstimates_df$Fishery <- factor(Stratified_HarvestEstimates_df$Fishery, levels = rev(c(SpatialAreas, "Unsampled")))
+    
+    # Create blank right plot
+    Temporal_HarvestEstimates_df <- data.frame("RG" = factor(x = Groups, levels = Groups),
+                                               "Median" = rep(0, ngroups),
+                                               "Lower5" = rep(0, ngroups),
+                                               "Upper95" = rep(0, ngroups))
+  } else {
+    # Read in stock-specific harvest data
+    harvest_lst <- KMAStrata_HarvestEstimatesStats
+    strata_nms <- grep(pattern = strata, x = names(harvest_lst), value = TRUE)
+    strata_nms <- grep(pattern = yr-2000, x = strata_nms, value = TRUE)
+    strata_silly <- c("SALIT", "SAYAK", "SIGVA", "SKARL", "SUGAN", "SUYAK")
+    
+    # Matrix of means
+    harvest_mean_mat <- matrix(data = 0, nrow = ngroups, ncol = nspatialareas, dimnames = list(Groups, sort(SpatialAreas)))
+    harvest_mean_mat.temp <- sapply(strata_nms, function(strat) {round(harvest_lst[[strat]][, "mean"])})
+    harvest_col_index <- sapply(strata_nms, function(strat) {which(strata_silly == paste(unlist(strsplit(x = strat, split = ''))[1:5], collapse = ''))})
+    harvest_mean_mat[, harvest_col_index] <- harvest_mean_mat.temp
+    harvest_mean_mat <- cbind("Unsampled" = rep(0, ngroups), harvest_mean_mat)
+    
+    # Matrix of medians
+    harvest_median_mat <- matrix(data = 0, nrow = ngroups, ncol = nspatialareas, dimnames = list(Groups, sort(SpatialAreas)))
+    harvest_median_mat.temp <- sapply(strata_nms, function(strat) {round(harvest_lst[[strat]][, "median"])})
+    harvest_col_index <- sapply(strata_nms, function(strat) {which(strata_silly == paste(unlist(strsplit(x = strat, split = ''))[1:5], collapse = ''))})
+    harvest_median_mat[, harvest_col_index] <- harvest_median_mat.temp
+    harvest_median_mat <- cbind("Unsampled" = rep(0, ngroups), harvest_median_mat)
+    
+    # Matrix of SDs
+    harvest_SD_mat <- matrix(data = 0, nrow = ngroups, ncol = nspatialareas, dimnames = list(Groups, sort(SpatialAreas)))
+    harvest_SD_mat.temp <- sapply(strata_nms, function(strat) {round(harvest_lst[[strat]][, "sd"])})
+    harvest_col_index <- sapply(strata_nms, function(strat) {which(strata_silly == paste(unlist(strsplit(x = strat, split = ''))[1:5], collapse = ''))})
+    harvest_SD_mat[, harvest_col_index] <- harvest_SD_mat.temp
+    harvest_SD_mat <- cbind("Unsampled" = rep(0, ngroups), harvest_SD_mat)
+    
+    # Create array of 5%, median, and 95% estimates
+    harvest_array <- abind("median" = harvest_median_mat, "SD" = harvest_SD_mat, along = 3)
+    
+    # Melt array into a dataframe for ggplot
+    Stratified_HarvestEstimates_df <- melt(harvest_array)
+    names(Stratified_HarvestEstimates_df) <- c("RG", "Fishery", "Estimator", "Harvest")
+    Stratified_HarvestEstimates_df$RG <- factor(Stratified_HarvestEstimates_df$RG, levels = rev(Groups))
+    Stratified_HarvestEstimates_df$Fishery <- factor(Stratified_HarvestEstimates_df$Fishery, levels = rev(c(SpatialAreas, "Unsampled")))
+    Stratified_HarvestEstimates_df$Harvest[Stratified_HarvestEstimates_df$Harvest == 0] <- NA
+    # str(Stratified_HarvestEstimates_df)
+    
+    # Get harvest data
+    Total_HarvestEstimates_df <- get(paste0("s", yr - 2000))[, c("Geo", unlist(strsplit(x = strata, split = "_"))[2])]
+    names(Total_HarvestEstimates_df) <- c("Fishery", "Harvest")
+    levels(Total_HarvestEstimates_df$Fishery)
+
+    # Matrix of temporal medians
+    temporal_harvest_mat <- get(paste0("KMA", yr, "_Temporal_17UCIRG_HarvestEstimatesStats"))[[strata]]
+    Temporal_HarvestEstimates_df <- data.frame("RG" = Groups, temporal_harvest_mat)[, c(1, 4:6)]
+    names(Temporal_HarvestEstimates_df) <- c("RG", "Median", "Lower5", "Upper95")
+    Temporal_HarvestEstimates_df$RG <- factor(Temporal_HarvestEstimates_df$RG, levels = rev(Groups))
+  }
+  
+  # TempTable <- formatC(x = rbind(cbind(harvest_median_mat[, levels(s14$Geo)], "Total Stock-specific Harvest" = round(temporal_harvest_mat[, "median"])),
+  #                                "Unknown Origin" = c(Total_HarvestEstimates_df[1, "Harvest"], rep(0, 6), Total_HarvestEstimates_df[1, "Harvest"]),
+  #                                "Total Area Harvest" = c(Total_HarvestEstimates_df$Harvest, sum(Total_HarvestEstimates_df$Harvest))
+  # ), digits = 0, big.mark = ",", format = "f")
+  
+  Caption <- paste0("Kodiak Management Area, ", yr, ", ", tolower(unlist(strsplit(x = strata, split = "_"))[2]), " temporal stratum. Subregional estimates of stock-specific harvest by sampling area. Estimates include median and standard deviation (SD).")
+  
+  TableX <- matrix(data = "", nrow = 23, ncol = 24)
+  TableX[1, 1] <- Caption
+  TableX[2, c(2, 11, 14, 20, 23)] <- c("Unsampled", "Ayakulik", "Karluk", "Uganik", "Total by")
+  TableX[3, c(2, 5, 8, 11, 14, 17, 20, 23)] <- c("Areas", "Igvak", "Alitak", "Halibut Bay", "Sturgeon", "Uyak", "Kupreanof", "Reporting Group")
+  TableX[4, seq(from = 2, by = 3, length.out = 8)] <- "Median"
+  TableX[4, seq(from = 3, by = 3, length.out = 8)] <- "SD"
+  TableX[4:23, 1] <- c("Reporting Group", KMA17UCIGroups, "Unknown", "Total by Sampling Area")
+  TableX[5:21, seq(from = 2, by = 3, length.out = 7)] <- formatC(x = harvest_median_mat[, levels(s14$Geo)], digits = 0, format = "f", big.mark = ",")
+  TableX[5:21, seq(from = 3, by = 3, length.out = 7)] <- formatC(x = harvest_SD_mat[, levels(s14$Geo)], digits = 0, format = "f", big.mark = ",")
+  TableX[5:21, 23:24] <- formatC(x = round(temporal_harvest_mat[, c("median", "sd")]), digits = 0, format = "f", big.mark = ",")
+  TableX[22, c(seq(from = 2, by = 3, length.out = 8), seq(from = 3, by = 3, length.out = 8))] <- 0
+  TableX[22, c(2, 23)] <- formatC(x = Total_HarvestEstimates_df[1, "Harvest"], digits = 0, format = "f", big.mark = ",")
+  TableX[23, seq(from = 2, by = 3, length.out = 7)] <- formatC(x = Total_HarvestEstimates_df$Harvest, digits = 0, format = "f", big.mark = ",")
+  TableX[23, seq(from = 3, by = 3, length.out = 8)] <- 0
+  TableX[23, 23] <- formatC(x = sum(Total_HarvestEstimates_df$Harvest), digits = 0, format = "f", big.mark = ",")
+
+  NamedAreas <- setNames(object = strata_silly, nm = sort(SpatialAreas))[rev(SpatialAreas)]
+  LowUCIStrata_2Remove <- sapply(grep(pattern = strata, x = grep(pattern = yr - 2000, x = c(KMA2014Strata_LowUCI, KMA2015Strata_LowUCI, KMA2016Strata_LowUCI), value = TRUE), value = TRUE), function(x) {unlist(strsplit(x, split = "C"))[1]})
+  
+  if(length(LowUCIStrata_2Remove) > 0) {
+    Cols2Remove <- c(seq(from = 5, by = 3, length.out = 6)[which(NamedAreas %in% LowUCIStrata_2Remove)])
+    Cols2Remove <- sort(c(Cols2Remove, Cols2Remove + 1))
+    TableX[16:19, Cols2Remove] <- "*"
+  }
+  
+  write.xlsx(x = TableX, file = "Estimates tables/KMA Sockeye Summary Tables.xlsx", sheetName = paste(yr, strata, sep = "_"), col.names = FALSE, row.names = FALSE, append = TRUE)
+  
+}
+
+
+for(yr in 2014:2016) {
+  for(strata in c("1_Early", "2_Middle", "3_Late")) {
+    Strata_Marginal_Credibility_Unsamp_Table.f(yr = yr, strata = strata)
+  }
+}
+
+
 
 
 
@@ -14199,9 +14329,9 @@ CookInlet_Median_HarvestEstimates <- CookInlet_Median_HarvestEstimates[-which(na
 strsplit(x = names(Regional_HarvestEstimatesStats), split = "C")
 
 CI_Harvest.df <- data.frame(
-  "Geo" = sapply(names(Regional_HarvestEstimatesStats), function(x) {unlist(strsplit(x = x, split = "C"))[1]}),
-  "Year" = sapply(names(Regional_HarvestEstimatesStats), function(x) {as.numeric(paste(unlist(strsplit(x = unlist(strsplit(x = x, split = "C"))[2], split = ''))[1:2], collapse = ''))+2000}),
-  "Strata" = sapply(names(Regional_HarvestEstimatesStats), function(x) {unlist(strsplit(x = unlist(strsplit(x = x, split = "C"))[2], split = '_'))[3]}),
+  "Geo" = sapply(names(CookInlet_Median_HarvestEstimates), function(x) {unlist(strsplit(x = x, split = "C"))[1]}),
+  "Year" = sapply(names(CookInlet_Median_HarvestEstimates), function(x) {as.numeric(paste(unlist(strsplit(x = unlist(strsplit(x = x, split = "C"))[2], split = ''))[1:2], collapse = ''))+2000}),
+  "Strata" = sapply(names(CookInlet_Median_HarvestEstimates), function(x) {unlist(strsplit(x = unlist(strsplit(x = x, split = "C"))[2], split = '_'))[3]}),
   "Harvest" = round(CookInlet_Median_HarvestEstimates),
   stringsAsFactors = FALSE)
 CI_Harvest.df$Strata[is.na(CI_Harvest.df$Strata)] <- "Annual"
@@ -14212,6 +14342,9 @@ CI_Harvest.df$Strata <- factor(x = CI_Harvest.df$Strata, levels = c("Early", "Mi
 
 require(reshape)
 cast(subset(CI_Harvest.df, subset = CI_Harvest.df$Year == "2014"), Geo ~ Strata)
+cast(subset(CI_Harvest.df, subset = CI_Harvest.df$Year == "2015"), Geo ~ Strata)
+cast(subset(CI_Harvest.df, subset = CI_Harvest.df$Year == "2016"), Geo ~ Strata)
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Percent
 CookInlet_Median_Estimates <- sapply(Regional_EstimatesStats, function(mix) {mix["Cook Inlet", "median"] * 100})
@@ -14220,9 +14353,9 @@ CookInlet_Median_Estimates <- CookInlet_Median_Estimates[-which(names(CookInlet_
 strsplit(x = names(Regional_EstimatesStats), split = "C")
 
 CI_Percent.df <- data.frame(
-  "Geo" = sapply(names(Regional_EstimatesStats), function(x) {unlist(strsplit(x = x, split = "C"))[1]}),
-  "Year" = sapply(names(Regional_EstimatesStats), function(x) {as.numeric(paste(unlist(strsplit(x = unlist(strsplit(x = x, split = "C"))[2], split = ''))[1:2], collapse = ''))+2000}),
-  "Strata" = sapply(names(Regional_EstimatesStats), function(x) {unlist(strsplit(x = unlist(strsplit(x = x, split = "C"))[2], split = '_'))[3]}),
+  "Geo" = sapply(names(CookInlet_Median_Estimates), function(x) {unlist(strsplit(x = x, split = "C"))[1]}),
+  "Year" = sapply(names(CookInlet_Median_Estimates), function(x) {as.numeric(paste(unlist(strsplit(x = unlist(strsplit(x = x, split = "C"))[2], split = ''))[1:2], collapse = ''))+2000}),
+  "Strata" = sapply(names(CookInlet_Median_Estimates), function(x) {unlist(strsplit(x = unlist(strsplit(x = x, split = "C"))[2], split = '_'))[3]}),
   "Percent" = round(CookInlet_Median_Estimates, 2),
   stringsAsFactors = FALSE)
 CI_Percent.df$Strata[is.na(CI_Percent.df$Strata)] <- "Annual"
@@ -14427,6 +14560,9 @@ Plot_PBSMapping_UCISockeyeHarvest_NoMar.f <- function(strata) {
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 png(file = paste0("Figures/Harvest Maps/UCI Harvest Maps/Overall_CookInlet_Harvest.png"), width = 6.5, height = 6.5, units = "in", res = 300, family = "serif", bg = "white")
+
+CookInlet_Median_HarvestEstimates <- sapply(Regiomal_HarvestEstimatesStats, function(mix) {mix["Cook Inlet", "median"]})
+CookInlet_Median_HarvestEstimates <- CookInlet_Median_HarvestEstimates[-which(names(CookInlet_Median_HarvestEstimates) == "SAYAKC16_1_Early")]
 
 cex.lab = 0.7  # This is for sampling area labels
 
