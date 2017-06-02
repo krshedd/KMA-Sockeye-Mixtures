@@ -13956,6 +13956,71 @@ for(yr in 2014:2016) {
 }
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+yr = 2014
+strata = "1_Early"
+
+Strata_Marginal_Credibility_Unsamp_Table.f <- function(yr, strata) {
+  
+  ngroups <- length(Groups)
+  nspatialareas <- length(SpatialAreas)
+  
+  # Read in stock-specific harvest data
+  harvest_lst <- KMAStrata_HarvestEstimatesStats
+  strata_nms <- grep(pattern = strata, x = names(harvest_lst), value = TRUE)
+  strata_nms <- grep(pattern = yr-2000, x = strata_nms, value = TRUE)
+  strata_silly <- c("SALIT", "SAYAK", "SIGVA", "SKARL", "SUGAN", "SUYAK")
+  
+  # Matrix of medians
+  harvest_median_mat <- matrix(data = 0, nrow = ngroups, ncol = nspatialareas, dimnames = list(Groups, sort(SpatialAreas)))
+  harvest_median_mat.temp <- sapply(strata_nms, function(strat) {round(harvest_lst[[strat]][, "median"])})
+  harvest_col_index <- sapply(strata_nms, function(strat) {which(strata_silly == paste(unlist(strsplit(x = strat, split = ''))[1:5], collapse = ''))})
+  harvest_median_mat[, harvest_col_index] <- harvest_median_mat.temp
+  harvest_median_mat <- cbind("Unsampled" = rep(0, ngroups), harvest_median_mat)
+  
+  # Get harvest data
+  Total_HarvestEstimates_df <- get(paste0("s", yr - 2000))[, c("Geo", unlist(strsplit(x = strata, split = "_"))[2])]
+  names(Total_HarvestEstimates_df) <- c("Fishery", "Harvest")
+  levels(Total_HarvestEstimates_df$Fishery)
+  
+  # Matrix of temporal medians
+  temporal_harvest_mat <- get(paste0("KMA", yr, "_Temporal_17UCIRG_HarvestEstimatesStats"))[[strata]]
+  Temporal_HarvestEstimates_df <- data.frame("RG" = Groups, temporal_harvest_mat)[, c(1, 4:6)]
+  names(Temporal_HarvestEstimates_df) <- c("RG", "Median", "Lower5", "Upper95")
+  Temporal_HarvestEstimates_df$RG <- factor(Temporal_HarvestEstimates_df$RG, levels = rev(Groups))
+  
+  Caption <- paste0("Kodiak Management Area, ", yr, ", ", tolower(unlist(strsplit(x = strata, split = "_"))[2]), " temporal stratum. Subregional median estimates of stock-specific harvest by sampling area.")
+  
+  TableX <- matrix(data = "", nrow = 22, ncol = 9)
+  TableX[1, 1] <- Caption
+  TableX[2, c(2, 5, 6, 8, 9)] <- c("Unsampled", "Ayakulik", "Karluk", "Uganik", "Total by")
+  TableX[3, ] <- c("Reporting Group", "Areas", "Igvak", "Alitak", "Halibut Bay", "Sturgeon", "Uyak", "Kupreanof", "Reporting Group")
+  TableX[4:22, 1] <- c(KMA17UCIGroups, "Unknown", "Total by Sampling Area")
+  TableX[4:20, 2:8] <- formatC(x = harvest_median_mat[, levels(s14$Geo)], digits = 0, format = "f", big.mark = ",")
+  TableX[4:20, 9] <- formatC(x = round(temporal_harvest_mat[, "median"]), digits = 0, format = "f", big.mark = ",")
+  TableX[21, 2:9] <- 0
+  TableX[21, c(2, 9)] <- formatC(x = Total_HarvestEstimates_df[1, "Harvest"], digits = 0, format = "f", big.mark = ",")
+  TableX[22, 2:8] <- formatC(x = Total_HarvestEstimates_df$Harvest, digits = 0, format = "f", big.mark = ",")
+  TableX[22, 9] <- formatC(x = sum(Total_HarvestEstimates_df$Harvest), digits = 0, format = "f", big.mark = ",")
+  
+  NamedAreas <- setNames(object = strata_silly, nm = sort(SpatialAreas))[rev(SpatialAreas)]
+  LowUCIStrata_2Remove <- sapply(grep(pattern = strata, x = grep(pattern = yr - 2000, x = c(KMA2014Strata_LowUCI, KMA2015Strata_LowUCI, KMA2016Strata_LowUCI), value = TRUE), value = TRUE), function(x) {unlist(strsplit(x, split = "C"))[1]})
+  
+  if(length(LowUCIStrata_2Remove) > 0) {
+    Cols2Remove <- which(NamedAreas %in% LowUCIStrata_2Remove) + 2
+    TableX[15:18, Cols2Remove] <- "*"
+  }
+  
+  write.xlsx(x = TableX, file = "Estimates tables/KMA Sockeye Summary Tables.xlsx", sheetName = paste(yr, strata, sep = "_"), col.names = FALSE, row.names = FALSE, append = TRUE)
+  
+}
+
+
+for(yr in 2014:2016) {
+  for(strata in c("1_Early", "2_Middle", "3_Late")) {
+    Strata_Marginal_Credibility_Unsamp_Table.f(yr = yr, strata = strata)
+  }
+}
 
 
 
