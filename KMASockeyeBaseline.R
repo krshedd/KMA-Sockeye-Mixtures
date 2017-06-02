@@ -5505,6 +5505,7 @@ PlotLikeProfile.GCL(likeprof = KMA473Pops_31Groups_46loci_LikelihoodProfile_NEW,
 
 KMA473Pops_17UCIGroups_46loci_LikelihoodProfile <- LeaveOneOutDist.GCL(sillyvec = KMA473Pops, loci = loci46, groupvec = KMA473PopsGroupVec17UCI)
 dput(x = KMA473Pops_17UCIGroups_46loci_LikelihoodProfile, file = "Likelihood Profiles/KMA473Pops_17UCIGroups_46loci_LikelihoodProfile.txt")
+KMA473Pops_17UCIGroups_46loci_LikelihoodProfile <- dget(file = "Likelihood Profiles/KMA473Pops_17UCIGroups_46loci_LikelihoodProfile.txt")
 
 KMA473Pops17UCIGroups_46loci_Confusion <- ConfusionMatrices.GCL(LeaveOneOutDist = KMA473Pops_17UCIGroups_46loci_LikelihoodProfile, groupnames = KMA17UCIGroups, groupvec = KMA473PopsGroupVec17UCI, sillyvec = KMA473Pops)
 dput(x = KMA473Pops17UCIGroups_46loci_Confusion, file = "Objects/KMA473Pops17UCIGroups_46loci_Confusion.txt")
@@ -5534,6 +5535,7 @@ levelplot(KMA473Pops17UCIGroups_46loci_Confusion[[1]], col.regions = new.colors,
 
 KMA473Pops_17UCIGroups_46loci_LikelihoodProfile_NEW <- LeaveOneOutLikeProfile.GCL(popvec = KMA473Pops, loci = loci46, groupvec = KMA473PopsGroupVec17UCI, groupnames = KMA17UCIGroups, groupcomps = NULL, ncores = 8)
 dput(x = KMA473Pops_17UCIGroups_46loci_LikelihoodProfile_NEW, file = "Likelihood Profiles/KMA473Pops_17UCIGroups_46loci_LikelihoodProfile_NEW.txt")
+KMA473Pops_17UCIGroups_46loci_LikelihoodProfile_NEW <- dget(file = "Likelihood Profiles/KMA473Pops_17UCIGroups_46loci_LikelihoodProfile_NEW.txt")
 PlotLikeProfile.GCL(likeprof = KMA473Pops_17UCIGroups_46loci_LikelihoodProfile_NEW, popvec = KMA473Pops, loci = loci46, groupvec = KMA473PopsGroupVec17UCI, groupnames = KMA17UCIGroups, dir = "Likelihood Profiles", filename = "KMA473Pops_17UCIGroups_46loci_LikelihoodProfile_NEW_", col = c(Colors14[1:11], "blue", "cyan", "pink2", "grey80", Colors14[13:14]))
 
 str(KMA473Pops_17UCIGroups_46loci_LikelihoodProfile_NEW)
