@@ -6299,3 +6299,7 @@ mtext(text = "Reporting Group", side = 1, line = 1)
 legend(x = max(ProofPlot), y = 0.8 * percent, legend = KMA17UCIGroups, fill = Colors17, bty = "n", xpd = TRUE)
 
 dev.off()
+
+mean(sapply(Groups17UCI[12:15], function(RG) {sapply(1:5, function(i) {StatsObject[[paste0(RG, i)]][RG, "median"]})}))
+range(sapply(Groups17UCI[12:15], function(RG) {sapply(1:5, function(i) {StatsObject[[paste0(RG, i)]][RG, "median"]})}))
+colMeans(sapply(Groups17UCI[12:15], function(RG) {sapply(1:5, function(i) {StatsObject[[paste0(RG, i)]][RG, "median"]})}))
