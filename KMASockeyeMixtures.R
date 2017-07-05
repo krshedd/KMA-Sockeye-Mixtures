@@ -11979,7 +11979,35 @@ t(t(Ayakulik14Collections))
 
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# HWE for weir collections
 
+gcl2Genepop.GCL(sillyvec = Ayakulik14Collections[3:9], loci = loci96[-mito.loci], path = "Genepop/AyakulikWeir2012_7Collections_93nuclearloci.txt", VialNums = TRUE); beep(2)
+
+## Check HWE in Genepop
+# Originally done with Exact test and subsequently re-done with MCMC
+HWE <- ReadGenepopHWE.GCL(file = "Genepop/AyakulikWeir2012_7Collections_93nuclearloci.txt.P")
+str(HWE)
+
+
+sapply(as.character(unique(HWE$DataByPop$Pop)), function(pop) {
+  x <- subset(x = HWE$DataByPop, subset = Pop == pop)
+  plot(sort(x[, "WC Fis"]), type = "h", lwd = 5, ylab = "WC Fis", xlab = "Loci (sorted)", col = "grey40", main = pop)
+  abline(h = 0, lwd = 5)
+  x[x$PValue[!is.na(x$PValue)] < 0.05, ]
+}, USE.NAMES = TRUE, simplify = FALSE
+)
+
+str(HWE$SummaryPValues)
+HWE$SummaryPValues["Overall Loci", ]
+
+sapply(as.character(unique(HWE$DataByPop$Pop)), function(silly) {
+  hist(HWE$SummaryPValues[1:93, grep(pattern = silly, colnames(HWE$SummaryPValues))], breaks = seq(from = 0, to = 1, by = 0.05), col = 8, main = silly, ylim = c(0, 50), xlab = "HWE P-values")
+  abline(h = 5, lwd = 3, col = "red")
+})
+
+apply(HWE$SummaryPValues[1:93, seq(Ayakulik14Collections[3:9])], 2, function(silly) {sum(silly < 0.05, na.rm = TRUE)})
+hist(apply(HWE$SummaryPValues[1:93, seq(Ayakulik14Collections[3:9])], 2, function(silly) {sum(silly < 0.05, na.rm = TRUE)}), main = "# loci out of HWE per collection", xlab = "# loci with HWE P-value < 0.05", breaks = 0:14, col = 8)
 
 
 
@@ -12118,6 +12146,35 @@ dev.off()
 t(t(Frazer19Collections))
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# HWE for weir collections
+
+gcl2Genepop.GCL(sillyvec = Frazer19Collections[13:19], loci = loci96[-mito.loci], path = "Genepop/DogSalmonWeir2012_7Collections_93nuclearloci.txt", VialNums = TRUE); beep(2)
+
+## Check HWE in Genepop
+# Originally done with Exact test and subsequently re-done with MCMC
+HWE <- ReadGenepopHWE.GCL(file = "Genepop/DogSalmonWeir2012_7Collections_93nuclearloci.txt.P")
+str(HWE)
+
+
+sapply(as.character(unique(HWE$DataByPop$Pop)), function(pop) {
+  x <- subset(x = HWE$DataByPop, subset = Pop == pop)
+  plot(sort(x[, "WC Fis"]), type = "h", lwd = 5, ylab = "WC Fis", xlab = "Loci (sorted)", col = "grey40", main = pop)
+  abline(h = 0, lwd = 5)
+  x[x$PValue[!is.na(x$PValue)] < 0.05, ]
+}, USE.NAMES = TRUE, simplify = FALSE
+)
+
+str(HWE$SummaryPValues)
+HWE$SummaryPValues["Overall Loci", ]
+
+sapply(as.character(unique(HWE$DataByPop$Pop)), function(silly) {
+  hist(HWE$SummaryPValues[1:93, grep(pattern = silly, colnames(HWE$SummaryPValues))], breaks = seq(from = 0, to = 1, by = 0.05), col = 8, main = silly, ylim = c(0, 50), xlab = "HWE P-values")
+  abline(h = 5, lwd = 3, col = "red")
+})
+
+apply(HWE$SummaryPValues[1:93, seq(Ayakulik14Collections[3:9])], 2, function(silly) {sum(silly < 0.05, na.rm = TRUE)})
+hist(apply(HWE$SummaryPValues[1:93, seq(Ayakulik14Collections[3:9])], 2, function(silly) {sum(silly < 0.05, na.rm = TRUE)}), main = "# loci out of HWE per collection", xlab = "# loci with HWE P-value < 0.05", breaks = 0:14, col = 8)
 
 
 
@@ -13548,7 +13605,7 @@ for(mix in intersect(All_Potential_Strata, SheetNames)) {
 # Table Annual KMA Results
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-KMApercent <- setNames(object = c(46.7, 55.2, 62.4), nm = 14:16)
+KMApercent <- setNames(object = c(46.7, 55.0, 62.7), nm = 14:16) # Got final harvest numbers from KMA 2016 AMR (FMR 16-42, Table 6)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # dir.create("Estimates tables")
@@ -14748,3 +14805,151 @@ for(strata in as.vector(t(outer(14:16, c("1_Early", "2_Middle", "3_Late"), paste
 
 dev.off(); beep(4)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Where were stocks caught? ####
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+KMA_Strata_17UCIRG_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA_Strata_17UCIRG_HarvestEstimatesStats.txt")
+str(KMA_Strata_17UCIRG_HarvestEstimatesStats)
+
+KMA_Strata_17UCIRG_EstimatesStats_Final <- dget(file = "Estimates objects/Final/KMA_Strata_17UCIRG_EstimatesStats_Final.txt")
+str(KMA_Strata_17UCIRG_EstimatesStats_Final)
+
+KMA2014_Annual_Stratified_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2014_Annual_Stratified_EstimatesStats.txt")
+KMA2015_Annual_Stratified_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2015_Annual_Stratified_EstimatesStats.txt")
+KMA2016_Annual_Stratified_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2016_Annual_Stratified_EstimatesStats.txt")
+
+KMA2014_Annual_Stratified_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2014_Annual_Stratified_HarvestEstimatesStats.txt")
+KMA2015_Annual_Stratified_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2015_Annual_Stratified_HarvestEstimatesStats.txt")
+KMA2016_Annual_Stratified_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2016_Annual_Stratified_HarvestEstimatesStats.txt")
+
+KMA2014Strata_Regional_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2014Strata_Regional_EstimatesStats.txt")
+KMA2015Strata_Regional_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2015Strata_Regional_EstimatesStats.txt")
+KMA2016Strata_Regional_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2016Strata_Regional_EstimatesStats.txt")
+
+KMA2014_Spatial_17UCIRG_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2014_Spatial_17UCIRG_HarvestEstimatesStats.txt")
+KMA2015_Spatial_17UCIRG_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2015_Spatial_17UCIRG_HarvestEstimatesStats.txt")
+KMA2016_Spatial_17UCIRG_HarvestEstimatesStats <- dget(file = "Estimates objects/Final/KMA2016_Spatial_17UCIRG_HarvestEstimatesStats.txt")
+
+KMA2014_Spatial_17UCIRG_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2014_Spatial_17UCIRG_EstimatesStats.txt")
+KMA2015_Spatial_17UCIRG_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2015_Spatial_17UCIRG_EstimatesStats.txt")
+KMA2016_Spatial_17UCIRG_EstimatesStats <- dget(file = "Estimates objects/Final/KMA2016_Spatial_17UCIRG_EstimatesStats.txt")
+
+
+
+EstimateStats <- KMA_Strata_17UCIRG_EstimatesStats_Final
+str(EstimateStats)
+length(EstimateStats)
+
+HarvestEstimatesStats <- KMA_Strata_17UCIRG_HarvestEstimatesStats
+
+
+StrataMedians <- sapply(KMA17UCIGroups, function(RG) {
+  sapply(EstimateStats, function(strata) {
+    round(strata[RG, "median"], 3)
+  })
+})
+
+HarvestMedians <- sapply(KMA17UCIGroups, function(RG) {
+  sapply(HarvestEstimatesStats, function(strata) {
+    round(strata[RG, "median"])
+  })
+})
+
+# If >= 5% of mixture, where?
+sapply(KMA17UCIGroups, function(RG) {which(StrataMedians[, RG] >= 0.05)})
+
+# Plot histogram
+invisible(sapply(KMA17UCIGroups, function(RG) {
+  hist(StrataMedians[, RG], col = 8, main = RG, ylab = "Proportion", xlim = c(0, 1), breaks = seq(0, 1, 0.01))
+  abline(v = 0.05, lwd = 3, col = 2)}))
+
+# If >= 5% of mixtures, which ones and how much?
+sapply(KMA17UCIGroups[12:15], function(RG) {
+  list("n" = sum(StrataMedians[, RG] >= 0.05),
+       "Strata" = rbind("Percent" = StrataMedians[StrataMedians[, RG] >= 0.05, RG] * 100,
+                        "Harvest" = HarvestMedians[StrataMedians[, RG] >= 0.05, RG]),
+       "Annual" = round(rbind("2014" = c(KMA2014_Annual_Stratified_EstimatesStats[RG, "median"] * 100, KMA2014_Annual_Stratified_HarvestEstimatesStats[RG, "median"]),
+                              "2015" = c(KMA2015_Annual_Stratified_EstimatesStats[RG, "median"] * 100, KMA2015_Annual_Stratified_HarvestEstimatesStats[RG, "median"]),
+                              "2016" = c(KMA2016_Annual_Stratified_EstimatesStats[RG, "median"] * 100, KMA2016_Annual_Stratified_HarvestEstimatesStats[RG, "median"])), 1))}, simplify = FALSE )
+
+HarvestMedians[grep(pattern = "C14", x = rownames(HarvestMedians)), "Kenai"]
+
+
+
+apply(StrataMedians, 2, function(x) {x>=0.05})
+
+
+
+
+z <- cbind(Annual2014_Stratified_HarvestEstimates,
+           Annual2015_Stratified_HarvestEstimates,
+           Annual2016_Stratified_HarvestEstimates)
+str(z)
+sum(z["Prince William Sound", c(5:6, 11:12, 17:18)]) / sum(z["Prince William Sound", ])
+
+
+
+# Summary by RG
+CookInlet_Median_HarvestEstimates <- sapply(HarvestEstimatesStats, function(mix) {mix["Other Cook Inlet", "median"]})
+
+CI_Harvest.df <- data.frame(
+  "Geo" = sapply(names(CookInlet_Median_HarvestEstimates), function(x) {unlist(strsplit(x = x, split = "C"))[1]}),
+  "Year" = sapply(names(CookInlet_Median_HarvestEstimates), function(x) {as.numeric(paste(unlist(strsplit(x = unlist(strsplit(x = x, split = "C"))[2], split = ''))[1:2], collapse = ''))+2000}),
+  "Strata" = sapply(names(CookInlet_Median_HarvestEstimates), function(x) {unlist(strsplit(x = unlist(strsplit(x = x, split = "C"))[2], split = '_'))[3]}),
+  "Harvest" = round(CookInlet_Median_HarvestEstimates),
+  stringsAsFactors = FALSE)
+CI_Harvest.df$Strata[is.na(CI_Harvest.df$Strata)] <- "Annual"
+str(CI_Harvest.df)
+
+CI_Harvest.df$Geo <- factor(x = CI_Harvest.df$Geo, levels = c("SUGAN", "SUYAK", "SKARL", "SAYAK", "SALIT", "SIGVA"))
+CI_Harvest.df$Strata <- factor(x = CI_Harvest.df$Strata, levels = c("Early", "Middle", "Late", "Annual"))
+
+require(reshape)
+cast(subset(CI_Harvest.df, subset = CI_Harvest.df$Year == "2014"), Geo ~ Strata)
+cast(subset(CI_Harvest.df, subset = CI_Harvest.df$Year == "2015"), Geo ~ Strata)
+cast(subset(CI_Harvest.df, subset = CI_Harvest.df$Year == "2016"), Geo ~ Strata)
+
+
+
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# This is for writing the "By Sampling Area" Results section
+
+sapply(c("SUGANC", "SUYAKC", "SKARLC", "SAYAKC", "SALITC"), function(geo) {
+  
+  geo_strata <- grep(pattern = geo, x = grep(pattern = "LateLate", x = KMA2014_2016Strata, value = TRUE, invert = TRUE), value = TRUE)
+  
+  list("2014" = list("Overall Cook Inlet Strata %" = round(sapply(grep(pattern = "14", x = geo_strata, value = TRUE), function(geo_strata_14) {KMA2014Strata_Regional_EstimatesStats[[geo_strata_14]]["Cook Inlet", "median"] * 100}), 1),
+                     "Subregional Cook Inlet Strata %" = StrataMedians[grep(pattern = "14", x = geo_strata, value = TRUE), KMA17UCIGroups[12:15]] * 100,
+                     "Overall Subregional Cook Inlet %" = round(KMA2014_Spatial_17UCIRG_EstimatesStats[[paste0(geo, "14")]][KMA17UCIGroups[12:15], "median"] * 100, 1),
+                     "Overall Subregional Cook Inlet Harvest" = round(KMA2014_Spatial_17UCIRG_HarvestEstimatesStats[[paste0(geo, "14")]][KMA17UCIGroups[12:15], "median"])),
+       "2015" = list("Overall Cook Inlet Strata %" = round(sapply(grep(pattern = "15", x = geo_strata, value = TRUE), function(geo_strata_15) {KMA2015Strata_Regional_EstimatesStats[[geo_strata_15]]["Cook Inlet", "median"] * 100}), 1),
+                     "Subregional Cook Inlet Strata %" = StrataMedians[grep(pattern = "15", x = geo_strata, value = TRUE), KMA17UCIGroups[12:15]] * 100,
+                     "Overall Subregional Cook Inlet %" = round(KMA2015_Spatial_17UCIRG_EstimatesStats[[paste0(geo, "15")]][KMA17UCIGroups[12:15], "median"] * 100, 1),
+                     "Overall Subregional Cook Inlet Harvest" = round(KMA2015_Spatial_17UCIRG_HarvestEstimatesStats[[paste0(geo, "15")]][KMA17UCIGroups[12:15], "median"])),
+       "2016" = list("Overall Cook Inlet Strata %" = round(sapply(grep(pattern = "16", x = geo_strata, value = TRUE), function(geo_strata_16) {KMA2016Strata_Regional_EstimatesStats[[geo_strata_16]]["Cook Inlet", "median"] * 100}), 1),
+                     "Subregional Cook Inlet Strata %" = StrataMedians[grep(pattern = "16", x = geo_strata, value = TRUE), KMA17UCIGroups[12:15]] * 100,
+                     "Overall Subregional Cook Inlet %" = round(KMA2016_Spatial_17UCIRG_EstimatesStats[[paste0(geo, "16")]][KMA17UCIGroups[12:15], "median"] * 100, 1),
+                     "Overall Subregional Cook Inlet Harvest" = round(KMA2016_Spatial_17UCIRG_HarvestEstimatesStats[[paste0(geo, "16")]][KMA17UCIGroups[12:15], "median"]))
+  )
+}, simplify = FALSE)
+
+# Do Igvak by itself since no 2014 data
+sapply(c("SIGVAC"), function(geo) {
+  
+  geo_strata <- grep(pattern = geo, x = grep(pattern = "LateLate", x = KMA2014_2016Strata, value = TRUE, invert = TRUE), value = TRUE)
+  
+  list("2015" = list("Overall Cook Inlet Strata %" = round(sapply(grep(pattern = "15", x = geo_strata, value = TRUE), function(geo_strata_15) {KMA2015Strata_Regional_EstimatesStats[[geo_strata_15]]["Cook Inlet", "median"] * 100}), 1),
+                     "Subregional Cook Inlet Strata %" = StrataMedians[grep(pattern = "15", x = geo_strata, value = TRUE), KMA17UCIGroups[12:15]] * 100,
+                     "Overall Subregional Cook Inlet %" = round(KMA2015_Spatial_17UCIRG_EstimatesStats[[paste0(geo, "15")]][KMA17UCIGroups[12:15], "median"] * 100, 1),
+                     "Overall Subregional Cook Inlet Harvest" = round(KMA2015_Spatial_17UCIRG_HarvestEstimatesStats[[paste0(geo, "15")]][KMA17UCIGroups[12:15], "median"])),
+       "2016" = list("Overall Cook Inlet Strata %" = round(sapply(grep(pattern = "16", x = geo_strata, value = TRUE), function(geo_strata_16) {KMA2016Strata_Regional_EstimatesStats[[geo_strata_16]]["Cook Inlet", "median"] * 100}), 1),
+                     "Subregional Cook Inlet Strata %" = StrataMedians[grep(pattern = "16", x = geo_strata, value = TRUE), KMA17UCIGroups[12:15]] * 100,
+                     "Overall Subregional Cook Inlet %" = round(KMA2016_Spatial_17UCIRG_EstimatesStats[[paste0(geo, "16")]][KMA17UCIGroups[12:15], "median"] * 100, 1),
+                     "Overall Subregional Cook Inlet Harvest" = round(KMA2016_Spatial_17UCIRG_HarvestEstimatesStats[[paste0(geo, "16")]][KMA17UCIGroups[12:15], "median"]))
+  )
+}, simplify = FALSE)
