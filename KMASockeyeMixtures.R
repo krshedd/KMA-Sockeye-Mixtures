@@ -10021,6 +10021,55 @@ s15 <- cbind(s15, "Annual" = rowSums(s15[, 2:4]))
 s16 <- cbind(s16, "Annual" = rowSums(s16[, 2:4]))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#### Output simple data for sockeye, pink, and chum ####
+## Sockeye
+KMA_Harvest_Simple.f(file = "Harvest/Kodiak Sockeye Salmon Catch by Day and Stat Area 2014.csv", name = "KMASockeyeHarvestSimple_2014", yr = 2014)
+KMA_Harvest_Simple.f(file = "Harvest/Kodiak Sockeye Salmon Catch by Day and Stat Area 2015.csv", name = "KMASockeyeHarvestSimple_2015", yr = 2015)
+KMA_Harvest_Simple.f(file = "Harvest/Kodiak Sockeye Salmon Catch by Day and Stat Area 2016.csv", name = "KMASockeyeHarvestSimple_2016", yr = 2016)
+
+require(reshape)
+s14 <- cast(melt(data = KMASockeyeHarvestSimple_2014, id.vars = c("Strata", "Geo"), measure.vars = "Number", na.rm = TRUE), Geo~Strata, sum)
+s15 <- cast(melt(data = KMASockeyeHarvestSimple_2015, id.vars = c("Strata", "Geo"), measure.vars = "Number", na.rm = TRUE), Geo~Strata, sum)
+s16 <- cast(melt(data = KMASockeyeHarvestSimple_2016, id.vars = c("Strata", "Geo"), measure.vars = "Number", na.rm = TRUE), Geo~Strata, sum)
+
+require(xlsx)
+write.xlsx(x = s14, file = "Harvest/KMA Summary Harvest Data.xlsx", sheetName = "Sockeye 2014", col.names = TRUE, row.names = FALSE, append = TRUE)
+write.xlsx(x = s15, file = "Harvest/KMA Summary Harvest Data.xlsx", sheetName = "Sockeye 2015", col.names = TRUE, row.names = FALSE, append = TRUE)
+write.xlsx(x = s16, file = "Harvest/KMA Summary Harvest Data.xlsx", sheetName = "Sockeye 2016", col.names = TRUE, row.names = FALSE, append = TRUE)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Pink
+KMA_Harvest_Simple.f(file = "Harvest/Kodiak Pink Salmon Catch by Day and Stat Area 2014.csv", name = "KMAPinkHarvestSimple_2014", yr = 2014)
+KMA_Harvest_Simple.f(file = "Harvest/Kodiak Pink Salmon Catch by Day and Stat Area 2015.csv", name = "KMAPinkHarvestSimple_2015", yr = 2015)
+KMA_Harvest_Simple.f(file = "Harvest/Kodiak Pink Salmon Catch by Day and Stat Area 2016.csv", name = "KMAPinkHarvestSimple_2016", yr = 2016)
+
+require(reshape)
+p14 <- cast(melt(data = KMAPinkHarvestSimple_2014, id.vars = c("Strata", "Geo"), measure.vars = "Number", na.rm = TRUE), Geo~Strata, sum)
+p15 <- cast(melt(data = KMAPinkHarvestSimple_2015, id.vars = c("Strata", "Geo"), measure.vars = "Number", na.rm = TRUE), Geo~Strata, sum)
+p16 <- cast(melt(data = KMAPinkHarvestSimple_2016, id.vars = c("Strata", "Geo"), measure.vars = "Number", na.rm = TRUE), Geo~Strata, sum)
+
+require(xlsx)
+write.xlsx(x = p14, file = "Harvest/KMA Summary Harvest Data.xlsx", sheetName = "Pink 2014", col.names = TRUE, row.names = FALSE, append = TRUE)
+write.xlsx(x = p15, file = "Harvest/KMA Summary Harvest Data.xlsx", sheetName = "Pink 2015", col.names = TRUE, row.names = FALSE, append = TRUE)
+write.xlsx(x = p16, file = "Harvest/KMA Summary Harvest Data.xlsx", sheetName = "Pink 2016", col.names = TRUE, row.names = FALSE, append = TRUE)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Chum
+KMA_Harvest_Simple.f(file = "Harvest/Kodiak Chum Salmon Catch by Day and Stat Area 2014.csv", name = "KMAChumHarvestSimple_2014", yr = 2014)
+KMA_Harvest_Simple.f(file = "Harvest/Kodiak Chum Salmon Catch by Day and Stat Area 2015.csv", name = "KMAChumHarvestSimple_2015", yr = 2015)
+KMA_Harvest_Simple.f(file = "Harvest/Kodiak Chum Salmon Catch by Day and Stat Area 2016.csv", name = "KMAChumHarvestSimple_2016", yr = 2016)
+
+require(reshape)
+c14 <- cast(melt(data = KMAChumHarvestSimple_2014, id.vars = c("Strata", "Geo"), measure.vars = "Number", na.rm = TRUE), Geo~Strata, sum)
+c15 <- cast(melt(data = KMAChumHarvestSimple_2015, id.vars = c("Strata", "Geo"), measure.vars = "Number", na.rm = TRUE), Geo~Strata, sum)
+c16 <- cast(melt(data = KMAChumHarvestSimple_2016, id.vars = c("Strata", "Geo"), measure.vars = "Number", na.rm = TRUE), Geo~Strata, sum)
+
+require(xlsx)
+write.xlsx(x = c14, file = "Harvest/KMA Summary Harvest Data.xlsx", sheetName = "Chum 2014", col.names = TRUE, row.names = FALSE, append = TRUE)
+write.xlsx(x = c15, file = "Harvest/KMA Summary Harvest Data.xlsx", sheetName = "Chum 2015", col.names = TRUE, row.names = FALSE, append = TRUE)
+write.xlsx(x = c16, file = "Harvest/KMA Summary Harvest Data.xlsx", sheetName = "Chum 2016", col.names = TRUE, row.names = FALSE, append = TRUE)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Plot_KMA_Harvest.f <- function(dat, species, yr, maxdat = NULL) {
   if(is.null(maxdat)) {maxdat <- max(dat)}
