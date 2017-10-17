@@ -9567,6 +9567,24 @@ table(harvest14$Strata, harvest14$Geo)
 require(plyr)
 require(reshape)
 daply(.data = harvest14, ~Geo+Strata, summarise, harvest = sum(Number))
+daply(.data = harvest14, ~Geo+Strata, summarise, harvest = sum(Pounds)/sum(Number))
+
+
+harvest14_simple <- cbind(aggregate(Pounds ~ Geo + Strata, data = harvest14, sum), "Number" = aggregate(Number ~ Geo + Strata, data = harvest14, sum)[, 3])
+harvest14_simple$AvgWt <- harvest14_simple$Pounds / harvest14_simple$Number
+cast(harvest14_simple, Geo ~ Strata, value = "AvgWt")
+
+harvest15_simple <- cbind(aggregate(Pounds ~ Geo + Strata, data = harvest15, sum), "Number" = aggregate(Number ~ Geo + Strata, data = harvest15, sum)[, 3])
+harvest15_simple$AvgWt <- harvest15_simple$Pounds / harvest15_simple$Number
+cast(harvest15_simple, Geo ~ Strata, value = "AvgWt")
+
+harvest16_simple <- cbind(aggregate(Pounds ~ Geo + Strata, data = harvest16, sum), "Number" = aggregate(Number ~ Geo + Strata, data = harvest16, sum)[, 3])
+harvest16_simple$AvgWt <- harvest16_simple$Pounds / harvest16_simple$Number
+cast(harvest16_simple, Geo ~ Strata, value = "AvgWt")
+
+
+
+
 
 cast(aggregate(Number ~ Geo + Strata, data = harvest14, sum), Geo ~ Strata, value = "Number")
 
@@ -13180,6 +13198,97 @@ sapply(GeoMix, function(geomix) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
+emf(file = paste("Figures/All Years/BlankDarkGreen.emf", sep = ''), width = 6, height = 5.75, family = "serif", bg = "white")
+
+
+layout(mat = layoutmat, widths = c(0.06, 0.3, 0.7), heights = c(0.9, 0.9, 0.9, 0.15))  # widths = c(0.075, 0.375, 0.625)
+par(mar = rep(0, 4))
+par(family = "times")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Y-axis label
+plot.new()
+text(x = 0.25, y = 0.5, labels = "Number of Fish Harvested (Thousands)", srt = 90, cex = cex.lab)
+
+height = t(cbind(rep(0, 6),
+                 rep(0, 6),
+                 rep(0, 6)))
+heightsub = t(cbind(rep(0, 14),
+                    rep(0, 14),
+                    rep(0, 14)))
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## 2014 Barplot Regional
+par(mar = c(1, 1, 1, 0))
+Barplot14 <- barplot2(height = height, beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd, ci.l = height,  ci.u = height, 
+                      ylim = c(0, ymax), col = 1, yaxt = "n", xaxt = 'n')
+axis(side = 2, at = seq(0, ymax, 50000), labels = formatC(x = seq(0, ymax, 50000) / 1000, big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+abline(h = 0, xpd = FALSE)
+
+#~~~~~~~~~~~~~~~~
+## 2014 Barplot SubRegional
+par(mar = c(1, 1, 1, 0))
+Barplot14 <- barplot2(height = heightsub, beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd, ci.l = heightsub,  ci.u = heightsub, 
+                      ylim = c(0, ymax), col = 1, yaxt = "n", xaxt = 'n')
+axis(side = 2, at = seq(0, ymax, 50000), labels = FALSE, cex.axis = cex.yaxis)
+abline(h = 0, xpd = FALSE)
+abline(v = c(mean(Barplot14[, 2:3]), mean(Barplot14[, 10:11])), lty = 2)
+legend(legend = c("Early", "Middle", "Late"), x = max(Barplot14[, 5]), y = ymax, fill = c("darkgreen", "green", "white"), border = "black", bty = "n", cex = cex.leg, title="2014")
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## 2015 Barplot Regional
+par(mar = c(1, 1, 1, 0))
+Barplot15 <- barplot2(height = height, beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd, ci.l = height,  ci.u = height, 
+                      ylim = c(0, ymax), col = 1, yaxt = "n", xaxt = 'n')
+axis(side = 2, at = seq(0, ymax, 50000), labels = formatC(x = seq(0, ymax, 50000) / 1000, big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+abline(h = 0, xpd = FALSE)
+
+#~~~~~~~~~~~~~~~~
+## 2015 Barplot SubRegional
+par(mar = c(1, 1, 1, 0))
+Barplot15 <- barplot2(height = heightsub, beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd, ci.l = heightsub,  ci.u = heightsub, 
+                      ylim = c(0, ymax), col = 1, yaxt = "n", xaxt = 'n')
+axis(side = 2, at = seq(0, ymax, 50000), labels = FALSE, cex.axis = cex.yaxis)
+abline(h = 0, xpd = FALSE)
+abline(v = c(mean(Barplot15[, 2:3]), mean(Barplot15[, 10:11])), lty = 2)
+legend(legend = c("Early", "Middle", "Late"), x = max(Barplot15[, 5]), y = ymax, fill = c("darkgreen", "green", "white"), border = "black", bty = "n", cex = cex.leg, title="2015")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## 2016 Barplot Regional
+par(mar = c(1, 1, 1, 0))
+Barplot16 <- barplot2(height = height, beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd, ci.l = height,  ci.u = height, 
+                      ylim = c(0, ymax), col = 1, yaxt = "n", xaxt = 'n')
+axis(side = 2, at = seq(0, ymax, 50000), labels = formatC(x = seq(0, ymax, 50000) / 1000, big.mark = "," , digits = 0, format = "f"), cex.axis = cex.yaxis)
+abline(h = 0, xpd = FALSE)
+mtext(text = RegGroups2Rows, side = 1, line = 1, at = colMeans(Barplot16), adj = 0.5, cex = cex.xaxis)
+# text(x = colMeans(Barplot16), y = -6, labels = c(Groups2Rows[1], "Chignik\n", "Kodiak\n", Groups2Rows[12:14]), adj = 0.5, cex = cex.xaxis, srt = 45, xpd = TRUE)
+#~~~~~~~~~~~~~~~~
+## 2016 Barplot SubRegional
+par(mar = c(1, 1, 1, 0))
+Barplot16 <- barplot2(height = heightsub, beside = TRUE, plot.ci = TRUE, ci.lwd = ci.lwd, ci.l = heightsub,  ci.u = heightsub, 
+                      ylim = c(0, ymax), col = 1, yaxt = "n", xaxt = 'n')
+axis(side = 2, at = seq(0, ymax, 50000), labels = FALSE, cex.axis = cex.yaxis)
+abline(v = c(mean(Barplot16[, 2:3]), mean(Barplot16[, 10:11])), lty = 2)
+abline(h = 0, xpd = FALSE)
+mtext(text = SubRegGroups2Rows, side = 1, line = 1, at = colMeans(Barplot16) + c(0, -0.25, 0, 0.5, 0.25, -0.25, 0, 0.25, 0.25, 0, rep(0, 4)), adj = 0.5, cex = cex.xaxis)
+legend(legend = c("Early", "Middle", "Late"), x = max(Barplot16[, 5]), y = ymax, fill = c("darkgreen", "green", "white"), border = "black", bty = "n", cex = cex.leg, title="2016")
+# text(x = colMeans(Barplot16), y = -6, labels = Groups2Rows[2:11], adj = 0.5, cex = cex.xaxis, srt = 45, xpd = TRUE)
+# - c(rep(0.5, 3), rep(0, 2), rep(0.5, 2), rep(0, 3))
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Blank Corner
+par(mar = rep(0, 4))
+plot.new()
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## x-axis label
+par(mar = rep(0, 4))
+plot.new()
+text(x = 0.5, y = 0.25, labels = "Regional Reporting Group", cex = cex.lab)
+
+par(mar = rep(0, 4))
+plot.new()
+text(x = 0.5, y = 0.25, labels = "Subregional Reporting Group", cex = cex.lab)
+
+dev.off()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #### Plot Annual KMA Percentages ####
@@ -14558,11 +14667,10 @@ Plot_PBSMapping_UCISockeyeHarvest.f <- function(strata) {
     max.col <- max(CookInlet_Median_HarvestEstimates[nchar(names(CookInlet_Median_HarvestEstimates)) == 8])
   }
   
-  max.col <- max(CookInlet_Median_HarvestEstimates)
-  
+  # max.col.round <- 2e5  # max(CookInlet_Median_HarvestEstimates)
+ 
   nice <- seq(from = 0, to = 1e6, by = 2.5e4)
   max.col.round <- min(nice[nice - max.col > 0])
-  
   
   
   plotMap(land, col = "grey90", cex.lab = 1.5, cex.axis = 1.5)
@@ -14632,6 +14740,13 @@ Plot_PBSMapping_UCISockeyeHarvest.f <- function(strata) {
   text(x = -153.4, y = 56.6, labels = paste(yr, stratum), cex = 1.5, adj = c(0, 0.5))
 }
 
+#~~~~~~~~~~~~~~~~~~
+## Create Blank Map
+# strata = "15_1_Early"
+# CookInlet_Median_HarvestEstimates <- ifelse(CookInlet_Median_HarvestEstimates > 0, 1, 0)
+# png(file = paste0("Figures/Harvest Maps/UCI Harvest Maps/Blank.png"), width = 871, height = 917, units = "px", res = 96, family = "serif", bg = "white")
+# Plot_PBSMapping_UCISockeyeHarvest.f(strata = strata); dev.off()
+
 
 # dir.create("Figures/Harvest Maps/UCI Harvest Maps")
 
@@ -14645,7 +14760,7 @@ for(strata in as.vector(outer(14:16, c("1_Early", "2_Middle", "3_Late"), paste, 
 cex.lab = 0.7  # This is for sampling area labels
 color.ramp <- colorRampPalette(c("white", "red", "darkred", "black"))(101)
 
-Plot_PBSMapping_UCISockeyeHarvest_NoMar.f <- function(strata) {
+Plot_PBSMapping_UCISockeyeHarvest_NoMar.f <- function(strata, leg.title = "Cook\nInlet\nHarvest") {
   
   if(nchar(strata) > 2) {
     max.col <- max(CookInlet_Median_HarvestEstimates[nchar(names(CookInlet_Median_HarvestEstimates)) > 8])
@@ -14716,7 +14831,7 @@ Plot_PBSMapping_UCISockeyeHarvest_NoMar.f <- function(strata) {
            fill = rev(color.ramp),
            border = NA,
            bg = 'white', x.intersp = 0.5, y.intersp = 0.07, lty = NULL, cex = cex.lab * 1.3)
-    text(x = -156.22, y = 58.5, labels = "Cook\nInlet\nHarvest", cex = 1.5 * cex.lab, adj = c(0, 0.5))
+    text(x = -156.22, y = 58.5, labels = leg.title, cex = 1.5 * cex.lab, adj = c(0, 0.5))
     
     north.arrow(xb = -152, yb = 56.6, len = 0.05, lab = "N")
   }
@@ -14732,7 +14847,7 @@ Plot_PBSMapping_UCISockeyeHarvest_NoMar.f <- function(strata) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 png(file = paste0("Figures/Harvest Maps/UCI Harvest Maps/Overall_CookInlet_Harvest.png"), width = 6.5, height = 6.5, units = "in", res = 300, family = "serif", bg = "white")
 
-CookInlet_Median_HarvestEstimates <- sapply(Regiomal_HarvestEstimatesStats, function(mix) {mix["Cook Inlet", "median"]})
+CookInlet_Median_HarvestEstimates <- sapply(Regional_HarvestEstimatesStats, function(mix) {mix["Cook Inlet", "median"]})
 CookInlet_Median_HarvestEstimates <- CookInlet_Median_HarvestEstimates[-which(names(CookInlet_Median_HarvestEstimates) == "SAYAKC16_1_Early")]
 
 cex.lab = 0.7  # This is for sampling area labels
@@ -14750,9 +14865,87 @@ for(strata in as.vector(t(outer(14:16, c("1_Early", "2_Middle", "3_Late"), paste
 dev.off(); beep(4)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+png(file = paste0("Figures/Harvest Maps/UCI Harvest Maps/Overall_Susitna_Harvest.png"), width = 6.5, height = 6.5, units = "in", res = 300, family = "serif", bg = "white")
 
+CookInlet_Median_HarvestEstimates <- sapply(HarvestEstimatesStats, function(mix) {mix["Susitna", "median"]})
+CookInlet_Median_HarvestEstimates <- CookInlet_Median_HarvestEstimates[-which(names(CookInlet_Median_HarvestEstimates) == "SAYAKC16_1_Early")]
 
+cex.lab = 0.7  # This is for sampling area labels
 
+layoutmat <- matrix(data=c(  1, 2, 3,
+                             4, 5, 6,
+                             7, 8, 9), nrow = 3, ncol = 3, byrow = TRUE)
+
+layout(mat = layoutmat, widths = c(1, 1, 1), heights = c(1, 1, 1))
+
+for(strata in as.vector(t(outer(14:16, c("1_Early", "2_Middle", "3_Late"), paste, sep = "_")))) {
+  Plot_PBSMapping_UCISockeyeHarvest_NoMar.f(strata = strata, leg.title = "Susitna\nHarvest")
+}
+
+dev.off(); beep(4)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+png(file = paste0("Figures/Harvest Maps/UCI Harvest Maps/Overall_Kenai_Harvest.png"), width = 6.5, height = 6.5, units = "in", res = 300, family = "serif", bg = "white")
+
+CookInlet_Median_HarvestEstimates <- sapply(HarvestEstimatesStats, function(mix) {mix["Kenai", "median"]})
+CookInlet_Median_HarvestEstimates <- CookInlet_Median_HarvestEstimates[-which(names(CookInlet_Median_HarvestEstimates) == "SAYAKC16_1_Early")]
+
+cex.lab = 0.7  # This is for sampling area labels
+
+layoutmat <- matrix(data=c(  1, 2, 3,
+                             4, 5, 6,
+                             7, 8, 9), nrow = 3, ncol = 3, byrow = TRUE)
+
+layout(mat = layoutmat, widths = c(1, 1, 1), heights = c(1, 1, 1))
+
+for(strata in as.vector(t(outer(14:16, c("1_Early", "2_Middle", "3_Late"), paste, sep = "_")))) {
+  Plot_PBSMapping_UCISockeyeHarvest_NoMar.f(strata = strata, leg.title = "Kenai\nHarvest")
+}
+
+dev.off(); beep(4)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+png(file = paste0("Figures/Harvest Maps/UCI Harvest Maps/Overall_Kasilof_Harvest.png"), width = 6.5, height = 6.5, units = "in", res = 300, family = "serif", bg = "white")
+
+CookInlet_Median_HarvestEstimates <- sapply(HarvestEstimatesStats, function(mix) {mix["Kasilof", "median"]})
+CookInlet_Median_HarvestEstimates <- CookInlet_Median_HarvestEstimates[-which(names(CookInlet_Median_HarvestEstimates) == "SAYAKC16_1_Early")]
+
+cex.lab = 0.7  # This is for sampling area labels
+
+layoutmat <- matrix(data=c(  1, 2, 3,
+                             4, 5, 6,
+                             7, 8, 9), nrow = 3, ncol = 3, byrow = TRUE)
+
+layout(mat = layoutmat, widths = c(1, 1, 1), heights = c(1, 1, 1))
+
+for(strata in as.vector(t(outer(14:16, c("1_Early", "2_Middle", "3_Late"), paste, sep = "_")))) {
+  Plot_PBSMapping_UCISockeyeHarvest_NoMar.f(strata = strata, leg.title = "Kasilof\nHarvest")
+}
+
+dev.off(); beep(4)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+png(file = paste0("Figures/Harvest Maps/UCI Harvest Maps/Overall_OtherCookInlet_Harvest.png"), width = 6.5, height = 6.5, units = "in", res = 300, family = "serif", bg = "white")
+
+CookInlet_Median_HarvestEstimates <- sapply(HarvestEstimatesStats, function(mix) {mix["Other Cook Inlet", "median"]})
+CookInlet_Median_HarvestEstimates <- CookInlet_Median_HarvestEstimates[-which(names(CookInlet_Median_HarvestEstimates) == "SAYAKC16_1_Early")]
+
+cex.lab = 0.7  # This is for sampling area labels
+
+layoutmat <- matrix(data=c(  1, 2, 3,
+                             4, 5, 6,
+                             7, 8, 9), nrow = 3, ncol = 3, byrow = TRUE)
+
+layout(mat = layoutmat, widths = c(1, 1, 1), heights = c(1, 1, 1))
+
+for(strata in as.vector(t(outer(14:16, c("1_Early", "2_Middle", "3_Late"), paste, sep = "_")))) {
+  Plot_PBSMapping_UCISockeyeHarvest_NoMar.f(strata = strata, leg.title = "Other\nCook\nInlet\nHarvest")
+}
+
+dev.off(); beep(4)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 3x3 Matrix of Percentage Plots
@@ -14961,6 +15154,20 @@ cast(subset(CI_Harvest.df, subset = CI_Harvest.df$Year == "2015"), Geo ~ Strata)
 cast(subset(CI_Harvest.df, subset = CI_Harvest.df$Year == "2016"), Geo ~ Strata)
 
 
+# Get worksheet names
+install.packages("XLConnect", lib = "C:/Users/krshedd/Documents/R/win-library/3.4")
+install.packages("XLConnectJars", lib = "C:/Users/krshedd/Documents/R/win-library/3.4")
+require(XLConnect)
+dataIn <- loadWorkbook(filename = "Estimates tables/KMA Sockeye Estimates Tables Regional 17UCI Formatted.xlsx")
+grep(pattern = "C14_1_Early", x = getSheets(dataIn))
+grep(pattern = "C14_2_Middle", x = getSheets(dataIn))
+grep(pattern = "C14_3_Late", x = getSheets(dataIn))
+grep(pattern = "C15_1_Early", x = getSheets(dataIn))
+grep(pattern = "C15_2_Middle", x = getSheets(dataIn))
+grep(pattern = "C15_3_Late", x = getSheets(dataIn))
+grep(pattern = "C16_1_Early", x = getSheets(dataIn))
+grep(pattern = "C16_2_Middle", x = getSheets(dataIn))
+grep(pattern = "C16_3_Late", x = getSheets(dataIn))
 
 
 
