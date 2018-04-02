@@ -1,0 +1,358 @@
+---
+title: "Coastwide Sockeye Baseline - rubias"
+author: "Kyle Shedd"
+date: "March 30, 2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, root.dir = 'V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Baseline/')
+```
+
+## Objectives
+
+Here I am testing Eric Anderson's new R package [rubias](https://github.com/eriqande/rubias#rubias-----genetic-stock-identification-gsi-in-the-tidyverse) on the coastwide sockeye baseline used in the Kodiak GSI project, 2014--2016. I will show how to convert our `.gcl` objects to `rubias` format, demonstrate some of the built-in baseline testing capabilities, and finally recreate the fishery scenario proof tests I did in `BAYES` to compare apples to applies.
+
+## Convert .gcl baseline to rubias
+
+First load packages, get `LocusControl`, necessary objects, and populations (i.e. `.gcl` objects).
+
+```{r load baseline}
+library(tidyverse)
+library(rubias)
+
+setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Baseline/")
+
+LocusControl <- dget(file = "Objects/LocusControl103.txt")
+loci89 <- dget(file = "Objects/loci89.txt")
+KMA473Pops <- dget(file = "Objects/KMA473Pops.txt")
+KMA473PopsGroupVec15 <- dget(file = "Objects/KMA473PopsGroupVec15.txt")
+Groups15 <- dget(file = "Objects/Groups15.txt")
+Colors15 <- dget(file = "Objects/Colors15.txt")
+
+
+invisible(sapply(KMA473Pops, function(silly) {assign(x = paste(silly, ".gcl", sep = ""), value = dget(file = paste0(getwd(), "/Raw genotypes/PostQCPopsloci103/", silly, ".txt")), pos = 1)} ))
+length(objects(pattern = "\\.gcl"))
+```
+
+Next load all GCL functions and the function `create_rubias_baseline` to create a tidy dataframe of the baseline in [`rubias` format](https://github.com/eriqande/rubias#input-data). One individual per row, with the first four columns required, then genotypes in a two column format. **Note** that the `rubias` specific GCL functions are currently only on the [develop](https://github.com/krshedd/GCL-R-Scripts/tree/develop) branch of the GCL-R-Scripts repository on <github.com>.
+
+```{r load gcl functions, results='hide'}
+source("C:/Users/krshedd/Documents/R/Functions.GCL.R")
+```
+
+```{r convert baseline to rubias}
+source("C:/Users/krshedd/Documents/R/GCL-R-Scripts/create_rubias_baseline.R")
+kma_473pops_89loci_15groups.rubias_base <- create_rubias_baseline(sillyvec = KMA473Pops, loci = loci89, group_names = Groups15, groupvec = KMA473PopsGroupVec15)
+str(kma_473pops_89loci_15groups.rubias_base, max.level = 0)
+head(kma_473pops_89loci_15groups.rubias_base[, 1:10])
+```
+
+## Baseline testing
+### Self assignment
+
+Perform self assignment test.
+
+```{r self assignment}
+kma_473pops_89loci_15groups.rubias_base_sa <- self_assign(reference = kma_473pops_89loci_15groups.rubias_base, gen_start_col = 5)
+str(kma_473pops_89loci_15groups.rubias_base_sa, max.level = 1)
+```
+
+The result is a dataframe with self assignment probabilities for each individual to each population. We can summarize that to get each individual scaled likelihood to each reporting unit.
+
+```{r roll sa to reporting units}
+sa_to_repu <- kma_473pops_89loci_15groups.rubias_base_sa %>% 
+  group_by(indiv, collection, repunit, inferred_repunit) %>%
+  summarise(repu_scaled_like = sum(scaled_likelihood))
+rm(kma_473pops_89loci_15groups.rubias_base_sa)
+```
+
+Then average of individuals within each collection, and average of collections within each reporting unit in order to plot a group to group confusion matrix.
+
+```{r confusion matrix}
+sa_to_repu %>% 
+  mutate(repunit_f = factor(x = repunit, levels = Groups15)) %>% 
+  mutate(inferred_repunit_f = factor(x = inferred_repunit, levels = Groups15)) %>% 
+  group_by(collection, repunit_f, inferred_repunit_f) %>% 
+  summarise(mean_repu_scaled_like_col = mean(repu_scaled_like)) %>% 
+  ungroup() %>% 
+  group_by(repunit_f, inferred_repunit_f) %>% 
+  summarise(mean_repu_scaled_like = mean(mean_repu_scaled_like_col)) %>% 
+  # spread(repunit_f, mean_repu_scaled_like)
+  ggplot(aes(x = repunit_f, y = inferred_repunit_f, z = mean_repu_scaled_like)) +
+  geom_tile(aes(fill = mean_repu_scaled_like)) +
+  scale_fill_gradient(low = "white", high = "black", limits = c(0, 1), name = "Mean Scaled Likelihood\n") +
+  theme(axis.text.x = element_text(angle = 90)) +
+  xlab("Reporting Unit") +
+  ylab("Inferred Reporting Unit")
+```
+
+This confusion matrix points out a couple of potential problems worth further investigation. Black Lake appears to have some significant, directional misallocation to Chignik Lake. Additionally, Frazer and Ayakulik present misallocation issues. While the Ayakulik and Frazer issue was previously known to me, the Black Lake and Chignik Lake was not and does not match up with previous confusion matrices that I have made from this data. Clearly there is some methodological difference that I am unaware of in Jim's implimentation of our `.GCL` Leave-one-out functions.
+
+### Leave one out
+
+The leave one out function can either make up scenarios or you can feed it scenarios. I'm going to have it replicate the seven scenarios that I used to test this baseline in `BAYES`. **Note**: this is not apples to apples because it is not picking the same fish as I used in my scenarios, we'll do that below later. This is just using the proportions I specified to create new repeats of these scenarios. Here I will read in those fishery scenario proportions and create a dataframe of those proportions in `rubias` format.
+
+```{r load fishery scenarios, warning=FALSE}
+setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Baseline/")
+fishery_scenarios <- read.table(file = "FisheryProofTestScenarios.txt", header = TRUE, sep = "\t", stringsAsFactors = FALSE)
+print(fishery_scenarios)
+fishery_scenarios.chr <- colnames(fishery_scenarios)[-1]
+arep <- sapply(fishery_scenarios.chr, function(scn) {data.frame(repunit = Groups15, ppn = fishery_scenarios[, scn], stringsAsFactors = FALSE)}, simplify = FALSE)
+```
+
+Run 50 repeats for each of the 7 scenarios with a mixture size of 200 fish.
+
+```{r loo scenarios, message=FALSE}
+kma_473pops_89loci_15groups.rubias_base_loo_scn <- assess_reference_loo(reference = kma_473pops_89loci_15groups.rubias_base, gen_start_col = 5, reps = 50, mixsize = 200, alpha_repunit = arep)
+
+```
+
+Summarize the data to the reporting unit level.
+
+```{r summarize to reporting units}
+loo_scn <- kma_473pops_89loci_15groups.rubias_base_loo_scn %>% 
+  mutate(repunit_f = factor(x = repunit, levels = Groups15)) %>% 
+  group_by(repunit_scenario, iter, repunit_f) %>% 
+  summarise(true_repprop = sum(true_pi), repprop_posterior_mean = sum(post_mean_pi), repu_n = sum(n)) %>% 
+  mutate(repu_n_prop = repu_n / sum(repu_n))
+```
+
+Plot scenarios. **Note** the black diagonal line represents perfect estimation of the true reporting group proportions.
+
+```{r plot loo scenarios, message=FALSE, results='hide'}
+sapply(fishery_scenarios.chr, function(scenario) {
+  tmp.scn <- filter(.data = loo_scn, repunit_scenario == scenario)
+  print(
+    ggplot(tmp.scn, aes(x = repu_n_prop, y = repprop_posterior_mean, colour = repunit_f)) +
+      geom_point() +
+      geom_abline(intercept = 0, slope = 1) +
+      scale_color_discrete(name = "Reporting Group") +
+      facet_wrap(~ repunit_f) +
+      xlab("True Reporting Group Proportion") +
+      ylab("Posterior Mean Reporting Group Proportion") +
+      ggtitle(paste("Fishery Scenario:", scenario))
+  )
+})
+```
+
+Overall, these scenarios look okay, with the exception of the Frazer and Ayakulik reporting groups, which perform very poorly. There is significant misallocation between these groups.
+
+### 100% Proof Tests in rubias
+
+Here I demonstrate that it is possible to do 100% proof tests in `rubias` as well.
+
+```{r loo proof tests, message=FALSE}
+arep_100 <- sapply(Groups15, function(x) {tibble(repunit = x, ppn = 1.0)}, simplify = FALSE)
+
+kma_473pops_89loci_15groups.rubias_base_loo_100 <- assess_reference_loo(reference = kma_473pops_89loci_15groups.rubias_base, gen_start_col = 5, reps = 10, mixsize = 200, alpha_repunit = arep_100)
+
+kma_473pops_89loci_15groups.rubias_base_loo_100 %>% 
+  mutate(repunit_f = factor(x = repunit, levels = Groups15)) %>% 
+  group_by(repunit_scenario, iter, repunit_f) %>% 
+  summarise(true_repprop = sum(true_pi), repprop_posterior_mean = sum(post_mean_pi), repu_n = sum(n)) %>% 
+  mutate(repu_n_prop = repu_n / sum(repu_n)) %>% 
+  filter(repunit_scenario == repunit_f) %>% 
+  ggplot(aes(x = iter, y = repprop_posterior_mean, fill = repunit_f)) +
+  geom_bar(stat = 'identity') +
+  geom_hline(yintercept = 0.9) +
+  scale_fill_manual(name = "Reporting Group", values = Colors15) +
+  facet_wrap(~ repunit_f) +
+  xlab("Iteration") +
+  ylab("Posterior Mean Reporting Group Proportion") +
+  ggtitle("100% Proof Tests")
+
+```
+
+Only problem with doing the 100% proof tests this way is that they are only point estimates, no error bars. That being said, 100% proof tests are not nearly as informative as the scenarios.  **Note**: Here the 100% tests give the fals impression that Frazer and Ayakulik "work" as separate reporting groups. While they are not panmictic, we know from other tests that there is clearly not enough differentiation to justify having them as separate groups.
+
+## BAYES vs. rubias
+
+Here I will directly compare `BAYES` and `rubias` by re-creating the exact fishery scenarios that I tested in `BAYES` with the same fish. This will allow us to determine which program provides better estimates across these seven scenarios.
+
+First get the mixture proof test objects
+
+```{r get mixture proof objects}
+setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Baseline/MixtureProofTests objects/")
+fishery_scenarios.indv <- sapply(fishery_scenarios.chr, function(scn){
+  sapply(as.character(1:5), function(rpt) {
+    dget(paste0(scn, rpt, "Proof.txt"))  
+  }, simplify = FALSE)
+}, simplify = FALSE)
+```
+
+Next create `rubias` mixture dataframes for each fishery scenario for each repeat.
+
+```{r rubias scenario mixtures, message=FALSE, warning=FALSE}
+source("C:/Users/krshedd/Documents/R/GCL-R-Scripts/create_rubias_mixture.R")
+
+fishery_scenarios.mix <- sapply(fishery_scenarios.chr, function(scn){
+  sapply(as.character(1:5), function(rpt) {
+    TmpCollections <- unlist(fishery_scenarios.indv[[scn]][[rpt]], recursive = FALSE)
+    names(TmpCollections) <- gsub(pattern = paste0(".*.", scn, rpt, "."), x = names(TmpCollections), replacement = '')
+    TmpCollections <- TmpCollections[!TmpCollections == "NULL"]
+    PoolCollections.GCL(collections = names(TmpCollections), loci = loci89,IDs = TmpCollections, newname = paste(scn, rpt, "mix", sep = "."))
+    create_rubias_mixture(silly = paste(scn, rpt, "mix", sep = "."), loci = loci89)
+  }, simplify = FALSE)
+}, simplify = FALSE)
+```
+
+Next create `rubias` basline dataframes for each fishery scenario for each repeat.
+
+```{r rubais scenario baselines}
+fishery_scenarios.base <- sapply(fishery_scenarios.chr, function(scn){
+  sapply(as.character(1:5), function(rpt) {
+    for(pop in KMA473Pops) {
+      PoolCollections.GCL(collections = pop, loci = loci89, IDs = NULL, newname = paste0(pop, ".tmp"))
+    }
+    TmpCollections <- unlist(fishery_scenarios.indv[[scn]][[rpt]], recursive = FALSE)
+    names(TmpCollections) <- paste0(gsub(pattern = paste0(".*.", scn, rpt, "."), x = names(TmpCollections), replacement = ''), ".tmp")
+    TmpCollections <- TmpCollections[!TmpCollections == "NULL"]
+    for(pop in names(TmpCollections)) {
+          RemoveIDs.GCL(silly = pop, IDs = TmpCollections[pop])
+    }
+    create_rubias_baseline(sillyvec = paste0(KMA473Pops, ".tmp"), loci = loci89, group_names = Groups15, groupvec = KMA473PopsGroupVec15)
+  }, simplify = FALSE)
+}, simplify = FALSE)
+```
+
+Run each mixture through `rubias`.
+
+```{r run scenarios, message=FALSE}
+out.rubias <- sapply(fishery_scenarios.chr, function(scn){
+  sapply(as.character(1:5), function(rpt) {
+    
+    mix.out <- infer_mixture(reference = fishery_scenarios.base[[scn]][[rpt]], mixture = fishery_scenarios.mix[[scn]][[rpt]], gen_start_col = 5, reps = 40000, burn_in = 20000)
+    
+    mix.sum <- mix.out$mix_prop_traces %>% 
+      filter(sweep >= 20000) %>% 
+      group_by(sweep, repunit) %>% 
+      summarise(repprop = sum(pi)) %>% 
+      ungroup() %>% 
+      group_by(repunit) %>% 
+      summarise(lo5CI = quantile(repprop, probs = 0.05),
+                hi95CI = quantile(repprop, probs = 0.95),
+                pi_mean = mean(repprop),
+                pi_median = quantile(repprop, probs = 0.5)) %>% 
+      mutate(scenario = scn) %>% 
+      mutate(iter = rpt) %>% 
+      mutate(method = "rubias")
+    
+    mix.sum
+  }, simplify = FALSE)
+}, simplify = FALSE)
+
+out.rubias <- bind_rows(combine(out.rubias))
+```
+
+Pull in `BAYES` estimates for each scenario and repeat.
+
+```{r pull BAYES estimates, warning=FALSE}
+setwd("V:/Analysis/4_Westward/Sockeye/KMA Commercial Harvest 2014-2016/Baseline/Estimates objects/loci46")
+fishery_scenarios.bayes <- dget(file = "KMA473PopsGroups15loci46RepeatedMixProofTestsEstimatesStats.txt")
+
+out.bayes <- data.frame(do.call(rbind, fishery_scenarios.bayes)) %>% 
+  mutate(scenario = rep(fishery_scenarios.chr, each = 15*5)) %>% 
+  mutate(iter = as.character(rep(rep(1:5, each = 15), 7))) %>%
+  mutate(repunit = rep(Groups15, 7*5)) %>% 
+  mutate(method = "BAYES") %>% 
+  rename(pi_mean = mean, pi_median = median, lo5CI = X5., hi95CI = X95.) %>% 
+  select(repunit, lo5CI, hi95CI, pi_mean, pi_median, scenario, iter, method)
+```
+
+Join `rubias` and `BAYES` estimates along with true fishery scenario values into a single dataframe for plotting.
+
+```{r join}
+out.join <- bind_rows(out.bayes, out.rubias)
+
+fishery_scenarios.tidy <- fishery_scenarios %>% 
+  select(-X) %>% 
+  mutate(repunit = Groups15) %>% 
+  gather(scenario, true_pi, -repunit)
+
+out.join_true <- out.join %>% 
+  full_join(fishery_scenarios.tidy, by = c("repunit" = "repunit", "scenario" = "scenario")) %>% 
+    mutate(repunit_f = factor(x = repunit, levels = Groups15))
+```
+
+Plot results to compare `rubias` and `BAYES`.
+
+```{r plot rubias v BAYES, message=FALSE, results='hide'}
+sapply(fishery_scenarios.chr, function(scn) {
+  out.join_true_scn <- filter(.data = out.join_true, scenario == scn)
+  print(
+    ggplot(data = out.join_true_scn, aes(x = iter, y = pi_mean, fill = method)) +
+      geom_bar(stat = 'identity', position = 'dodge') +
+      geom_errorbar(aes(ymin = lo5CI, ymax = hi95CI, width = 0.3), position = position_dodge(0.9)) +
+      geom_hline(aes(yintercept = true_pi)) +
+      facet_wrap(~ repunit_f) +
+      xlab("Repeat") +
+      ylab("Mean Stock Composition (95% CI)") +
+      ggtitle(paste("Fishery Scenario:", scn))
+  )
+})
+```
+
+Overall, ther results look very comparable between both `rubais` and `BAYES` with the exception of Frazer and Ayakulik, which we know do not perform well as reporting groups anyways. 
+
+As a few final metrics, we can compute the mean absolute error (MAE), also known as bias, for each method. Here is plot of MAE for each reporting group and scenario (average across iterations within scenario).
+
+```{r MAE plot}
+out.join_true %>% 
+  group_by(scenario, iter, repunit_f, method) %>% 
+  summarise(bias = abs(true_pi - pi_mean)) %>% 
+  ungroup() %>% 
+  group_by(scenario, repunit_f, method) %>% 
+  summarise(MAE = mean(bias)) %>% 
+  ggplot(aes(x = scenario, y = MAE, fill = method)) +
+  geom_bar(stat = 'identity', position = 'dodge') +
+  geom_hline(yintercept = 0) +
+  facet_wrap(~ repunit_f) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  xlab("Scenario") +
+  ylab("Mean Absolute Error")
+```
+
+This shows that on average across iterations, both methods have low bias. However, if we look at a boxplot of bias (not the absolute value) for each reporting group and scenario we can get a sense of both the bias (accuracy) and precision of the estimates. **Note** to facilitate highilighting differences between `rubias` and `BAYES` the y-axes are not the same between reporting groups.
+
+```{r bias boxplot}
+out.join_true %>% 
+  group_by(scenario, iter, repunit_f, method) %>% 
+  summarise(bias = true_pi - pi_mean) %>% 
+  ggplot(aes(x = scenario, y = bias, fill = method)) +
+  geom_boxplot() +
+  geom_hline(yintercept = 0) +
+  facet_wrap(~ repunit_f, scales = "free_y") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  xlab("Scenario") +
+  ylab("Mean Bias")
+```
+
+This shows that while both methods are fairly accurate, `rubais` appears to be more precise across scenarios (smaller differences in bias across iterations).
+
+Final metric, root-mean-square error (RMSE). Y-axes are the same across reporting groups again.
+
+```{r RMSE plot}
+out.join_true %>% 
+  group_by(scenario, iter, repunit_f, method) %>% 
+  summarise(bias = true_pi - pi_mean) %>% 
+  ungroup() %>% 
+  group_by(scenario, repunit_f, method) %>% 
+  summarise(RMSE = sqrt(mean(bias^2))) %>% 
+  ggplot(aes(x = scenario, y = RMSE, fill = method)) +
+  geom_bar(stat = 'identity', position = 'dodge') +
+  geom_hline(yintercept = 0) +
+  facet_wrap(~ repunit_f) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  xlab("Scenario") +
+  ylab("Root Mean Squared Error")
+```
+Overall, `rubias` appears to have a lower RMSE than `BAYES` for these "apples" to "apples", known fishery scenario tests.
+
+## Conclusion
+
+Overall, `rubias` is fast, flexible, and reliable for both baseline testing and standard MSA. I see no reason not to religate `BAYES` to the dustbin of history.
+
+Future work includes testing `rubias` on uSATs, such as the Chinook GAPS baseline.
