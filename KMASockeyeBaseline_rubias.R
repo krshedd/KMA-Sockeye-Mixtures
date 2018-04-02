@@ -42,6 +42,23 @@ sa_to_repu <- kma_473pops_89loci_15groups.rubias_base_sa %>%
   group_by(indiv, collection, repunit, inferred_repunit) %>%
   summarise(repu_scaled_like = sum(scaled_likelihood))
 
+sa_to_repu %>% 
+  filter(inferred_repunit == "Black Lake") %>% 
+  filter(repunit %in% c("Black Lake", "Chignik Lake")) %>% 
+  ggplot(aes(x = collection, y = repu_scaled_like)) +
+  geom_boxplot()
+
+sa_to_repu %>% 
+  filter(repunit == "Black Lake") %>% 
+  ggplot(aes(x = inferred_repunit, y = repu_scaled_like)) +
+  geom_boxplot()
+
+kma_473pops_89loci_15groups.rubias_base_sa %>% 
+  filter(repunit == "Black Lake") %>% 
+  filter(inferred_repunit %in% c("Black Lake", "Chignik Lake")) %>% 
+  ggplot(aes(x = inferred_collection, y = scaled_likelihood)) +
+  geom_boxplot(aes(colour = inferred_repunit))
+
 # Confusion matrix
 str(sa_to_repu)
 sa_to_repu %>% 
@@ -68,12 +85,6 @@ tmp <- kma_473pops_89loci_15groups.rubias_base_loo %>%
   mutate(repu_n_prop = repu_n / sum(repu_n))
 tmp
 
-# Plot
-# ggplot(tmp, aes(x = true_repprop, y = repprop_posterior_mean, colour = repunit)) +
-#   geom_point() +
-#   geom_abline(intercept = 0, slope = 1) +
-#   facet_wrap(~ repunit)
- 
 ggplot(tmp, aes(x = repu_n_prop, y = repprop_posterior_mean, colour = repunit)) +
   geom_point() +
   geom_abline(intercept = 0, slope = 1) +
@@ -85,7 +96,6 @@ ggplot(tmp, aes(x = repu_n_prop, y = repprop_posterior_mean, colour = repunit)) 
 # Grab scenarios
 fishery_scenarios <- read.table(file = "FisheryProofTestScenarios.txt", header = TRUE, sep = "\t")
 arep <- sapply(colnames(fishery_scenarios)[-1], function(scn) {data.frame(repunit = Groups15, ppn = fishery_scenarios[, scn])}, simplify = FALSE)
-# arep_middle.Uyak <- data.frame("repunit" = Groups15, "ppn" = fishery_scenarios$middle.Uyak)
 
 # Test Scenarios
 kma_473pops_89loci_15groups.rubias_base_loo_scn <- assess_reference_loo(reference = kma_473pops_89loci_15groups.rubias_base, gen_start_col = 5, reps = 50, mixsize = 200, alpha_repunit = arep)
@@ -129,12 +139,6 @@ tmp <- kma_473pops_89loci_15groups.rubias_base_mc %>%
   summarise(true_repprop = sum(omega), repprop_posterior_mean = sum(post_mean), repu_n = sum(n)) %>% 
   mutate(repu_n_prop = repu_n / sum(repu_n))
 tmp
-
-# Plot
-# ggplot(tmp, aes(x = true_repprop, y = repprop_posterior_mean, colour = repunit)) +
-#   geom_point() +
-#   geom_abline(intercept = 0, slope = 1) +
-#   facet_wrap(~ repunit)
 
 ggplot(tmp, aes(x = repu_n_prop, y = repprop_posterior_mean, colour = repunit)) +
   geom_point() +
