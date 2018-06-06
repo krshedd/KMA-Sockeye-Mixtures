@@ -84,7 +84,7 @@ sa_to_repu %>%
   ggplot(aes(x = repunit_f, y = inferred_repunit_f, z = mean_repu_scaled_like)) +
   geom_tile(aes(fill = mean_repu_scaled_like)) +
   scale_fill_gradient(low = "white", high = "black", limits = c(0, 1), name = "Mean Scaled Likelihood\n") +
-  theme(axis.text.x = element_text(angle = 90)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
   xlab("Reporting Unit") +
   ylab("Inferred Reporting Unit")
 ```
