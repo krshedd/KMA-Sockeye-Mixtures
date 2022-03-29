@@ -23,7 +23,7 @@ length(objects(pattern = "\\.gcl"))
 ## Load gcl functions
 source("C:/Users/krshedd/Documents/R/Functions.GCL.R")
 source("C:/Users/krshedd/Documents/R/GCL-R-Scripts/create_rubias_baseline.R")
-kma_473pops_89loci_15groups.rubias_base <- create_rubias_baseline(sillyvec = KMA473Pops, loci = loci89, group_names = Groups15, groupvec = KMA473PopsGroupVec15)
+kma_473pops_89loci_15groups.rubias_base <- create_rubias_baseline(sillyvec = KMA473Pops, loci = loci89, group_names = Groups15, groupvec = KMA473PopsGroupVec15, path = "rubias/baseline/", baseline_name = "KMA_sockeye_473pop_89loci_rubias")
 str(kma_473pops_89loci_15groups.rubias_base, max.level = 2)
 
 require(rubias)
